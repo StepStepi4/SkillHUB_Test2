@@ -1,10 +1,10 @@
 // ==========================================
 // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И НАСТРОЙКИ
 // ==========================================
-const API_URL = 'https://script.google.com/macros/s/AKfycbzqN7GVBm8Q2CtutMNdxvLipQzjQ5zap0bL4d4plqphvNH3TJChsZFR9mf8nCbOMC8Gqw/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzu9v1_2-iePDzfL9j7uMlWT4PgAMNZCE_X0JpG8sWaHcSwx1bcYLfiLHd91PHWlHzF/exec';
 const CACHE_KEY = 'skillhub_v1_flat'; 
 const SEEN_VERSION_KEY = 'skillhub_version_flat';
-const SELLER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyMDkyDEPQ9FpeBvRdLxoVm7qUlEEs2ksJSALjv11gZX1-6jNckZvdayvnNahQfcWG8Ig/exec";
+const SELLER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu9v1_2-iePDzfL9j7uMlWT4PgAMNZCE_X0JpG8sWaHcSwx1bcYLfiLHd91PHWlHzF/exec";
 
 window.currentDevicePrice = 0; 
 window.currentRezervItem = null;
