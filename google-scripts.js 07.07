@@ -1,0 +1,783 @@
+function doGet(e) {
+  try {
+    const data = getDatabase();
+    return ContentService.createTextOutput(JSON.stringify(data))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: err.toString(), stack: err.stack }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPost(e) {
+  try {
+    let params = JSON.parse(e.postData.contents);
+    let action = params.action || "save_score";
+
+    if (action === "set_session") {
+        let login = params.login;
+        let token = params.token;
+        if (token) {
+            PropertiesService.getScriptProperties().setProperty('session_' + login, token);
+            if (!PropertiesService.getScriptProperties().getProperty('start_' + login)) {
+                PropertiesService.getScriptProperties().setProperty('start_' + login, Date.now().toString());
+            }
+        } else {
+            PropertiesService.getScriptProperties().deleteProperty('session_' + login);
+        }
+        return ContentService.createTextOutput(JSON.stringify({ success: true }));
+    }
+
+    let login = params.login;
+    let product = params.product;
+    let newScore = parseInt(params.score) || 0;
+    let newTime = parseInt(params.time) || 0; 
+
+    let ss = SpreadsheetApp.getActiveSpreadsheet();
+    let statSheet = ss.getSheets().find(s => s.getName().toLowerCase().trim() === "статистика навчання");
+
+    if (!statSheet) throw new Error("Лист 'Статистика навчання' не знайдено");
+
+    let data = statSheet.getDataRange().getDisplayValues();
+    let headers = data[0];
+    
+    let cleanProduct = String(product).toLowerCase().replace(/[^a-zа-яёієїґ0-9]/g, '');
+
+    let loginColIndex = -1;
+    let targetColIndex = -1;
+
+    for (let i = 0; i < headers.length; i++) {
+      let rawHeader = String(headers[i]).trim();
+      let cleanHeader = rawHeader.toLowerCase().replace(/[^a-zа-яёієїґ0-9]/g, '');
+      
+      if (cleanHeader === "login" || cleanHeader === "логін") {
+        loginColIndex = i;
+      }
+      
+      if (!rawHeader.startsWith("✦") && cleanHeader === cleanProduct && cleanHeader !== "") {
+        targetColIndex = i;
+      }
+    }
+
+    if (loginColIndex === -1) throw new Error("Колонка 'Login' не знайдена в таблиці");
+    if (targetColIndex === -1) throw new Error("Колонка результату для продукту не знайдена");
+
+    let rowIndex = -1;
+    let targetLogin = String(login).toLowerCase().trim();
+    for (let i = 1; i < data.length; i++) {
+      let rowLogin = String(data[i][loginColIndex]).toLowerCase().trim();
+      if (rowLogin === targetLogin && rowLogin !== "") { 
+        rowIndex = i;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) throw new Error("Користувач не знайдений");
+
+    let currentVal = String(data[rowIndex][targetColIndex] || "0/0%/0").trim();
+    let attempts = 0;
+    let bestScore = 0;
+    let bestTime = 0;
+
+    let match = currentVal.match(/(\d+)\s*\/\s*(\d+)%(?:\/(\d+))?/);
+    if (match) {
+      attempts = parseInt(match[1], 10) || 0;
+      bestScore = parseInt(match[2], 10) || 0;
+      bestTime = parseInt(match[3], 10) || 0;
+    } else {
+       let scoreMatch = currentVal.match(/(\d+)%/);
+       if (scoreMatch) {
+           bestScore = parseInt(scoreMatch[1], 10) || 0;
+           attempts = 1;
+       }
+    }
+
+    attempts += 1;
+    
+    if (newScore > bestScore) {
+      bestScore = newScore;
+      bestTime = newTime;
+    } else if (newScore === bestScore && (newTime < bestTime || bestTime === 0)) {
+      bestTime = newTime;
+    }
+
+    let newVal = `${attempts}/${bestScore}%/${bestTime}`;
+    statSheet.getRange(rowIndex + 1, targetColIndex + 1).setValue(newVal);
+
+    return ContentService.createTextOutput(JSON.stringify({ success: true, newValue: newVal }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function getDatabase() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const allSheets = ss.getSheets();
+  
+  let descriptions = {}; 
+  let serviceCodes = {};
+  let serviceBrands = {};
+  let appVersion = ""; 
+  let changelog = ""; 
+  let tariffs = [];
+  let categories = [];
+  let montazhData = { cities: [], services: [] };
+  let rezervyData = []; 
+  let rezervyDate = "";
+  let trainingData = [];
+  let categoryToFocus = {}; 
+  let categoryToServices = {};
+  let skillHubButtons = []; 
+  let sellerRatings = [];
+  
+  let educationData = { users: [], courses: [], activeSessions: {}, startTimes: {} };
+  let simulatorData = []; 
+  let achievementData = []; 
+
+  try {
+      let props = PropertiesService.getScriptProperties().getProperties();
+      for (let k in props) {
+          if (k.startsWith('session_')) {
+              educationData.activeSessions[k.replace('session_', '')] = props[k];
+          }
+          if (k.startsWith('start_')) {
+              educationData.startTimes[k.replace('start_', '')] = props[k];
+          }
+      }
+  } catch(err) {}
+
+  const getSheet = name => allSheets.find(s => s.getName().toLowerCase().includes(name));
+  
+  try {
+      let tariffSheet = getSheet("вартість");
+      let rezervySheet = getSheet("резерв");
+      let typesSheet = getSheet("типи сервісів") || getSheet("типы сервисов");
+      let focusSheet = getSheet("фокус");
+      let dataSheet = getSheet("дані") || getSheet("данные");
+      let montazhSheet = getSheet("впт") || getSheet("монтаж");
+      let catSheet = getSheet("категор");
+      let skillSheet = getSheet("кнопки skillhub") || getSheet("кнопки");
+      
+      let statSheet = allSheets.find(s => s.getName().toLowerCase().trim() === "статистика навчання");
+      let courseSheet = allSheets.find(s => s.getName().toLowerCase().trim() === "навчання");
+      let simSheet = allSheets.find(s => s.getName().toLowerCase().includes("тренажер заперечень"));
+
+      if (tariffSheet) {
+        let topData = tariffSheet.getDataRange().getDisplayValues();
+        let rowsScan = Math.min(topData.length, 15);
+        for (let r = 0; r < rowsScan; r++) {
+            let colsScan = Math.min(topData[r].length, 20);
+            for (let c = 0; c < colsScan; c++) {
+                let cell = topData[r][c].toLowerCase().trim();
+                if (cell === "версія" || cell === "version" || cell === "версия") {
+                    appVersion = (r+1 < topData.length && topData[r+1][c]) ? topData[r+1][c].trim() : (c+1 < topData[r].length ? topData[r][c+1].trim() : "");
+                }
+                if (cell === "оновлення" || cell === "що змінено?" || cell === "що змінено") {
+                    changelog = (r+1 < topData.length && topData[r+1][c]) ? topData[r+1][c].trim() : (c+1 < topData[r].length ? topData[r][c+1].trim() : "");
+                }
+            }
+        }
+      }
+      if (changelog) changelog = changelog.replace(/^"|"$/g, '').trim();
+
+      if (rezervySheet) {
+        const rData = rezervySheet.getDataRange().getValues();
+        if (rData.length > 1) {
+            const rHeaders = rData[0].map(h => String(h).toLowerCase().trim());
+            let idxStore = rHeaders.findIndex(h => h.includes("магазин"));
+            let idxCat = rHeaders.findIndex(h => h.includes("категорія"));
+            let idxName = rHeaders.findIndex(h => h === "назва товару" || h === "модель" || h === "товар" || (h.includes("назва") && !h.includes("магазин")));
+            let idxPrice = rHeaders.findIndex(h => h === "вартість" || h === "ціна" || h.includes("вартість") || h.includes("ціна"));
+            let idxDate = rHeaders.findIndex(h => h.includes("дата оновлення"));
+            
+            if (idxDate !== -1 && rData.length > 1) {
+                let rawDate = rData[1][idxDate];
+                if (rawDate instanceof Date) {
+                    let dd = String(rawDate.getDate()).padStart(2, '0');
+                    let mm = String(rawDate.getMonth() + 1).padStart(2, '0');
+                    let yyyy = rawDate.getFullYear();
+                    rezervyDate = `${dd}.${mm}.${yyyy}`; // Формат 08.06.2026 без часу
+                } else {
+                    rezervyDate = String(rawDate).trim(); 
+                }
+            }
+
+            if (idxName !== -1) {
+                for (let i = 1; i < rData.length; i++) {
+                    let name = rData[i][idxName];
+                    if (!name) continue;
+                    let rawPrice = idxPrice !== -1 && rData[i][idxPrice] ? String(rData[i][idxPrice]).replace(/\s+/g, '').replace(',', '.') : "0";
+                    rezervyData.push({
+                        store: idxStore !== -1 ? String(rData[i][idxStore] || "Не вказано").trim() : "Не вказано",
+                        cat: idxCat !== -1 ? String(rData[i][idxCat] || "").trim() : "",
+                        name: String(name).trim(),
+                        price: parseFloat(rawPrice) || 0
+                    });
+                }
+            }
+        }
+      }
+
+      if (typesSheet) {
+        const tData = typesSheet.getDataRange().getDisplayValues();
+        if (tData.length > 1) {
+          let cBrand = 3, cName = 4, cDesc = 5;
+          for (let c = 0; c < tData[0].length; c++) {
+            let val = tData[0][c].toLowerCase().trim();
+            if (val === "бренд") cBrand = c;
+            else if (val === "назва сервісу" || val === "назва") cName = c;
+            else if (val === "опис") cDesc = c;
+          }
+          for (let i = 1; i < tData.length; i++) {
+            let brand = tData[i][cBrand] ? String(tData[i][cBrand]).trim() : "";
+            let name = tData[i][cName] ? String(tData[i][cName]).trim() : "";
+            let desc = tData[i][cDesc] ? String(tData[i][cDesc]).trim() : "";
+            if (name && name !== "Назва сервісу") trainingData.push({ brand, name, desc });
+          }
+        }
+      }
+
+      if (focusSheet) {
+        const focusData = focusSheet.getDataRange().getValues();
+        if (focusData.length > 0) {
+            const focusHeaders = focusData[0];
+            for (let i = 1; i < focusData.length; i++) {
+              let cat = focusData[i][0] ? String(focusData[i][0]).trim().toLowerCase() : "";
+              let focusList = [];
+              for (let j = 1; j < focusHeaders.length; j++) {
+                if (focusData[i][j] === true || String(focusData[i][j]).toUpperCase() === "TRUE" || focusData[i][j] === "+") {
+                  focusList.push(String(focusHeaders[j]).trim());
+                }
+              }
+              if (cat && focusList.length > 0) categoryToFocus[cat] = focusList.join('|');
+            }
+        }
+      }
+
+      if (dataSheet) {
+        const dataData = dataSheet.getDataRange().getValues();
+        if (dataData.length > 0) {
+            const dataHeaders = dataData[0];
+            for (let i = 1; i < dataData.length; i++) {
+              let cat = dataData[i][0] ? String(dataData[i][0]).trim().toLowerCase() : "";
+              let listArr = [];
+              for (let j = 1; j < dataHeaders.length; j++) {
+                if (dataData[i][j] === true || String(dataData[i][j]).toUpperCase() === "TRUE" || dataData[i][j] === "+") {
+                  listArr.push(String(dataHeaders[j]).trim());
+                }
+              }
+              if (cat && listArr.length > 0) categoryToServices[cat] = listArr.join('|');
+            }
+        }
+      }
+
+      if (tariffSheet) {
+        const data = tariffSheet.getDataRange().getDisplayValues();
+        let hRow = -1;
+        let cCode=-1, cUa=-1, cRu=-1, cMin=-1, cMax=-1, cPrice=-1, cDesc=-1, cCat=-1, cBrand=-1;
+        for(let r=0; r<Math.min(data.length, 100); r++) {
+            let rowStr = data[r].join("").toLowerCase();
+            if(rowStr.includes("ua") && (rowStr.includes("ціна від") || rowStr.includes("від ") || rowStr.includes("вартість"))) {
+                hRow = r;
+                data[r].forEach((h, i) => {
+                    let k = String(h).toLowerCase().trim();
+                    if(k==="код" || k==="артикул" || k==="id") cCode = i;
+                    else if(k==="ua" || k==="назва сервісу" || k==="назва" || k==="сервіс") cUa = i;
+                    else if(k==="ru") cRu = i;
+                    else if(k==="ціна від" || k==="від") cMin = i;
+                    else if(k==="ціна до" || k==="до") cMax = i;
+                    else if(k==="вартість сервісу" || k==="вартість" || k==="ціна") cPrice = i;
+                    else if(k==="опис сервісу" || k==="опис") cDesc = i;
+                    else if(k==="тип сервісу" || k==="тип" || k==="категорія") cCat = i;
+                    else if(k==="бренд" || k==="brand") cBrand = i;
+                });
+                break;
+            }
+        }
+       
+        if (hRow !== -1 && (cUa !== -1 || cRu !== -1)) {
+            for(let r=hRow+1; r<data.length; r++) {
+                let row = data[r];
+                let nameUa = cUa !== -1 && row[cUa] ? String(row[cUa]).trim() : "";
+                let nameRu = cRu !== -1 && row[cRu] ? String(row[cRu]).trim() : "";
+                let name = nameUa || nameRu;
+                if(!name || name.toLowerCase()==="ua" || name.toLowerCase().includes("назва") || name.toLowerCase()==="ru") continue;
+               
+                let minP = cMin !== -1 && row[cMin] ? Number(String(row[cMin]).replace(/[^\d]/g,'')) || 0 : 0;
+                let maxP = cMax !== -1 && row[cMax] ? Number(String(row[cMax]).replace(/[^\d]/g,'')) || 9999999 : 9999999;
+                let cost = cPrice !== -1 && row[cPrice] ? String(row[cPrice]).trim() : "";
+                let code = cCode !== -1 && row[cCode] ? String(row[cCode]).trim() : "";
+                let desc = cDesc !== -1 && row[cDesc] ? String(row[cDesc]).trim() : "";
+                let rawCat = cCat !== -1 && row[cCat] ? String(row[cCat]).trim() : "";
+                let brandVal = cBrand !== -1 && row[cBrand] ? String(row[cBrand]).trim() : "";
+               
+                if (brandVal) { serviceBrands[name] = brandVal;
+                if (nameRu && nameRu !== name) serviceBrands[nameRu] = brandVal; }
+                if (code) { serviceCodes[name] = code;
+                if (nameRu && nameRu !== name) serviceCodes[nameRu] = code; }
+                if (desc) { descriptions[name] = desc;
+                if (nameRu && nameRu !== name) descriptions[nameRu] = desc; }
+               
+                let catsArr = rawCat ? rawCat.split('|').map(s => s.trim()).filter(Boolean) : [""];
+                catsArr.forEach(cat => {
+                    if (cost && cost !== "-" && cost !== "") tariffs.push({ service: name, serviceRu: nameRu, minPrice: minP, maxPrice: maxP, cost: cost, code: code, cat: cat });
+                });
+            }
+        }
+      }
+
+      if (montazhSheet) {
+        const data = montazhSheet.getDataRange().getDisplayValues();
+        let cCity = -1; let rMatrixHeader = -1; let matrixCols = {}; let montazhCities = []; let coverage = {};
+        for (let r=0; r<Math.min(data.length, 20); r++) {
+           for (let c=0; c<data[r].length; c++) {
+               let val = String(data[r][c]).toLowerCase().trim();
+               if (val === "міста" || val === "місто" || val === "підпис міста") { cCity = c; rMatrixHeader = r; break; }
+           }
+           if (cCity !== -1) break;
+        }
+
+        if (cCity !== -1 && rMatrixHeader !== -1) {
+            for (let c=0; c<data[rMatrixHeader].length; c++) {
+                if (c !== cCity && String(data[rMatrixHeader][c]).trim() !== "") matrixCols[c] = String(data[rMatrixHeader][c]).trim();
+            }
+            for (let r=rMatrixHeader+1; r<data.length; r++) {
+                let city = String(data[r][cCity]).trim();
+                if (city && city !== "" && city !== "-" && !city.toLowerCase().includes("версія") && !city.toLowerCase().includes("міста")) {
+                    if (!montazhCities.includes(city)) montazhCities.push(city);
+                    coverage[city] = {};
+                    for (let c in matrixCols) coverage[city][matrixCols[c]] = data[r][c] ? String(data[r][c]).trim() : "";
+                }
+            }
+        }
+
+        let rServHeader = -1;
+        let cUa=-1, cCode=-1, cCat=-1, cSub=-1, cDesc=-1, cPrice=-1, cRu=-1;
+
+        for (let r=0; r<Math.min(data.length, 20); r++) {
+           let rowStr = data[r].join("").toLowerCase();
+           if ((rowStr.includes("ua") || rowStr.includes("назва")) && rowStr.includes("тип")) {
+               rServHeader = r;
+               data[r].forEach((h, i) => {
+                   let k = String(h).toLowerCase().trim();
+                   if(k==="код" || k==="артикул") cCode = i;
+                   else if(k==="ua" || k==="назва сервісу" || k==="назва") cUa = i;
+                   else if(k==="ru") cRu = i;
+                   else if(k==="тип сервісу" || k==="тип" || k==="категорія") cCat = i;
+                   else if(k.includes("потужність") || k.includes("опція") || k==="підкатегорія") cSub = i;
+                   else if(k==="опис сервісу" || k==="опис") cDesc = i;
+                   else if(k==="вартість сервісу" || k==="вартість" || k==="ціна") cPrice = i;
+               });
+               break;
+           }
+        }
+
+        let montazhServices = [];
+        if (rServHeader !== -1 && (cUa !== -1 || cRu !== -1)) {
+            for (let r = rServHeader + 1; r < data.length; r++) {
+                let nameUa = cUa !== -1 && data[r][cUa] ? String(data[r][cUa]).trim() : "";
+                let nameRu = cRu !== -1 && data[r][cRu] ? String(data[r][cRu]).trim() : "";
+                let name = nameUa || nameRu;
+                if (!name || name.toLowerCase() === "ua" || name.toLowerCase().includes("назва")) continue;
+
+                let rawCat = data[r][cCat] ? String(data[r][cCat]).trim() : "";
+                let sub = cSub !== -1 && data[r][cSub] ? String(data[r][cSub]).trim() : "";
+                let code = cCode !== -1 && data[r][cCode] ? String(data[r][cCode]).trim() : "";
+                let desc = cDesc !== -1 && data[r][cDesc] ? String(data[r][cDesc]).trim() : "";
+                let price = cPrice !== -1 && data[r][cPrice] ? String(data[r][cPrice]).trim() : "";
+
+                if (code) { serviceCodes[name] = code;
+                if (nameRu && nameRu !== name) serviceCodes[nameRu] = code; }
+                if (desc) { descriptions[name] = desc;
+                if (nameRu && nameRu !== name) descriptions[nameRu] = desc; }
+
+                let provider = "OTHER";
+                let match = name.match(/^\[(.*?)\]/);
+                if (match) {
+                    provider = match[1].trim().toUpperCase();
+                    if (provider === 'ЕКТА') provider = 'EKTA';
+                    if (provider === 'НАШ СЕРВІС' || provider === 'SUPPORT') provider = 'SUPPORT';
+                } else if (name.toLowerCase().includes("наш сервіс") || name.toLowerCase().includes("support")) {
+                    provider = "SUPPORT";
+                }
+
+                let catsArr = rawCat ? rawCat.split('|').map(s => s.trim()).filter(Boolean) : [""];
+                catsArr.forEach(cat => {
+                    let searchCat = cat.replace(/[^\w\sа-яА-ЯіІїЇєЄґҐ()\-]/gi, '').trim().toLowerCase();
+                    let targetMatrixColName = null;
+                    for (let c in matrixCols) {
+                        let originalMName = matrixCols[c];
+                        let mName = originalMName.replace(/[^\w\sа-яА-ЯіІїЇєЄґҐ()\-]/gi, '').trim().toLowerCase();
+                        if (searchCat && (mName.includes(searchCat) || searchCat.includes(mName))) {
+                            if (provider === "EKTA" && (mName.includes("екта") || mName.includes("ekta"))) { targetMatrixColName = originalMName; break; }
+                            else if (provider === "SUPPORT" && (mName.includes("наш сервіс") || mName.includes("support") || mName.includes("мій сервіс"))) { targetMatrixColName = originalMName; break; }
+                        }
+                    }
+                
+                    if (!targetMatrixColName) {
+                         for (let c in matrixCols) {
+                            let originalMName = matrixCols[c];
+                            let mName = originalMName.replace(/[^\w\sа-яА-ЯіІїЇєЄґҐ()\-]/gi, '').trim().toLowerCase();
+                            if (mName.includes(searchCat) || searchCat.includes(mName)) { targetMatrixColName = originalMName; break; }
+                         }
+                    }
+                    let avail = {};
+                    montazhCities.forEach(city => { avail[city] = targetMatrixColName && coverage[city] && coverage[city][targetMatrixColName] ? coverage[city][targetMatrixColName] : "Немає можливості"; });
+                    montazhServices.push({ cat, subcat: sub, provider, name, desc, code, price, availability: avail });
+                });
+            }
+        }
+        montazhData = { cities: montazhCities, services: montazhServices };
+      }
+
+      if (catSheet) {
+        const catData = catSheet.getDataRange().getValues();
+        if (catData.length > 0) {
+            const catHeaders = catData.shift();
+            let idxs = {};
+            catHeaders.forEach((h, i) => { if (h) idxs[String(h).trim().toLowerCase()] = i; });
+            let kUa = Object.keys(idxs).find(k => k === "ua" || k === "назва" || k === "найменування");
+            let kRu = Object.keys(idxs).find(k => k === "ru");
+            let kEn = Object.keys(idxs).find(k => k === "en" || k === "eng");
+            let kCat = Object.keys(idxs).find(k => k.includes("категор"));
+            let kComp = Object.keys(idxs).find(k => k.includes("складн"));
+            let kPrice = Object.keys(idxs).find(k => k.includes("вартість"));
+            let kExp = Object.keys(idxs).find(k => k.includes("найдорожч") || k.includes("запчастин"));
+            let kGar = Object.keys(idxs).find(k => k.includes("гарантій") && !k.includes("не"));
+            let kNeg = Object.keys(idxs).find(k => k.includes("не гарант") || k.includes("негарант"));
+            let kPhoto1 = Object.keys(idxs).find(k => k.includes("фото 1") || k.includes("photo 1"));
+            let kPhoto2 = Object.keys(idxs).find(k => k.includes("фото 2") || k.includes("photo 2"));
+            let kPhoto3 = Object.keys(idxs).find(k => k.includes("фото 3") || k.includes("photo 3"));
+            catData.forEach(row => {
+              let uaName = kUa !== undefined ? row[idxs[kUa]] : "";
+              if(!uaName) return;
+              let parent = kCat !== undefined ? String(row[idxs[kCat]] || "").trim().toLowerCase() : "";
+              let key = String(uaName).toLowerCase().trim();
+              
+              let obj = {
+                ua: uaName || "", ru: kRu !== undefined ? row[idxs[kRu]] : "", en: kEn !== undefined ? row[idxs[kEn]] : "",
+                category: kCat !== undefined ? row[idxs[kCat]] : "", complexity: kComp !== undefined ? row[idxs[kComp]] : "",
+                price: kPrice !== undefined ? row[idxs[kPrice]] : "", expensiveParts: kExp !== undefined ? row[idxs[kExp]] : "",
+                garant: kGar !== undefined ? row[idxs[kGar]] : "", negarant: kNeg !== undefined ? row[idxs[kNeg]] : "",
+                photo1: kPhoto1 !== undefined ? row[idxs[kPhoto1]] : "", photo2: kPhoto2 !== undefined ? row[idxs[kPhoto2]] : "",
+                photo3: kPhoto3 !== undefined ? row[idxs[kPhoto3]] : ""
+              };
+              let pServices = parent ? categoryToServices[parent] : undefined;
+              let kServices = key ? categoryToServices[key] : undefined;
+              obj.service = pServices || kServices || "";
+
+              let pFocus = parent ? categoryToFocus[parent] : undefined;
+              let kFocus = key ? categoryToFocus[key] : undefined;
+              obj.focusServices = pFocus || kFocus || "";
+              
+              if (obj.ua) categories.push(obj);
+            });
+        }
+      }
+
+      if (skillSheet) {
+        const sData = skillSheet.getDataRange().getDisplayValues();
+        if (sData.length > 1) {
+          for (let i = 1; i < sData.length; i++) {
+            let emoji = sData[i][0] ? sData[i][0].trim() : "";
+            let btnName = sData[i][1] ? sData[i][1].trim() : "";
+            let btnDesc = sData[i][2] ? sData[i][2].trim() : "";
+            let btnLink = sData[i][3] ? sData[i][3].trim() : "#";
+            
+            if (btnName) {
+              skillHubButtons.push({
+                emoji: emoji, name: btnName, desc: btnDesc, link: btnLink
+              });
+            }
+
+            let sellerName = sData[i][4] ? sData[i][4].trim() : "";
+            let nomination = sData[i][5] ? sData[i][5].trim() : "";
+            let result = sData[i][6] ? sData[i][6].trim() : "";
+            if (sellerName) {
+              sellerRatings.push({
+                name: sellerName, nomination: nomination, result: result
+              });
+            }
+          }
+        }
+      }
+      
+      if (statSheet) {
+          let sData = statSheet.getDataRange().getValues();
+          let headers = sData[0].map(h => String(h).trim());
+          
+          let dictCodeIdx = -1, dictNameIdx = -1, dictDescIdx = -1;
+          let idxName = -1, idxLogin = -1, idxPass = -1, idxDeadline = -1, idxAchUser = -1;
+          
+          let idxGoalPcs = -1, idxGoalUah = -1, idxExecPcs = -1, idxExecUah = -1;
+
+          for (let j = 0; j < headers.length; j++) {
+              let rawH = String(headers[j]).trim().toLowerCase();
+              let cleanH = rawH.replace(/[^a-zа-яёієїґ0-9]/g, '');
+
+              if (cleanH === 'піб' || cleanH === 'имя') idxName = j;
+              else if (cleanH === 'login' || cleanH === 'логін') idxLogin = j;
+              else if (cleanH === 'password' || cleanH === 'пароль') idxPass = j;
+              else if (cleanH === 'дедлайн') idxDeadline = j;
+              else if (cleanH === 'achievement' && rawH === 'achievement') idxAchUser = j; 
+              else if (cleanH === 'code' || cleanH === 'код') dictCodeIdx = j;
+              else if (cleanH.includes('name') && cleanH.includes('achievement')) dictNameIdx = j;
+              else if (cleanH === 'discript' || cleanH === 'description' || cleanH.includes('опис')) dictDescIdx = j;
+              
+              else if (cleanH === 'цільшт') idxGoalPcs = j;
+              else if (cleanH === 'цільгрн') idxGoalUah = j;
+              else if (cleanH === 'виконанняшт') idxExecPcs = j;
+              else if (cleanH === 'виконаннягрн') idxExecUah = j;
+          }
+
+          if (dictCodeIdx !== -1 && dictNameIdx !== -1) {
+              for (let i = 1; i < sData.length; i++) {
+                  let c = String(sData[i][dictCodeIdx]).trim();
+                  let n = String(sData[i][dictNameIdx]).trim();
+                  let d = dictDescIdx !== -1 ? String(sData[i][dictDescIdx]).trim() : "";
+                  
+                  if (c && n && c !== "" && n !== "") {
+                      if (!achievementData.some(a => a.code === c)) {
+                          achievementData.push({ name: n, code: c, description: d });
+                      }
+                  }
+              }
+          }
+
+          for(let i = 1; i < sData.length; i++) {
+              let pib = idxName !== -1 ? sData[i][idxName] : ""; 
+              let login = idxLogin !== -1 ? sData[i][idxLogin] : "";
+              let pass = idxPass !== -1 ? sData[i][idxPass] : "";  
+              let deadlineVal = idxDeadline !== -1 ? sData[i][idxDeadline] : "";
+              let achVal = idxAchUser !== -1 ? sData[i][idxAchUser] : ""; 
+              
+              let goalPcs = idxGoalPcs !== -1 ? sData[i][idxGoalPcs] : "";
+              let goalUah = idxGoalUah !== -1 ? sData[i][idxGoalUah] : "";
+              let execPcsStr = idxExecPcs !== -1 ? sData[i][idxExecPcs] : "";
+              let execUahStr = idxExecUah !== -1 ? sData[i][idxExecUah] : "";
+              
+              if (login && pass) {
+                  let assignedProducts = [];
+                  let results = {}; 
+                  
+                  for (let j = 0; j < headers.length; j++) {
+                      let rawHStr = String(headers[j]).trim();
+                      let cleanHStr = rawHStr.toLowerCase().replace(/[^a-zа-яёієїґ0-9]/g, '');
+                      
+                      if (rawHStr.startsWith("✦")) {
+                          let isChecked = sData[i][j] === true || String(sData[i][j]).toUpperCase() === "TRUE" || String(sData[i][j]) === "1";
+                          if (isChecked) {
+                              assignedProducts.push(rawHStr);
+                          }
+                      } 
+                      else if (
+                          cleanHStr !== "піб" && cleanHStr !== "имя" && 
+                          cleanHStr !== "login" && cleanHStr !== "логін" && 
+                          cleanHStr !== "password" && cleanHStr !== "пароль" && 
+                          cleanHStr !== "дедлайн" && 
+                          cleanHStr !== "achievement" && cleanHStr !== "ачивки" && 
+                          cleanHStr !== "code" && cleanHStr !== "код" && 
+                          !(cleanHStr.includes("name") && cleanHStr.includes("achievement")) && 
+                          cleanHStr !== "discript" && cleanHStr !== "description" &&
+                          cleanHStr !== "цільшт" && cleanHStr !== "цільгрн" && 
+                          cleanHStr !== "виконанняшт" && cleanHStr !== "виконаннягрн" && 
+                          cleanHStr !== ""
+                      ) {
+                          let val = String(sData[i][j] || "").trim();
+                          if (val) results[cleanHStr] = val;
+                      }
+                  }
+                  
+                  educationData.users.push({ 
+                      name: String(pib || login).trim(), 
+                      login: String(login).trim(), 
+                      pass: String(pass).trim(),
+                      deadline: String(deadlineVal).trim(),
+                      achievements: String(achVal).trim(),
+                      targetPcs: goalPcs,   
+                      targetUah: goalUah,
+                      execPcs: execPcsStr,
+                      execUah: execUahStr,
+                      assigned: assignedProducts,
+                      results: results 
+                  });
+              }
+          }
+      }
+
+      if (courseSheet) {
+          let cData = courseSheet.getDataRange().getDisplayValues();
+          let headers = cData[0];
+          for(let i = 1; i < cData.length; i++) {
+              let courseName = cData[i][0];
+              let productName = cData[i][3];
+              let theoryInfo = cData[i][4];
+              let testQuestions = cData[i][5];
+
+              let presentations = [];
+              for (let j = 6; j < headers.length; j++) { 
+                  if (cData[i][j] && String(cData[i][j]).trim() !== "") {
+                      presentations.push(String(cData[i][j]).trim());
+                  }
+              }
+
+              if (courseName && productName) {
+                  educationData.courses.push({
+                      course: String(courseName).trim(),
+                      product: String(productName).trim(),
+                      info: String(theoryInfo).trim(),
+                      test: String(testQuestions).trim(),
+                      presentations: presentations
+                  });
+              }
+          }
+      }
+
+      if (simSheet) {
+          let sData = simSheet.getDataRange().getDisplayValues();
+          if (sData.length > 1) {
+              let sHeaders = sData[0].map(h => String(h).trim().toLowerCase());
+
+              let idxService = sHeaders.findIndex(h => h.includes('сервіс'));
+              let idxObj = sHeaders.findIndex(h => h.includes('заперечення'));
+
+              let presCols = [];
+              for (let j = 0; j < sHeaders.length; j++) {
+                  if (sHeaders[j].includes('варіант презентації') || sHeaders[j].includes('презентац')) {
+                      presCols.push(j);
+                  }
+              }
+
+              let diagColsStart = idxObj !== -1 ? idxObj + 1 : 7;
+
+              let currentService = "";
+              let currentPresentations = [];
+
+              for (let i = 1; i < sData.length; i++) {
+                  let serviceRaw = idxService !== -1 ? String(sData[i][idxService]).trim() : "";
+
+                  if (serviceRaw) {
+                      currentService = serviceRaw;
+                      currentPresentations = [];
+                      presCols.forEach(col => {
+                          let p = String(sData[i][col] || "").trim();
+                          if (p) currentPresentations.push(p);
+                      });
+                  }
+
+                  let objection = idxObj !== -1 ? String(sData[i][idxObj]).trim() : "";
+                  if (!currentService || !objection) continue;
+
+                  let steps = [];
+                  for (let j = diagColsStart; j < sHeaders.length; j += 2) {
+                      let cons = String(sData[i][j] || "").trim();
+                      let cli = String(sData[i][j+1] || "").trim();
+                      if (cons || cli) {
+                          steps.push({ consultant: cons, client: cli });
+                      } else {
+                          break; 
+                      }
+                  }
+                  
+                  simulatorData.push({
+                      service: currentService,
+                      presentations: currentPresentations,
+                      objection: objection,
+                      steps: steps
+                  });
+              }
+          }
+      }
+
+  } catch (e) {
+      appVersion = "Error: " + e.toString();
+  }
+
+  return {
+    categories, descriptions, tariffs, appVersion, changelog,
+    montazhData, serviceCodes, rezervyData, rezervyDate, serviceBrands, trainingData,
+    skillHubButtons, sellerRatings, educationData, simulatorData, achievementData
+  };
+}
+
+
+// =========================================================================
+// НОВІ ФУНКЦІЇ ДЛЯ КОНТРОЛЮ ПРАВ ТА АВТОМАТИЗАЦІЇ СТВОРЕННЯ КОРИСТУВАЧІВ
+// =========================================================================
+
+function onEdit(e) {
+  if (!e || !e.range) return;
+  const sheet = e.range.getSheet();
+  const sheetName = sheet.getName().toLowerCase().trim();
+
+  // Працюємо тільки на листі зі статистикою
+  if (sheetName !== "статистика навчання") return;
+
+  const row = e.range.getRow();
+  const col = e.range.getColumn();
+  const val = e.value;
+
+  if (row < 2 || !val) return; // Пропускаємо заголовки та порожні рядки
+
+  // Динамічний пошук колонок
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  let cPib = 1, cLogin = -1, cPass = -1, cRole = -1; // Припускаємо, що ПІБ у колонці А (1)
+
+  headers.forEach((h, i) => {
+    const cleanH = String(h).trim().toLowerCase().replace(/[^a-zа-яёієїґ0-9]/g, '');
+    if (cleanH === 'піб' || cleanH === 'имя') cPib = i + 1;
+    else if (cleanH === 'login' || cleanH === 'логін') cLogin = i + 1;
+    else if (cleanH === 'password' || cleanH === 'пароль') cPass = i + 1;
+    else if (cleanH === 'роль' || cleanH === 'role') cRole = i + 1;
+  });
+
+  // 1. АВТОЗАПОВНЕННЯ: Якщо Керівник або Власник вносить ПІБ (Колонка А)
+  if (col === cPib) {
+    // Якщо логін порожній — генеруємо
+    if (cLogin !== -1 && !sheet.getRange(row, cLogin).getValue()) {
+      const login = transliterateUa(val).split('_')[0] + Math.floor(100 + Math.random() * 900);
+      sheet.getRange(row, cLogin).setValue(login);
+    }
+    // Якщо пароль порожній — генеруємо випадкові 6 цифр
+    if (cPass !== -1 && !sheet.getRange(row, cPass).getValue()) {
+      const pass = Math.floor(100000 + Math.random() * 900000).toString();
+      sheet.getRange(row, cPass).setValue(pass);
+    }
+    // Якщо роль порожня — автоматично ставимо "Сотрудник"
+    if (cRole !== -1 && !sheet.getRange(row, cRole).getValue()) {
+      sheet.getRange(row, cRole).setValue("Сотрудник");
+    }
+  }
+
+  // 2. КОНТРОЛЬ ПРАВ: Якщо хтось намагається змінити колонку "Роль"
+  if (col === cRole) {
+    const allowedRoles = ["сотрудник", "співробітник"];
+    const isAllowedRole = allowedRoles.includes(String(val).toLowerCase().trim());
+    
+    const currentUser = Session.getEffectiveUser().getEmail();
+    const owner = SpreadsheetApp.getActiveSpreadsheet().getOwner().getEmail();
+
+    // Якщо обрано іншу роль і користувач НЕ є власником документа — скасовуємо
+    if (!isAllowedRole && currentUser !== owner) {
+      e.range.setValue("Сотрудник"); // Примусове повернення ролі
+      SpreadsheetApp.getActiveSpreadsheet().toast("Ви можете призначати лише роль 'Сотрудник'", "Доступ обмежено", 5);
+    }
+  }
+}
+
+function transliterateUa(text) {
+  const cyrillicToLatin = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'h', 'ґ': 'g', 'д': 'd', 'е': 'e', 'є': 'ye', 'ж': 'zh',
+    'з': 'z', 'и': 'y', 'і': 'i', 'ї': 'yi', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n',
+    'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts',
+    'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ь': '', 'ю': 'yu', 'я': 'ya',
+    'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'H', 'Ґ': 'G', 'Д': 'D', 'Е': 'E', 'Є': 'Ye', 'Ж': 'Zh',
+    'З': 'Z', 'И': 'Y', 'І': 'I', 'Ї': 'Yi', 'Й': 'Y', 'К': 'K', 'Л': 'L', 'М': 'M', 'Н': 'N',
+    'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U', 'Ф': 'F', 'Х': 'Kh', 'Ц': 'Ts',
+    'Ч': 'Ch', 'Ш': 'Sh', 'Щ': 'Shch', 'Ь': '', 'Ю': 'Yu', 'Я': 'Ya', ' ': '_'
+  };
+  return String(text).split('').map(char => cyrillicToLatin[char] || char).join('').toLowerCase();
+}
