@@ -11,10 +11,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="SkillHUB_Assistant">
     
-    <!-- Обновленный путь к иконке PWA -->
+    <!-- Шлях до іконки PWA -->
     <link rel="apple-touch-icon" href="./assets/img/icon-192.png">
     
-    <!-- Подключаем внешние стили -->
+    <!-- Підключаємо зовнішні стилі -->
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
@@ -56,8 +56,13 @@
     </div>
 
     <div id="tab-search" class="app-tab active">
+        <!-- ОНОВЛЕНЕ ПОЛЕ ПОШУКУ -->
         <div class="input-group">
-            <input type="text" id="catInput" placeholder="Яку техніку чи послугу шукаємо?" autocomplete="off" disabled>
+            <!-- Іконка лупи -->
+            <div style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--text-muted); display: flex; pointer-events: none; z-index: 5;">
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <input type="text" id="catInput" placeholder="Яку техніку чи послугу шукаємо?" autocomplete="off" disabled style="padding-left: 54px; background: var(--card-bg); box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
             <button id="clearAllBtn" class="clear-btn">×</button>
             <div id="customSuggestions" class="suggestions"></div>
         </div>
@@ -159,15 +164,13 @@
                 <img src="./assets/svg/ukraine.svg" alt="UA" style="width: 16px; height: 16px;">
                 <span>ROZETKA KHARKIV REGION</span>
             </div>
-            <div id="appVersionDisp" style="display:inline-block; padding:6px 12px; background:var(--card-bg); border-radius:8px; border:1px solid var(--border); font-weight:bold; cursor:pointer; color:var(--text-main);" onclick="if(db.appVersion) window.showChangelogModal(db.appVersion, db.changelog)">v1.0.0</div>
+            <div id="appVersionDisp" style="display:inline-block; padding:6px 12px; background:var(--card-bg); border-radius:8px; border:1px solid var(--border); font-weight:bold; cursor:pointer; color:var(--primary);" onclick="if(db.appVersion) window.showChangelogModal(db.appVersion, db.changelog)">v1.0.0</div>
         </div>
     </div>
 </div>
 
 <nav class="bottom-nav">
-    <!-- ЧЕРНАЯ КАПЛЯ-ИНДИКАТОР -->
     <div class="nav-indicator"></div>
-
     <button class="nav-item active" onclick="window.switchTab('tab-search')">
         <div class="nav-icon icon-search"></div>
         <span>Пошук</span>
@@ -201,7 +204,7 @@
             <div style="display:flex; flex-direction:column;">
                 <div class="modal-title" style="width: 100%;">🧮 Калькулятор бонусів</div>
                 <div style="font-size: 11px; color: var(--text-muted); font-weight: 500; margin-top: 4px;">
-                    Актуально на <span id="klochRelevance" style="font-weight: 700; color: var(--text-main);"></span>
+                    Актуально на <span id="klochRelevance" style="font-weight: 700; color: var(--primary);"></span>
                 </div>
             </div>
             <button class="modal-close" onclick="window.closeKlochCalc()"></button>
@@ -224,7 +227,7 @@
                 </div>
             </div>
 
-            <div style="background: var(--input-bg); border-radius: 20px; padding: 20px; text-align: center; border: 1px solid var(--border); transition: 0.3s;" id="klochResultBox">
+            <div style="background: var(--primary-light); border-radius: 16px; padding: 20px; text-align: center; border: 1px solid var(--border); transition: 0.3s;" id="klochResultBox">
                 <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px;">Розрахунковий бонус</div>
                 <div id="klochResultValue" style="font-size: 28px; font-weight: 800; color: var(--text-main);">0.00 ₴</div>
                 <div id="klochResultFormula" style="font-size: 11px; color: var(--text-muted); margin-top: 4px; font-style: italic;">Формула: (0 * 0%) * 1</div>
@@ -241,8 +244,7 @@
                 <button style="background: transparent; border: none; color: var(--danger); font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 8px;" onclick="window.clearKlochList()">Очистити</button>
             </div>
 
-            <div id="klochListContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                </div>
+            <div id="klochListContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
 
             <div style="display: flex; gap: 8px; margin-top: 8px;">
                 <div style="flex: 1; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 16px 20px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
@@ -325,8 +327,7 @@
             <div class="modal-title" style="width: 100%;">🏆 Рейтинг продавців</div>
             <button class="modal-close" onclick="window.closeModalBase('ratingModal')"></button>
         </div>
-        <div class="modal-body" id="ratingModalBody">
-            </div>
+        <div class="modal-body" id="ratingModalBody"></div>
         <button class="btn btn-primary" style="margin-top: 10px;" onclick="window.closeModalBase('ratingModal')">Супер!</button>
     </div>
 </div>
@@ -399,7 +400,6 @@
     </div>
 </div>
 
-<!-- Подключаем внешний JavaScript -->
 <script src="./js/app.js"></script>
 </body>
 </html>
