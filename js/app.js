@@ -2114,11 +2114,9 @@ window.openModal = function(name, code = "", priceLabel = "") {
     window.openModalBase('descModal', name, code, priceLabel);
 }
 
-// Оновлена функція Changelog для відображення як в Telegram
 window.showChangelogModal = function(version, changelogText) {
     document.getElementById('modalTitle').innerHTML = `Оновлення v${version}`;
     
-    // Розділяємо текст на блоки по символу "--"
     let blocks = String(changelogText).split(/(?:\r?\n)?\s*--\s*(?:\r?\n)?/);
     let html = '<div style="display:flex; flex-direction:column; gap:12px;">';
     
@@ -2134,7 +2132,6 @@ window.showChangelogModal = function(version, changelogText) {
             
             let lineStyle = "";
             
-            // Перевірка маркерів кастомного форматування
             if (l.startsWith('(AA+)')) {
                 l = l.substring(5).trim().toUpperCase();
                 lineStyle += " font-weight:800;";
@@ -2156,7 +2153,6 @@ window.showChangelogModal = function(version, changelogText) {
                 lineStyle += " font-style:italic; color:var(--danger);";
             }
 
-            // Збільшення Емодзі
             l = l.replace(/([\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g, '<span style="font-size: 1.5em; vertical-align: middle; line-height: 1;">$1</span>');
 
             let margin = blockHtml !== '' ? "margin-top: 6px;" : "";
@@ -2223,6 +2219,119 @@ document.getElementById('sellerFormSubmit').onsubmit = function(e) {
         alert("Помилка відправки.");
         btn.disabled = false;
         btn.innerText = 'ВІДПРАВИТИ';
+    });
+};
+
+// ==========================================
+// ЛОГІКА ДЛЯ ОКРЕМОЇ СТОРІНКИ ПОШУКУ
+// ==========================================
+
+window.handleGlobalSearch = function() {
+    // Ці ID мають бути в твоєму Search.html
+    const searchInput = document.getElementById('globalSearchInput');
+    const resultsContainer = document.getElementById('globalSearchResults');
+    
+    if (!searchInput || !resultsContainer) return;
+
+    const query = searchInput.value.toLowerCase().trim();
+    resultsContainer.innerHTML = '';
+
+    if (query.length < 2) return;
+
+    let results = [];
+
+    // 1. Пошук по послугах (з db.tariffs та db.descriptions)
+    if (db.tariffs) {
+        // Щоб уникнути дублікатів, використовуємо Set
+        let seenServices = new Set();
+        
+        db.tariffs.forEach(t => {
+            let name = t.service || "";
+            if (!name || seenServices.has(name)) return;
+
+            let descRaw = window.findInDb(db.descriptions, name) || "";
+            let ruName = t.serviceRu || "";
+            let enName = t.serviceEn || "";
+
+            // Шукаємо в назві (укр/рос/англ) або в описі
+            if (name.toLowerCase().includes(query) || 
+                ruName.toLowerCase().includes(query) || 
+                enName.toLowerCase().includes(query) || 
+                descRaw.toLowerCase().includes(query)) {
+                
+                seenServices.add(name);
+                
+                // Очищаємо опис від технічних символів для прев'ю
+                let cleanDesc = descRaw.replace(/\|/g, ' ').replace(/\+/g, '').replace(/=/g, '').replace(/"/g, '').substring(0, 100);
+                if (cleanDesc.length >= 100) cleanDesc += '...';
+                if (cleanDesc === "Опис відсутній..." || !cleanDesc) cleanDesc = "Опис відсутній";
+                
+                let exactBrand = db.serviceBrands ? window.findInDb(db.serviceBrands, name) : "";
+                let brandMatch = name.match(/^\[(.*?)\]/);
+                let brand = exactBrand || (brandMatch ? brandMatch[1] : "Окрема послуга");
+                let cleanName = name.replace(/^\[.*?\]\s*/, '').trim();
+
+                results.push({
+                    type: 'Послуга',
+                    badge: brand,
+                    title: cleanName,
+                    description: cleanDesc,
+                    originalName: name,
+                    code: t.code || ""
+                });
+            }
+        });
+    }
+
+    // 2. Пошук по категоріях (з db.categories)
+    if (db.categories) {
+        db.categories.forEach(c => {
+            let nameUa = c.ua || "";
+            let nameRu = c.ru || "";
+            let desc = c.service || ""; // Список сервісів як опис
+            
+            if (nameUa.toLowerCase().includes(query) || 
+                nameRu.toLowerCase().includes(query) || 
+                desc.toLowerCase().includes(query)) {
+                
+                results.push({
+                    type: 'Категорія',
+                    badge: 'Категорія товарів',
+                    title: nameUa,
+                    description: 'Містить послуги: ' + (desc.replace(/\|/g, ', ').substring(0, 80)) + '...',
+                    originalName: nameUa
+                });
+            }
+        });
+    }
+
+    if (results.length === 0) {
+        resultsContainer.innerHTML = '<div class="loading-text">Нічого не знайдено 😕</div>';
+        return;
+    }
+
+    // Рендер результатів
+    results.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'search-result-item';
+        
+        // По кліку відкриваємо модалку для послуги, або переходимо в симулятор для категорії
+        div.onclick = () => {
+            if (item.type === 'Послуга') {
+                window.openModal(item.originalName, item.code);
+            } else {
+                window.switchTab('tab-search'); // Перемикаємось на головну вкладку симулятора
+                let fakeItem = { searchType: 'category', ua: item.originalName, category: item.originalName, icon: '📦' };
+                selectItem(fakeItem);
+            }
+        };
+
+        div.innerHTML = `
+            <div class="item-badge">${item.badge}</div>
+            <div class="item-title">${item.title}</div>
+            <div class="item-desc">${item.description}</div>
+        `;
+        resultsContainer.appendChild(div);
     });
 };
 
