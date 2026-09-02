@@ -55,6 +55,7 @@
         </div>
     </div>
 
+    <!-- ВКЛАДКА 1: КАЛЬКУЛЯТОР (Основний пошук) -->
     <div id="tab-search" class="app-tab active">
         
         <!-- БЛОК ИЗБРАННОГО -->
@@ -89,6 +90,7 @@
         </div>
     </div>
 
+    <!-- ВКЛАДКА 2: РЕЗЕРВИ -->
     <div id="tab-reserves" class="app-tab">
         <div class="input-group" style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
             <select id="storeFilter" onchange="window.renderRezervyList()" style="flex: 1; margin-bottom: 0;">
@@ -102,10 +104,21 @@
         <div id="rezervyList" class="list-group"></div>
     </div>
 
+    <!-- ВКЛАДКА 3: SKILLHUB (БАЗА ЗНАНЬ ТА ПОСИЛАННЯ) -->
     <div id="tab-skillhub" class="app-tab">
+        
+        <!-- НОВИЙ БЛОК ГЛОБАЛЬНОГО ПОШУКУ ПО БАЗІ -->
+        <div class="search-container" style="padding: 0 0 24px 0;">
+            <div style="font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">📖 Довідник послуг</div>
+            <input type="text" id="globalSearchInput" class="search-input" placeholder="Введіть назву або опис послуги..." oninput="window.handleGlobalSearch()">
+            <div id="globalSearchResults" class="results-container"></div>
+        </div>
+
+        <div style="font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">🔗 Корисні посилання</div>
         <div class="list-group" id="dynamicSkillHubButtons"></div>
     </div>
 
+    <!-- ВКЛАДКА 4: НАЛАШТУВАННЯ -->
     <div id="tab-settings" class="app-tab">
         <div class="list-group">
             <div class="list-item">
@@ -140,7 +153,6 @@
         </div>
 
         <div class="list-group">
-            <!-- КНОПКА ИЗБРАННОГО -->
             <button class="list-item" onclick="window.openFavoritesModal()">
                 <div class="list-item-content">
                     <span class="list-item-title">⭐ Налаштувати обране</span>
@@ -183,12 +195,11 @@
 </div>
 
 <nav class="bottom-nav">
-    <!-- СЕРАЯ КАПЛЯ-ИНДИКАТОР С КРАСИВОЙ АНИМАЦИЕЙ -->
     <div class="nav-indicator"></div>
 
     <button class="nav-item active" onclick="window.switchTab('tab-search')">
         <div class="nav-icon icon-search"></div>
-        <span>Пошук</span>
+        <span>Калькулятор</span>
     </button>
     <button class="nav-item" onclick="window.switchTab('tab-reserves')">
         <div class="nav-icon icon-rezerv"></div>
