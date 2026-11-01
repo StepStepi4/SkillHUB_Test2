@@ -627,7 +627,7 @@
         <div class="login-wrapper">
             <div class="login-card">
                 <div class="big-emoji">
-                    <img src="Achievement/17.png" alt="SkillHUB Logo" style="width: 80px; height: 80px; object-fit: contain; display: block; margin: 0 auto 16px auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));" onerror="this.style.display='none'">
+                    <img src="Achievement/17.webp" alt="SkillHUB Logo" style="width: 80px; height: 80px; object-fit: contain; display: block; margin: 0 auto 16px auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));" onerror="this.style.display='none'">
                 </div>
                 <h1>Вхід в академію</h1>
 
@@ -1170,7 +1170,7 @@
             let cardClass = isEarned ? "ach-card earned" : "ach-card locked";
             return `
                 <div class="${cardClass}" onclick="toggleAchZoom(this)">
-                    <div class="ach-icon-wrapper"><img src="Achievement/${safeCode}.png" onerror="this.src='medal.svg'" class="ach-img"></div>
+                    <div class="ach-icon-wrapper"><img src="Achievement/${safeCode}.webp" onerror="this.src='medal.svg'" class="ach-img"></div>
                     <div style="display: flex; flex-direction: column; justify-content: center; flex: 1;">
                         <div class="ach-card-title">${safeTitle}</div>
                         <div class="ach-card-desc">${safeDesc}</div>
@@ -2674,7 +2674,7 @@
                 let title = achInfo && achInfo.name ? achInfo.name : `Відзнака #${code}`, desc = achInfo && achInfo.description ? achInfo.description : "", safeCode = escapeHTMLAttr(code);
                 return `
                     <div class="ach-card earned" onclick="toggleAchZoom(this)">
-                        <div class="ach-icon-wrapper"><img src="Achievement/${safeCode}.png" onerror="this.src='medal.svg'" class="ach-img"></div>
+                        <div class="ach-icon-wrapper"><img src="Achievement/${safeCode}.webp" onerror="this.src='medal.svg'" class="ach-img"></div>
                         <div style="display: flex; flex-direction: column; justify-content: center; flex: 1;">
                             <div class="ach-card-title">${escapeHTMLAttr(title)}</div><div class="ach-card-desc">${escapeHTMLAttr(desc)}</div>
                             <div style="margin-top:6px;"><span style="color:var(--success); font-size:11px; font-weight:800;">НАТИСНІТЬ ДЛЯ ОПИСУ</span></div>
