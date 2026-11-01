@@ -268,5 +268,9 @@
         }, 800);
     }
 </script>
+<script>
+    // Офлайн-оболонка: реєструємо service worker і тут (на випадок, якщо застосунок відкрито одразу на цій сторінці)
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(function () {}); }
+</script>
 </body>
 </html>

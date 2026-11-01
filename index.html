@@ -1040,7 +1040,8 @@
 
     const API_URL = 'https://script.google.com/macros/s/AKfycbyeoKV6uQRE_h0jy_QjkbQI7k_Py_UOYMvckWhHmGITT-q-Ai832__GWVxbdjxBgQ6zqA/exec';
 
-    const CACHE_KEY = 'skillhub_v6_cache';
+    const CACHE_KEY = 'skillhub_v7_catalog';      // тільки загальні дані (без співробітників і паролів)
+    const OLD_CACHE_KEY = 'skillhub_v6_cache';    // старий кеш містив паролі - читаємо один раз і видаляємо
     const SEEN_VERSION_KEY = 'skillhub_version_flat_v6';
 
     let db = { categories: [], descriptions: {}, tariffs: [], appVersion: "", changelog: "", montazhData: {cities:[], services:[]}, serviceCodes: {}, rezervyData: [], rezervyDate: "", serviceBrands: {}, trainingData: [], skillHubButtons: [], sellerRatings: [], klochCalcData: { rules: [], relevance: "" } };
@@ -1939,8 +1940,20 @@
         let ok = false;
         try { await idbSet(CACHE_KEY, dataStr); ok = true; } catch (e) { console.warn('IDB save failed', e); }
         try { localStorage.setItem(CACHE_KEY, dataStr); ok = true; } catch (e) { /* квота - ігноруємо, є IDB */ }
-        if (ok) { try { localStorage.setItem('skillhub_has_cache', '1'); } catch (e) {} }
+        if (ok) {
+            try { localStorage.setItem('skillhub_has_cache', '1'); } catch (e) {}
+            purgeOldCatalogCache();
+        }
         return ok;
+    }
+
+    // Старий кеш (v6) зберігав у собі всіх співробітників із паролями - після переходу прибираємо
+    async function purgeOldCatalogCache() {
+        try { localStorage.removeItem(OLD_CACHE_KEY); } catch (e) {}
+        try {
+            const idb = await openIDB();
+            await new Promise(res => { const tx = idb.transaction(IDB_STORE, 'readwrite'); tx.objectStore(IDB_STORE).delete(OLD_CACHE_KEY); tx.oncomplete = tx.onerror = tx.onabort = () => res(); });
+        } catch (e) {}
     }
 
     // Читаємо: спочатку IDB, потім localStorage. Повертаємо ТІЛЬКИ валідний кеш.
@@ -1954,6 +1967,17 @@
                 if (isUsableDb(parsed)) return parsed;
             } catch (e) {}
         }
+        // Перший запуск після оновлення: беремо загальні дані зі старого кешу (без співробітників), щоб не було порожнього екрану
+        try {
+            let old = null;
+            try { const v = await idbGet(OLD_CACHE_KEY); if (v) old = v; } catch (e) {}
+            if (!old) old = localStorage.getItem(OLD_CACHE_KEY);
+            if (old) {
+                const parsed = JSON.parse(old);
+                delete parsed.educationData; delete parsed.achievementData;
+                if (isUsableDb(parsed)) return parsed;
+            }
+        } catch (e) {}
         return null;
     }
 
@@ -1992,7 +2016,7 @@
         const timeoutId = setTimeout(() => controller.abort(), 60000);
         let response;
         try {
-            response = await fetch(API_URL + '?nocache=' + Date.now(), { signal: controller.signal });
+            response = await fetch(API_URL + '?action=catalog', { signal: controller.signal });
         } catch (e) {
             if (e && e.name === 'AbortError') throw new Error('Час очікування вичерпано');
             throw e;
