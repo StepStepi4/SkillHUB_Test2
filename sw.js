@@ -1,6 +1,6 @@
 // SkillHUB Assistant - Service Worker (offline-first)
 // ВАЖЛИВО: при кожному релізі міняйте VERSION - тоді всі пристрої підтягнуть нові файли.
-const VERSION = 'v5-img';
+const VERSION = 'v6-split';
 const SHELL_CACHE = 'skillhub-shell-' + VERSION;   // "оболонка": сторінки, іконки, бібліотеки
 const RUNTIME_CACHE = 'skillhub-runtime-v1';       // шрифти, картинки досягнень та інше, що завантажується під час роботи
 
@@ -22,6 +22,19 @@ const SHELL = [
   "./Achievement/10.webp",
   "./Achievement/11.webp",
   "./Achievement/17.webp",
+  "./css/fonts.css",
+  "./css/index.css",
+  "./css/Education.css",
+  "./css/Simulator.css",
+  "./js/index.js",
+  "./js/Education.js",
+  "./js/Simulator.js",
+  "./fonts/Inter-Regular.woff",
+  "./fonts/Inter-Medium.woff",
+  "./fonts/Inter-SemiBold.woff",
+  "./fonts/Inter-Bold.woff",
+  "./fonts/Inter-ExtraBold.woff",
+  "./fonts/Inter-Black.woff",
   "./icon-192.png",
   "./icon-512.png",
   "./lib/chart.umd.js",
