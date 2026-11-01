@@ -23,6 +23,7 @@
 
     window.updateFontScale = function(scale) {
         localStorage.setItem('skillhub_font_scale', scale);
+        if (window.updateAcademyFontScale) window.updateAcademyFontScale(scale);
         let style = document.getElementById('dynamicFontScale');
         if(!style) {
             style = document.createElement('style');
@@ -73,7 +74,7 @@
         if (!val) return '';
         let clean = String(val).trim();
         if (clean.toLowerCase().endsWith('.svg') || clean.toLowerCase().endsWith('.png')) {
-            return `<img src="icons_skillHUB/${clean}" alt="icon" style="width: 100%; height: 100%; object-fit: contain; display: block;">`;
+            return `<img src="${SKILLHUB_ICONS_DIR}${clean}" alt="icon" style="width: 100%; height: 100%; object-fit: contain; display: block;">`;
         }
         return clean;
     };
@@ -84,8 +85,6 @@
             elLoader.querySelector('.loader-text').innerHTML = "Критична помилка HTML:<br>" + e.message + "<br><br><span style='font-size:10px; opacity:0.7'>Скиньте кеш браузера</span>";
         }
     });
-
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyeoKV6uQRE_h0jy_QjkbQI7k_Py_UOYMvckWhHmGITT-q-Ai832__GWVxbdjxBgQ6zqA/exec';
 
     const CACHE_KEY = 'skillhub_v7_catalog';      // тільки загальні дані (без співробітників і паролів)
     const OLD_CACHE_KEY = 'skillhub_v6_cache';    // старий кеш містив паролі - читаємо один раз і видаляємо
@@ -581,12 +580,15 @@
         let nm = String(btn.name).toLowerCase();
         let prefix = fromModal ? "window.closeModalBase('favQuickMenuModal'); " : "";
 
+        // Академія тепер частина цього застосунку: кнопка з таблиці з посиланням "Academy" (або старим Education.html) відкриває розділ
+        if (/^academy$/i.test(linkStr) || /education\.html/i.test(linkStr)) return `onclick="${prefix}window.Academy.open()"`;
         if (linkStr === "Calculator_kloch") return `onclick="${prefix}window.openKlochCalc()"`;
         if (linkStr === "--") return `onclick="${prefix}window.openSellerModal()"`;
         if (linkStr === "%") return `onclick="${prefix}window.openRatingModal()"`;
         if (linkStr === "@@") return `onclick="${prefix}window.openModalBase('certManualModal')"`;
         if (linkStr !== "" && linkStr !== "#") return `onclick="${prefix}window.open('${linkStr}', '_blank')"`;
 
+        if ((linkStr === "" || linkStr === "#") && (nm.includes("academy") || nm.includes("академ"))) return `onclick="${prefix}window.Academy.open()"`;
         if (nm.includes("замін") || nm.includes("замен") || nm.includes("продавц")) return `onclick="${prefix}window.openSellerModal()"`;
         if (nm.includes("об'єдн") || nm.includes("объед") || nm.includes("сертиф")) return `onclick="${prefix}window.openModalBase('certManualModal')"`;
         if (nm.includes("рейтинг")) return `onclick="${prefix}window.openRatingModal()"`;
@@ -933,47 +935,7 @@
         formatStep('step4', v4, 'Перевірка цілісності даних');
     };
 
-        // ====================== СХОВИЩЕ (IndexedDB + localStorage як запасний) ======================
-    const IDB_NAME = 'skillhub_store';
-    const IDB_STORE = 'kv';
-    let _idbPromise = null;
-
-    function openIDB() {
-        if (_idbPromise) return _idbPromise;
-        _idbPromise = new Promise((resolve, reject) => {
-            try {
-                if (!window.indexedDB) return reject(new Error('no idb'));
-                const req = indexedDB.open(IDB_NAME, 1);
-                req.onupgradeneeded = () => { req.result.createObjectStore(IDB_STORE); };
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
-                req.onblocked = () => reject(new Error('idb blocked'));
-            } catch (e) { reject(e); }
-        });
-        _idbPromise.catch(() => { _idbPromise = null; });
-        return _idbPromise;
-    }
-
-    async function idbGet(key) {
-        const idb = await openIDB();
-        return new Promise((resolve, reject) => {
-            const tx = idb.transaction(IDB_STORE, 'readonly');
-            const rq = tx.objectStore(IDB_STORE).get(key);
-            rq.onsuccess = () => resolve(rq.result);
-            rq.onerror = () => reject(rq.error);
-        });
-    }
-
-    async function idbSet(key, value) {
-        const idb = await openIDB();
-        return new Promise((resolve, reject) => {
-            const tx = idb.transaction(IDB_STORE, 'readwrite');
-            tx.objectStore(IDB_STORE).put(value, key);
-            tx.oncomplete = () => resolve(true);
-            tx.onerror = () => reject(tx.error);
-            tx.onabort = () => reject(tx.error);
-        });
-    }
+    // IndexedDB-обгортки (openIDB / idbGet / idbSet / idbDelete) - у js/core/storage.js
 
     function isUsableDb(obj) {
         return !!obj && typeof obj === 'object' && !obj.error &&
@@ -1287,7 +1249,7 @@ window.saveDefaultStore = function() {
 
             let snMatchList = shortName.match(/^\[Уцінка:\s*([^\]]+)\]/i);
             let isDiscount = shortName.toLowerCase().includes('уцінка') || snMatchList !== null;
-            let discountIconHtml = isDiscount ? `<img src="icons_skillHUB/Discount.svg" alt="%" class="discount-tag-icon">` : '';
+            let discountIconHtml = isDiscount ? `<img src="assets/icons/ui/discount.svg" alt="%" class="discount-tag-icon">` : '';
 
             let safeCatOnClick = String(r.cat).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\u0026quot;');
             let safeNameOnClick = String(shortName).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\u0026quot;');

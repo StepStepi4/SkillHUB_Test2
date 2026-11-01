@@ -1,57 +1,17 @@
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyeoKV6uQRE_h0jy_QjkbQI7k_Py_UOYMvckWhHmGITT-q-Ai832__GWVxbdjxBgQ6zqA/exec'; 
-    const CACHE_KEY = 'skillhub_v7_edu';          // кеш даних навчання (лише дані цього користувача, без паролів)
-    const OLD_CACHE_KEY = 'skillhub_v6_cache';   // старий кеш містив паролі всіх - видаляємо
+    const EDU_CACHE_KEY = 'skillhub_v7_edu';   // кеш даних навчання (лише дані цього користувача, без паролів)
+    window.fullData = null; // повна відповідь API (educationData + achievementData)
 
-    // ====================== СХОВИЩЕ: IndexedDB (спільне з index.html) + localStorage як запасне ======================
-    const IDB_NAME = 'skillhub_store';
-    const IDB_STORE = 'kv';
-    let _idbPromise = null;
-    window.fullData = null; // повна відповідь API (educationData + achievementData + ...)
-
-    function openIDB() {
-        if (_idbPromise) return _idbPromise;
-        _idbPromise = new Promise((resolve, reject) => {
-            try {
-                if (!window.indexedDB) return reject(new Error('no idb'));
-                const req = indexedDB.open(IDB_NAME, 1);
-                req.onupgradeneeded = () => { req.result.createObjectStore(IDB_STORE); };
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
-                req.onblocked = () => reject(new Error('idb blocked'));
-            } catch (e) { reject(e); }
-        });
-        _idbPromise.catch(() => { _idbPromise = null; });
-        return _idbPromise;
-    }
-    async function idbGet(key) {
-        const idb = await openIDB();
-        return new Promise((resolve, reject) => {
-            const rq = idb.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(key);
-            rq.onsuccess = () => resolve(rq.result);
-            rq.onerror = () => reject(rq.error);
-        });
-    }
-    async function idbSet(key, value) {
-        const idb = await openIDB();
-        return new Promise((resolve, reject) => {
-            const tx = idb.transaction(IDB_STORE, 'readwrite');
-            tx.objectStore(IDB_STORE).put(value, key);
-            tx.oncomplete = () => resolve(true);
-            tx.onerror = () => reject(tx.error);
-            tx.onabort = () => reject(tx.error);
-        });
-    }
-    async function saveCache(dataStr) {
+    async function eduSaveCache(dataStr) {
         let ok = false;
-        try { await idbSet(CACHE_KEY, dataStr); ok = true; } catch (e) {}
-        try { localStorage.setItem(CACHE_KEY, dataStr); ok = true; } catch (e) {}
+        try { await idbSet(EDU_CACHE_KEY, dataStr); ok = true; } catch (e) {}
+        try { localStorage.setItem(EDU_CACHE_KEY, dataStr); ok = true; } catch (e) {}
         if (ok) { try { localStorage.setItem('skillhub_has_cache7', '1'); } catch (e) {} }
         return ok;
     }
-    async function loadCache() {
+    async function eduLoadCache() {
         let candidates = [];
-        try { const v = await idbGet(CACHE_KEY); if (v) candidates.push(v); } catch (e) {}
-        try { const v = localStorage.getItem(CACHE_KEY); if (v) candidates.push(v); } catch (e) {}
+        try { const v = await idbGet(EDU_CACHE_KEY); if (v) candidates.push(v); } catch (e) {}
+        try { const v = localStorage.getItem(EDU_CACHE_KEY); if (v) candidates.push(v); } catch (e) {}
         for (const str of candidates) {
             try {
                 const parsed = JSON.parse(str);
@@ -62,11 +22,11 @@
     }
     // Відкладений запис (не блокує інтерфейс), об'єднує часті виклики
     let _saveTimer = null;
-    function saveCacheLater() {
+    function eduSaveCacheLater() {
         if (_saveTimer) clearTimeout(_saveTimer);
         _saveTimer = setTimeout(() => {
             _saveTimer = null;
-            const run = () => { try { if (window.fullData) saveCache(JSON.stringify(window.fullData)); } catch (e) {} };
+            const run = () => { try { if (window.fullData) eduSaveCache(JSON.stringify(window.fullData)); } catch (e) {} };
             if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 2000 }); else run();
         }, 400);
     }
@@ -77,19 +37,24 @@
         try {
             const oc = localStorage.getItem('skillhub_edu_creds');
             if (oc && !localStorage.getItem('skillhub_auth')) localStorage.setItem('skillhub_edu_creds_old', oc); // одноразова міграція
-            localStorage.removeItem('skillhub_edu_creds'); localStorage.removeItem('skillhub_has_cache');
+            localStorage.removeItem('skillhub_edu_creds');
             if (localStorage.getItem('skillhub_auth')) localStorage.removeItem('skillhub_edu_creds_old');
         } catch (e) {}
         try { localStorage.removeItem('skillhub_session_token'); } catch (e) {}
-        try { const raw = localStorage.getItem(OLD_CACHE_KEY); if (raw && raw.indexOf('"educationData"') !== -1) localStorage.removeItem(OLD_CACHE_KEY); } catch (e) {}
-        try {
-            const idb = await openIDB();
-            const v = await idbGet(OLD_CACHE_KEY);
-            if (v && String(v).indexOf('"educationData"') !== -1) {
-                await new Promise(res => { const tx = idb.transaction(IDB_STORE, 'readwrite'); tx.objectStore(IDB_STORE).delete(OLD_CACHE_KEY); tx.oncomplete = tx.onerror = tx.onabort = () => res(); });
-            }
-        } catch (e) {}
     }
+
+    /* ====================== Ізоляція «Академії» всередині єдиного застосунку ====================== */
+    const ACADEMY_ROOT_ID = 'academyApp';
+    function academyRoot() { return document.getElementById(ACADEMY_ROOT_ID); }
+    // Додає префікс #academyApp до кожного селектора (щоб масштаб шрифту не чіпав «Асистента»)
+    function scopeAcademyCss(css) {
+        return css.replace(/(^|\})\s*([^{}]+)\{/g, function (m, br, sel) {
+            const scoped = sel.split(',').map(x => '#' + ACADEMY_ROOT_ID + ' ' + x.trim()).join(', ');
+            return br + '\n' + scoped + ' {';
+        });
+    }
+    function academyScroll(lock) { const r = academyRoot(); if (r) r.style.overflowY = lock ? 'hidden' : ''; }
+    function academyScrollTop() { const r = academyRoot(); if (r) r.scrollTop = 0; }
 
     // ====================== Ліниве завантаження Chart.js ======================
     let _chartPromise = null;
@@ -98,7 +63,7 @@
         if (_chartPromise) return _chartPromise;
         _chartPromise = new Promise((resolve, reject) => {
             const sc = document.createElement('script');
-            sc.src = 'lib/chart.umd.js'; // локальна копія (працює офлайн)
+            sc.src = 'js/vendor/chart.umd.js'; // локальна копія (працює офлайн)
             sc.onload = () => resolve();
             sc.onerror = () => {
                 // запасний варіант - CDN
@@ -132,14 +97,14 @@
         return 'seller';
     }
 
-    window.updateFontScale = function(scale) {
-        let style = document.getElementById('dynamicFontScale');
+    window.updateAcademyFontScale = function(scale) {
+        let style = document.getElementById('dynamicFontScaleAcademy');
         if(!style) { 
             style = document.createElement('style'); 
-            style.id = 'dynamicFontScale'; 
+            style.id = 'dynamicFontScaleAcademy'; 
             document.head.appendChild(style); 
         }
-        style.innerHTML = `
+        style.innerHTML = scopeAcademyCss(`
             input, select, textarea, button, .btn { font-size: calc(16px * ${scale}) !important; }
             h1 { font-size: calc(26px * ${scale}) !important; }
             h2 { font-size: calc(22px * ${scale}) !important; }
@@ -159,13 +124,13 @@
             .timer-box { font-size: calc(16px * ${scale}) !important; }
             .role-action-btn span { font-size: calc(11px * ${scale}) !important; }
             .banner-action-btn span { font-size: calc(11.5px * ${scale}) !important; }
-        `;
+        `);
     };
 
-    let savedFontScale = localStorage.getItem('skillhub_font_scale') || "1";
-    window.updateFontScale(savedFontScale);
+    let academySavedFontScale = localStorage.getItem('skillhub_font_scale') || "1";
+    window.updateAcademyFontScale(academySavedFontScale);
 
-    let db = null;
+    let eduDb = null;
     let globalAchievements = []; 
     let currentUser = null;
     let windowUserRole = 'seller'; 
@@ -252,14 +217,14 @@
         if (drawer.classList.contains('open')) {
             drawer.classList.remove('open');
             overlay.classList.remove('active');
-            document.body.style.overflow = '';
+            academyScroll(false);
         } else {
             renderAchievementsList();
             drawer.classList.add('open');
             overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
+            academyScroll(true);
             if (currentUser) {
-                let user = db.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
+                let user = eduDb.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
                 if (user && user.achievements) {
                     let achCodes = String(user.achievements).split(',').map(s => s.trim()).filter(Boolean);
                     localStorage.setItem('skillhub_achievements_' + user.login, JSON.stringify(achCodes));
@@ -282,7 +247,7 @@
     function renderAchievementsList() {
         let container = document.getElementById('achList');
         if (!container) return;
-        let user = db.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
+        let user = eduDb.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
         let earnedCodes = user && user.achievements ? String(user.achievements).split(',').map(s => s.trim()).filter(Boolean) : [];
         if (!globalAchievements || globalAchievements.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted); font-weight:600;">Відзнаки відсутні в базі</div>';
@@ -296,7 +261,7 @@
             let cardClass = isEarned ? "ach-card earned" : "ach-card locked";
             return `
                 <div class="${cardClass}" onclick="toggleAchZoom(this)">
-                    <div class="ach-icon-wrapper"><img src="Achievement/${safeCode}.webp" onerror="this.src='medal.svg'" class="ach-img"></div>
+                    <div class="ach-icon-wrapper"><img src="assets/achievements/${safeCode}.webp" onerror="this.src='assets/icons/ui/medal.svg'" class="ach-img"></div>
                     <div style="display: flex; flex-direction: column; justify-content: center; flex: 1;">
                         <div class="ach-card-title">${safeTitle}</div>
                         <div class="ach-card-desc">${safeDesc}</div>
@@ -554,13 +519,7 @@
         }
     }
 
-    function goBackToIndex() {
-        if (document.referrer && document.referrer.includes('index.html')) {
-            window.history.back(); 
-        } else {
-            window.location.href = 'index.html';
-        }
-    }
+    function goBackToIndex() { Academy.close(); }
 
     function handleFloatingBack() {
         let activeEl = document.querySelector('.view.active');
@@ -591,13 +550,13 @@
         document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
         let target = document.getElementById(viewId);
         if (target) target.classList.add('active');
-        window.scrollTo(0, 0);
+        academyScrollTop();
 
         const exitBtn = document.getElementById('floatingExitBtn');
         exitBtn.style.display = (viewId === 'testView') ? 'none' : 'flex';
 
         requestAnimationFrame(() => {
-            document.documentElement.classList.remove('fast-boot');
+            document.documentElement.classList.remove('edu-fast-boot');
         });
     }
 
@@ -674,8 +633,8 @@
     // Застосувати відповідь сервера (login / edu) до стану застосунку й кешу
     function applyEduData(data) {
         window.fullData = { educationData: data.educationData, achievementData: data.achievementData || [], me: data.me || null };
-        saveCache(JSON.stringify(window.fullData));
-        db = data.educationData;
+        eduSaveCache(JSON.stringify(window.fullData));
+        eduDb = data.educationData;
         globalAchievements = data.achievementData || [];
     }
 
@@ -693,11 +652,11 @@
             applyEduData(data);
 
             if (currentUser) {
-                let user = db.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
+                let user = eduDb.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
                 if (user) {
                     if (document.getElementById('cabinetView').classList.contains('active')) {
                         if (windowViewingEmployee) {
-                            let updatedEmp = db.users.find(u => String(u.login).toLowerCase() === String(windowViewingEmployee.login).toLowerCase());
+                            let updatedEmp = eduDb.users.find(u => String(u.login).toLowerCase() === String(windowViewingEmployee.login).toLowerCase());
                             if (updatedEmp) {
                                 windowViewingEmployee = updatedEmp;
                                 buildCoursesMap(updatedEmp);
@@ -766,7 +725,7 @@
         const textEl = document.getElementById('deadlineText');
         const iconEl = document.getElementById('deadlineIcon');
 
-        let user = windowViewingEmployee || (db && db.users ? db.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase()) : null);
+        let user = windowViewingEmployee || (eduDb && eduDb.users ? eduDb.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase()) : null);
         
         if (!user || detectRoleGroup(user.role) === 'guest') {
             container.style.display = 'none'; window.isDeadlinePassed = false; updateTestButtonState(); return;
@@ -812,7 +771,7 @@
 
     // Автовхід із кешу: пароль не потрібен, є токен
     function bootFromCache() {
-        let user = db && db.users && auth ? db.users.find(u => lowLogin(u.login) === lowLogin(auth.login)) : null;
+        let user = eduDb && eduDb.users && auth ? eduDb.users.find(u => lowLogin(u.login) === lowLogin(auth.login)) : null;
         if (user) {
             currentUser = user.login;
             windowUserRole = detectRoleGroup(user.role);
@@ -820,7 +779,7 @@
             switchToMyCabinet();
             return true;
         }
-        document.documentElement.classList.remove('fast-boot');
+        document.documentElement.classList.remove('edu-fast-boot');
         document.getElementById('loader').style.display = 'none';
         switchView('loginView');
         return false;
@@ -851,7 +810,7 @@
                 writeAuth({ login: r.me.login, token: r.token }, persist);
                 applyEduData(r);
                 storeVerifier(r.me.login, p);
-                let user = db.users.find(u => lowLogin(u.login) === lowLogin(r.me.login));
+                let user = eduDb.users.find(u => lowLogin(u.login) === lowLogin(r.me.login));
                 currentUser = r.me.login;
                 windowUserRole = detectRoleGroup(user ? user.role : r.me.role);
                 windowViewingEmployee = null;
@@ -870,7 +829,7 @@
             }
 
             // Мережі немає (або сервер недоступний): офлайн-вхід за відбитком пароля й кешем
-            const cachedUser = db && db.users ? db.users.find(u => lowLogin(u.login) === lowLogin(l)) : null;
+            const cachedUser = eduDb && eduDb.users ? eduDb.users.find(u => lowLogin(u.login) === lowLogin(l)) : null;
             if (cachedUser && await checkVerifier(l, p)) {
                 currentUser = cachedUser.login;
                 pendingLogin = { login: l, pass: p, persist: persist };
@@ -911,11 +870,11 @@
 
     function buildCoursesMap(user) {
         coursesMap = {};
-        if (!user || !db) return;
+        if (!user || !eduDb) return;
         let roleGroup = detectRoleGroup(user.role);
         let currentUserAssigned = user.assigned || [];
 
-        (db.courses || []).forEach(c => {
+        (eduDb.courses || []).forEach(c => {
             let cleanProdTitle = cleanCourseTitle(c.product);
             let pClean = getCleanName(cleanProdTitle);
             let isAssigned = (roleGroup === 'guest') || currentUserAssigned.some(assignedName => getCleanName(assignedName) === pClean);
@@ -962,7 +921,7 @@
 
             container.innerHTML = `
                 <div class="list-card" style="border-color: var(--primary); background: var(--primary-light); margin-bottom: 0; cursor: default;">
-                    <img src="education/Meet.svg" class="ui-icon" style="width:28px; height:28px;" onerror="this.style.display='none'">
+                    <img src="assets/icons/academy/meet.svg" class="ui-icon" style="width:28px; height:28px;" onerror="this.style.display='none'">
                     <div style="flex:1; margin-left: 14px; padding-right: 10px;">
                         <div style="font-size: 15px; font-weight: 800; color: var(--primary);">Google Meet</div>
                         ${dateTxt}
@@ -984,9 +943,9 @@
         if (!btn) return;
         
         let hasApproaching = false;
-        if (db && db.users) {
+        if (eduDb && eduDb.users) {
             let now = Date.now();
-            hasApproaching = db.users.some(u => {
+            hasApproaching = eduDb.users.some(u => {
                 let d = parseUaDate(u.meetDate);
                 if (!d) return false;
                 let diff = d.getTime() - now;
@@ -1059,7 +1018,7 @@
         windowViewingEmployee = null;
         closeStatsModal(); closeAssignModal(); closeMeetModal();
 
-        let user = db.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
+        let user = eduDb.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
         if (!user) return;
 
         windowUserRole = detectRoleGroup(user.role);
@@ -1108,15 +1067,15 @@
     }
 
     function getAccessibleEmployeesList() {
-        if (!db || !db.users) return [];
-        let me = db.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
+        if (!eduDb || !eduDb.users) return [];
+        let me = eduDb.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
         if (!me) return [];
         
         let myNameLow = String(me.name || "").toLowerCase().trim();
         let myParts = myNameLow.split(/\s+/).filter(Boolean);
         let myShort = myParts.length >= 2 ? `${myParts[0]} ${myParts[1]}` : myNameLow;
 
-        return db.users.filter(u => {
+        return eduDb.users.filter(u => {
             if (!u.name || String(u.name).trim() === "") return false;
             if (detectRoleGroup(u.role) === 'guest') return false;
             if (windowUserRole === 'owner') return true;
@@ -1154,14 +1113,14 @@
         renderStatsModalEmployees('');
         document.getElementById('statsModalOverlay').classList.add('active');
         document.getElementById('statsModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
+        academyScroll(true);
     }
 
     function closeStatsModal() {
         document.getElementById('statsModalOverlay').classList.remove('active');
         document.getElementById('statsModal').classList.remove('active');
         document.getElementById('empSearchSuggestions').classList.remove('open');
-        document.body.style.overflow = '';
+        academyScroll(false);
         
         if (!windowViewingEmployee && (windowUserRole === 'owner' || windowUserRole === 'manager')) {
             document.getElementById('btnMyEducation').classList.add('active');
@@ -1310,7 +1269,7 @@
     }
 
     function selectEmployeeFromModal(login) {
-        let emp = db.users.find(u => String(u.login).toLowerCase() === String(login).toLowerCase());
+        let emp = eduDb.users.find(u => String(u.login).toLowerCase() === String(login).toLowerCase());
         if (!emp) return;
         
         windowViewingEmployee = emp;
@@ -1356,14 +1315,14 @@
         renderMeetList();
         document.getElementById('meetModalOverlay').classList.add('active');
         document.getElementById('meetModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
+        academyScroll(true);
         checkUpcomingMeets();
     }
 
     function closeMeetModal() {
         document.getElementById('meetModalOverlay').classList.remove('active');
         document.getElementById('meetModal').classList.remove('active');
-        document.body.style.overflow = '';
+        academyScroll(false);
         
         document.getElementById('btnMyMeets').classList.remove('active');
         if (!windowViewingEmployee) {
@@ -1376,9 +1335,9 @@
 
     function renderMeetList() {
         let listContainer = document.getElementById('meetModalList');
-        if (!db || !db.users) return;
+        if (!eduDb || !eduDb.users) return;
 
-        let meets = db.users.filter(u => {
+        let meets = eduDb.users.filter(u => {
             let l = String(u.meetLink || "").trim();
             let d = String(u.meetDate || "").trim();
             return (l !== "" && l !== "-") || (d !== "" && d !== "-");
@@ -1489,8 +1448,8 @@
             deadlineInput.disabled = false;
         }
 
-        if (db.courseCatalog && db.courseCatalog.length > 0) {
-            db.courseCatalog.forEach(c => {
+        if (eduDb.courseCatalog && eduDb.courseCatalog.length > 0) {
+            eduDb.courseCatalog.forEach(c => {
                 if (!c.name || c.name.trim() === '') return;
                 
                 let cleanKey = c.name.toLowerCase().replace(/[^a-zа-яёієїґ0-9]/g, '');
@@ -1520,13 +1479,13 @@
         
         modal.classList.add('active');
         overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        academyScroll(true);
     }
 
     function closeAssignModal() {
         document.getElementById('assignModal').classList.remove('active');
         document.getElementById('assignModalOverlay').classList.remove('active');
-        document.body.style.overflow = '';
+        academyScroll(false);
     }
 
     function toggleDeadline(val) { pendingDeadline = String(val).trim(); checkAssignChanges(); }
@@ -1550,8 +1509,8 @@
     }
 
     function getOriginalCourseNameByKey(cleanKey) {
-        if (!db || !db.courseCatalog) return cleanKey;
-        let catCourse = db.courseCatalog.find(c => getCleanName(c.name) === cleanKey);
+        if (!eduDb || !eduDb.courseCatalog) return cleanKey;
+        let catCourse = eduDb.courseCatalog.find(c => getCleanName(c.name) === cleanKey);
         return catCourse ? catCourse.name : cleanKey; 
     }
 
@@ -1564,7 +1523,7 @@
         }
         
         const saveBtn = document.getElementById('saveAssignBtn');
-        saveBtn.innerHTML = '<img src="education/save.svg" class="ui-icon" style="width:20px; height:20px; filter: brightness(0) invert(1);"> ЗБЕРЕЖЕННЯ...'; 
+        saveBtn.innerHTML = '<img src="assets/icons/academy/save.svg" class="ui-icon" style="width:20px; height:20px; filter: brightness(0) invert(1);"> ЗБЕРЕЖЕННЯ...'; 
         saveBtn.disabled = true;
 
         let payload = { action: 'assign_courses', targetLogin: windowViewingEmployee.login, assignments: changes };
@@ -1592,7 +1551,7 @@
         }
         windowViewingEmployee.assigned = newAssigned;
 
-        let dbUser = db.users.find(u => u.login === windowViewingEmployee.login);
+        let dbUser = eduDb.users.find(u => u.login === windowViewingEmployee.login);
         if (dbUser) {
             dbUser.deadlineDays = windowViewingEmployee.deadlineDays;
             dbUser.assigned = windowViewingEmployee.assigned;
@@ -1605,7 +1564,7 @@
         closeAssignModal();
 
         setTimeout(() => {
-            saveBtn.innerHTML = '<img src="education/save.svg" class="ui-icon" style="width:20px; height:20px; filter: brightness(0) invert(1);"> ЗБЕРЕГТИ';
+            saveBtn.innerHTML = '<img src="assets/icons/academy/save.svg" class="ui-icon" style="width:20px; height:20px; filter: brightness(0) invert(1);"> ЗБЕРЕГТИ';
             saveBtn.disabled = false;
             saveBtn.style.display = 'none';
         }, 300);
@@ -1626,7 +1585,7 @@
         document.getElementById('skillhubIframe').src = '';
         document.getElementById('skillhubModalOverlay').classList.remove('active');
         document.getElementById('skillhubModal').classList.remove('active');
-        document.body.style.overflow = '';
+        academyScroll(false);
     }
 
     function computeUserMetrics(user) {
@@ -1800,7 +1759,7 @@
                 let title = achInfo && achInfo.name ? achInfo.name : `Відзнака #${code}`, desc = achInfo && achInfo.description ? achInfo.description : "", safeCode = escapeHTMLAttr(code);
                 return `
                     <div class="ach-card earned" onclick="toggleAchZoom(this)">
-                        <div class="ach-icon-wrapper"><img src="Achievement/${safeCode}.webp" onerror="this.src='medal.svg'" class="ach-img"></div>
+                        <div class="ach-icon-wrapper"><img src="assets/achievements/${safeCode}.webp" onerror="this.src='assets/icons/ui/medal.svg'" class="ach-img"></div>
                         <div style="display: flex; flex-direction: column; justify-content: center; flex: 1;">
                             <div class="ach-card-title">${escapeHTMLAttr(title)}</div><div class="ach-card-desc">${escapeHTMLAttr(desc)}</div>
                             <div style="margin-top:6px;"><span style="color:var(--success); font-size:11px; font-weight:800;">НАТИСНІТЬ ДЛЯ ОПИСУ</span></div>
@@ -1843,7 +1802,7 @@
         document.getElementById('productViewTitle').innerText = parsedCourse.title;
 
         const products = coursesMap[name] || [];
-        let currentUserObj = windowViewingEmployee || db.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
+        let currentUserObj = windowViewingEmployee || eduDb.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
         let userResults = (currentUserObj && currentUserObj.results) ? currentUserObj.results : {};
 
         let completedCount = 0;
@@ -1908,7 +1867,7 @@
             }
             contentHtml += `
             <a href="${sLink}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="margin-bottom: 24px; border-color: var(--primary); color: var(--primary); padding: 14px; font-size: 14px; font-weight: 800; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-                <img src="education/info.svg" class="ui-icon" onerror="this.style.display='none'">
+                <img src="assets/icons/academy/info.svg" class="ui-icon" onerror="this.style.display='none'">
                 Детальніше про цей курс
             </a>`;
         }
@@ -2031,7 +1990,7 @@
         let passed = totalScore >= 80, timeSpentNow = Math.max(1, totalTimeSpent), violationAdded = forceZeroByCheat ? 1 : 0;
         let cleanTitle = cleanCourseTitle(currentProductData.product), cleanKey = getCleanName(cleanTitle);
 
-        let currentUserObj = db.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
+        let currentUserObj = eduDb.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
         if (currentUserObj) {
             if (!currentUserObj.results) currentUserObj.results = {};
             let prevRaw = currentUserObj.results[cleanTitle] || currentUserObj.results[cleanKey] || "", prev = parseTestResultString(prevRaw);
@@ -2045,7 +2004,7 @@
             }
         }
         window.sessionTotalTime = 0; window.theoryEntryTime = 0;
-        if (window.fullData) { window.fullData.educationData = db; saveCacheLater(); }
+        if (window.fullData) { window.fullData.educationData = eduDb; eduSaveCacheLater(); }
 
         let actionHtml = passed
             ? `<button class="btn btn-glow" onclick="openCourse(this.getAttribute('data-course'))" data-course="${escapeHTMLAttr(currentCourseName)}">ПЕРЕЙТИ ДАЛІ</button>`
@@ -2089,13 +2048,17 @@
         if (wrap && sugg && !wrap.contains(e.target)) sugg.classList.remove('open');
     });
 
-    document.addEventListener('DOMContentLoaded', async () => {
+    let _academyInit = null;
+    // Ініціалізація при першому відкритті розділу (кеш -> автовхід за токеном)
+    function academyInit() {
+        if (_academyInit) return _academyInit;
+        _academyInit = (async () => {
         await purgeLegacyStorage();
         let hasCache = false;
-        const cached = await loadCache();
+        const cached = await eduLoadCache();
         if (cached) {
             window.fullData = cached;
-            db = cached.educationData;
+            eduDb = cached.educationData;
             globalAchievements = cached.achievementData || [];
             hasCache = true;
         }
@@ -2105,7 +2068,7 @@
         try { const raw = localStorage.getItem('skillhub_edu_creds_old'); if (raw) oldCreds = JSON.parse(raw); } catch (e) {}
 
         auth = readAuth();
-        const cacheHasMe = !!(auth && hasCache && db && db.users && db.users.some(u => lowLogin(u.login) === lowLogin(auth.login)));
+        const cacheHasMe = !!(auth && hasCache && eduDb && eduDb.users && eduDb.users.some(u => lowLogin(u.login) === lowLogin(auth.login)));
 
         if (auth) {
             document.getElementById('loginInput').value = auth.login;
@@ -2115,17 +2078,17 @@
                 document.getElementById('loader').style.display = 'none'; bootFromCache();
                 setTimeout(() => { if (navigator.onLine) fetchFreshDataSilent(); }, 200);
             } else if (navigator.onLine) {
-                document.documentElement.classList.remove('fast-boot');
+                document.documentElement.classList.remove('edu-fast-boot');
                 document.documentElement.style.setProperty('--edu-loader-display', 'flex'); document.getElementById('loader').style.display = 'flex';
                 await fetchFreshDataSilent(true);
                 document.getElementById('loader').style.display = 'none';
-                if (auth && db && db.users && db.users.length > 0) bootFromCache(); else switchView('loginView');
+                if (auth && eduDb && eduDb.users && eduDb.users.length > 0) bootFromCache(); else switchView('loginView');
             } else {
-                document.documentElement.classList.remove('fast-boot');
+                document.documentElement.classList.remove('edu-fast-boot');
                 document.getElementById('loader').style.display = 'none'; switchView('loginView');
             }
         } else {
-            document.documentElement.classList.remove('fast-boot');
+            document.documentElement.classList.remove('edu-fast-boot');
             document.documentElement.style.setProperty('--edu-loader-display', 'flex');
             document.getElementById('loader').style.display = 'none'; switchView('loginView');
             if (oldCreds && oldCreds.login && oldCreds.pass && navigator.onLine) {
@@ -2134,13 +2097,55 @@
                 await handleLogin(true, oldCreds);
             }
         }
+        })();
+        return _academyInit;
+    }
+
+
+
+    /* ====================== Публічний інтерфейс розділу «Академія» ====================== */
+    window.Academy = {
+        isOpen: false,
+        async open(opts) {
+            const root = academyRoot();
+            if (!root) return;
+            if (typeof window.closeModalBase === 'function') {
+                ['favQuickMenuModal', 'favSelectModal'].forEach(id => { try { window.closeModalBase(id); } catch (e) {} });
+            }
+            await academyInit();
+            root.hidden = false;
+            document.body.classList.add('academy-open');
+            this.isOpen = true;
+            if (!(opts && opts.fromPopstate)) { try { history.pushState({ academy: 1 }, '', '#academy'); } catch (e) {} }
+            if (currentUser) checkSessionNow();
+            if (navigator.onLine && auth) fetchFreshDataSilent();
+        },
+        close(opts) {
+            const root = academyRoot();
+            if (!root || !this.isOpen) return;
+            root.hidden = true;
+            document.body.classList.remove('academy-open');
+            this.isOpen = false;
+            if (!(opts && opts.fromPopstate)) {
+                try {
+                    if (history.state && history.state.academy) history.back();
+                    else if (location.hash === '#academy') history.replaceState(null, '', location.pathname + location.search);
+                } catch (e) {}
+            }
+        }
+    };
+    window.addEventListener('popstate', () => {
+        if (location.hash === '#academy' && !window.Academy.isOpen) window.Academy.open({ fromPopstate: true });
+        else if (location.hash !== '#academy' && window.Academy.isOpen) window.Academy.close({ fromPopstate: true });
     });
+    // Пряме посилання на розділ (#academy), у т.ч. зі старої адреси Education.html
+    window.addEventListener('load', () => { if (location.hash === '#academy') window.Academy.open({ fromPopstate: true }); });
 
     window.addEventListener('pageshow', function(event) {
         if (event.persisted) {
             document.documentElement.style.setProperty('--edu-loader-display', 'none');
             const loader = document.getElementById('loader'); if (loader) loader.style.display = 'none';
-            document.documentElement.classList.remove('fast-boot');
+            document.documentElement.classList.remove('edu-fast-boot');
             if (currentUser) checkSessionNow();
         }
     });
