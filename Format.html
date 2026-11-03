@@ -42,7 +42,13 @@ h1{font-size:21px;margin:6px 0 4px}
 #ed .ed-acc-title{padding:11px 14px;font-weight:800;font-size:14px;background:var(--input-bg)}
 #ed .ed-acc-title::before{content:"▸ ";color:var(--primary)}
 #ed .rt-acc-body{padding:8px 14px 12px}
-#ed .rt-table td,#ed .rt-table th{min-width:70px}
+
+/* --- Стилі для таблиці в редакторі --- */
+#ed .rt-table-wrap { overflow-x: auto; margin: 12px 0; }
+#ed .rt-table { width: 100%; border-collapse: collapse; }
+#ed .rt-table td, #ed .rt-table th { border: 1px solid var(--border); padding: 8px 10px; min-width: 70px; vertical-align: top; position: relative; }
+#ed .rt-table th { background: var(--input-bg); font-weight: 800; }
+
 #ed .rt-code,#ed .rt-btn,#ed img{user-select:all}
 .panel{margin-top:14px;background:var(--card-bg);border:1px solid var(--border);border-radius:16px;overflow:hidden}
 .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--input-bg)}
@@ -73,6 +79,13 @@ details.h code{background:var(--input-bg);border:1px solid var(--border);border-
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;color:#fff;padding:11px 18px;border-radius:12px;font-size:14px;font-weight:700;z-index:200;opacity:0;pointer-events:none;transition:.25s}
 #toast.on{opacity:1}
 #err{display:none;background:#fee2e2;color:#991b1b;border-radius:12px;padding:12px;margin-bottom:10px;font-weight:700;font-size:13px}
+
+/* --- UI Сітки для створення таблиці --- */
+.tbl-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin: 12px 0; }
+.tbl-grid div { aspect-ratio: 1; border: 1px solid var(--border); background: var(--card-bg); cursor: pointer; border-radius: 4px; transition: background 0.1s, border-color 0.1s; }
+.tbl-grid div:hover { border-color: var(--primary); }
+.tbl-grid div.on { background: var(--primary); border-color: var(--primary); }
+.tbl-lbl { text-align: center; font-weight: 800; color: var(--primary); font-size: 16px; margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -111,7 +124,7 @@ details.h code{background:var(--input-bg);border:1px solid var(--border);border-
       <b>Варіант 1 (найнадійніший, працює без інтернету):</b> покладіть файл у папку <code>assets/articles/</code> репозиторію застосунку й вкажіть <code>assets/articles/назва.webp</code>. Назву пишіть латиницею, без пробілів.<br>
       <b>Варіант 2 (Google Диск):</b> відкрийте файл → «Доступ» → «Усі, хто має посилання». З посилання <code>drive.google.com/file/d/<b>ABC123</b>/view</code> візьміть ABC123 і напишіть <code>https://drive.google.com/uc?export=view&amp;id=ABC123</code>.<br>
       <b>Варіант 3:</b> будь-яке пряме посилання на картинку з інтернету.<br>Підпис (alt) — короткий опис для тих, у кого картинка не завантажилась.</div></details>
-    <details class="h"><summary>▦ Таблиця</summary><div>«▦» → кількість рядків і стовпців. Перший рядок — шапка. Усередині клітинок можна друкувати й оформлювати текст. Кнопки «＋ряд» / «＋стовпець» з'являються, коли курсор у таблиці.</div></details>
+    <details class="h"><summary>▦ Таблиця</summary><div>«▦» → проведіть по сітці, щоб обрати розмір. Перший рядок автоматично стає шапкою. Усередині клітинок можна друкувати й оформлювати текст, а також вирівнювати його. Кнопки «＋ряд» / «＋стовпець» з'являються, коли курсор у таблиці.</div></details>
     <details class="h"><summary>▭ Картка, колонки, розкривний блок</summary><div><b>Картка</b> — текст у рамці з заголовком. <b>Колонки</b> — 2–4 блоки поруч (ціни, «було/стало»). <b>Розкривний блок</b> — заголовок, під яким текст ховається; відкривається дотиком. Після вставки просто пишіть усередині блоку.</div></details>
     <details class="h"><summary>➖ Розділювачі, відступ</summary><div>«➖» → оберіть вигляд лінії (тонка, товста, пунктир, зірочки, хвиляста або з написом). «␣» додає порожній проміжок потрібної висоти. Щоб видалити блок — поставте курсор у нього й натисніть «🗑».</div></details>
     <details class="h"><summary>‹› Код (скопіювати по дотику)</summary><div>Виділіть, наприклад, промокод → «‹›». У застосунку по дотику на нього код копіюється в буфер.</div></details>
@@ -229,8 +242,19 @@ function inlLines(nodes){
   return s.split('\n').map(function(x){return x.trim()});
 }
 function lead(l){return l.replace(/^(#{1,3}\s|[-•]\s|>\s|\|)/,function(m){return '\\'+m}).replace(/^([+=])/,'\\$1')}
-function cellText(c){return inlLines(Array.prototype.slice.call(c.childNodes)).filter(Boolean).join(' ').replace(/\|/g,'¦')}
 function alignOf(el){var a=(el.style&&el.style.textAlign)||el.getAttribute('align')||'';return a==='center'?'[центр] ':a==='right'?'[право] ':''}
+
+// Виправлена обробка тексту в клітинках для зчитування вирівнювання
+function cellText(c){
+  var text = inlLines(Array.prototype.slice.call(c.childNodes)).filter(Boolean).join(' ').replace(/\|/g,'¦');
+  var al = c.style.textAlign || c.getAttribute('align') || '';
+  if(!al){
+    var div = c.querySelector('div[style*="text-align"]');
+    if(div) al = div.style.textAlign;
+  }
+  var pfx = al === 'center' ? '[центр] ' : al === 'right' ? '[право] ' : '';
+  return pfx + text.trim();
+}
 
 function blocksOf(node){
   var out=[],buf=[];
@@ -290,7 +314,7 @@ function block(el,out){
     Array.prototype.forEach.call(rows,function(r,i){
       var cells=Array.prototype.map.call(r.children,cellText);
       out.push('| '+cells.join(' | ')+' |');
-      if(i===0&&r.querySelector('th'))out.push('|'+cells.map(function(){return '---'}).join('|')+'|');
+      if(i===0&&r.querySelector('th'))out.push('| '+cells.map(function(){return '---'}).join(' | ')+' |');
     });return;
   }
   var al=alignOf(el);
@@ -301,7 +325,6 @@ function block(el,out){
 }
 function toCode(){
   var lines=blocksOf(ed);
-  // порожні рядки = відступ; зайві по краях і поспіль прибираємо
   var res=[],blank=false;
   lines.forEach(function(l){
     if(l===''){blank=true;return}
@@ -371,26 +394,37 @@ ed.addEventListener('keydown',function(e){
 });
 
 /* ---------------- діалоги ---------------- */
+// Додана підтримка кастомного HTML та подій для створення таблиці-сітки
 function dialog(o){
   return new Promise(function(res){
     var d=$('#dlg'),h='<h3>'+o.title+'</h3>'+(o.help?'<div class="help">'+o.help+'</div>':'');
+    if(o.html) h += o.html;
     (o.fields||[]).forEach(function(f){
       h+='<label>'+f.label+'</label>';
       if(f.type==='select')h+='<select id="f_'+f.id+'">'+f.options.map(function(x){return '<option value="'+x[0]+'">'+x[1]+'</option>'}).join('')+'</select>';
       else h+='<input id="f_'+f.id+'" type="'+(f.type||'text')+'" value="'+esc(f.value||'')+'" placeholder="'+esc(f.placeholder||'')+'" '+(f.min?'min="'+f.min+'" max="'+f.max+'"':'')+' autocomplete="off">';
     });
     if(o.choices)h+='<div class="ch" id="chs">'+o.choices.map(function(c,i){return '<button data-i="'+i+'" class="'+(i===0&&o.pick?'on':'')+'">'+(c.sw?'<span class="sw" style="background:'+c.sw+'"></span>':'')+c.label+'</button>'}).join('')+'</div>';
-    h+='<div class="row"><button class="btn" id="dok">'+(o.ok||'Вставити')+'</button><button class="btn g" id="dno">Скасувати</button></div>';
+    
+    if(!o.noOk) h+='<div class="row"><button class="btn" id="dok">'+(o.ok||'Вставити')+'</button><button class="btn g" id="dno">Скасувати</button></div>';
+    else h+='<div class="row"><button class="btn g" id="dno">Скасувати</button></div>';
+    
     d.innerHTML=h;$('#ov').classList.add('on');
     var chosen=o.pick?0:-1;
     function close(v){$('#ov').classList.remove('on');res(v)}
+    
+    // Callback для підключення подій сітки
+    if(o.html && o.onHtml) o.onHtml(d, res, close);
+    
     if(o.choices)$('#chs').addEventListener('click',function(e){
       var b=e.target.closest('button');if(!b)return;
       chosen=+b.getAttribute('data-i');
       if(!o.pick){close({choice:o.choices[chosen]});return}
       Array.prototype.forEach.call($('#chs').children,function(x){x.classList.remove('on')});b.classList.add('on');
     });
-    $('#dok').onclick=function(){
+    
+    var dok = $('#dok');
+    if(dok) dok.onclick=function(){
       var v={};(o.fields||[]).forEach(function(f){v[f.id]=$('#f_'+f.id).value});
       if(o.choices&&chosen>=0)v.choice=o.choices[chosen];
       close(v);
@@ -429,7 +463,7 @@ function insertBlockAfterLine(html,focusSel){
   while(host&&host.parentNode!==ed&&!host.parentNode.matches(CONT))host=host.parentNode;
   if(!host)host=ed.lastElementChild;
   var empty=host&&host.tagName==='DIV'&&!host.className&&!host.textContent.trim()&&!host.querySelector('img,table');
-  if(host&&host.parentNode){host.parentNode.insertBefore(el,empty?host:host.nextSibling);if(empty){/*порожній рядок замінюємо*/}}
+  if(host&&host.parentNode){host.parentNode.insertBefore(el,empty?host:host.nextSibling);}
   else ed.appendChild(el);
   if(!el.nextElementSibling||el.nextElementSibling.className)el.parentNode.insertBefore(emptyLine(),el.nextSibling);
   if(empty&&host.parentNode)host.parentNode.removeChild(host);
@@ -437,7 +471,7 @@ function insertBlockAfterLine(html,focusSel){
   if(tgt){var r=document.createRange();r.selectNodeContents(tgt);var s=getSelection();s.removeAllRanges();s.addRange(r)}
   update();
 }
-function convertLine(open,close,cls){ // ряд -> виноска
+function convertLine(open,close,cls){ 
   restore();var l=ensureLine();if(!l){toast('Поставте курсор у рядок');return}
   var ex=closest(l,'.rt-callout');
   if(ex){var same=ex.classList.contains(cls);var kids=Array.prototype.slice.call(ex.childNodes);kids.forEach(function(k){ex.parentNode.insertBefore(k,ex)});ex.parentNode.removeChild(ex);if(same){update();return}}
@@ -464,7 +498,21 @@ function listCmd(kind){
   var s2=selInfo(),u2=s2&&closest(s2.anchorNode,'ul,ol');if(u2){u2.classList.add('rt-list',u2.tagName==='OL'?'rt-ol':'rt-ul');Array.prototype.forEach.call(u2.children,function(li){li.classList.remove('chk')});u2.classList.remove('chk-list')}
   update();
 }
-function align(a){restore();document.execCommand(a==='center'?'justifyCenter':a==='right'?'justifyRight':'justifyLeft');update()}
+
+// Виправлене вирівнювання (також для таблиць)
+function align(a){
+  restore();
+  var s=selInfo();
+  var cell = s ? closest(s.anchorNode, 'td,th') : null;
+  if (cell) {
+    cell.style.textAlign = a === 'center' ? 'center' : (a === 'right' ? 'right' : 'left');
+    update();
+    return;
+  }
+  document.execCommand(a==='center'?'justifyCenter':a==='right'?'justifyRight':'justifyLeft');
+  update();
+}
+
 function deleteBlock(){
   restore();var s=selInfo();if(!s)return;
   var b=closest(s.anchorNode,'.rt-card,.rt-cols,.ed-acc,.rt-callout,.rt-table-wrap,.rt-hr,.rt-hr-text,.ed-br');
@@ -524,13 +572,56 @@ function askCode(){
   var t=getSelection().toString().trim();if(!t)return;
   document.execCommand('insertHTML',false,'<span class="rt-code" data-copy="'+esc(t)+'" contenteditable="false">'+esc(t)+'</span>&nbsp;');update();
 }
+
+// Виправлено: інтерактивне вікно з сіткою (як у Word) для створення таблиці
 function askTable(){
-  dialog({title:'Таблиця',help:'Перший рядок буде шапкою. У клітинках можна друкувати й оформлювати текст; Tab — наступна клітинка.',fields:[{id:'r',label:'Рядків',type:'number',value:'3',min:1,max:20},{id:'c',label:'Стовпців',type:'number',value:'2',min:1,max:6}]}).then(function(v){
-    if(!v)return;var R=Math.max(1,Math.min(20,+v.r||3)),C=Math.max(1,Math.min(6,+v.c||2)),h='<div class="rt-table-wrap"><table class="rt-table">';
-    for(var i=0;i<R;i++){h+='<tr>';for(var j=0;j<C;j++)h+=(i===0?'<th>':'<td>')+(i===0?'Назва':'')+(i===0?'</th>':'</td>');h+='</tr>'}
-    insertBlockAfterLine(h+'</table></div>','th');
+  var gh = '<div class="tbl-grid" id="tg">';
+  for(var r=1;r<=8;r++){
+    for(var c=1;c<=8;c++){
+      gh += '<div data-r="'+r+'" data-c="'+c+'"></div>';
+    }
+  }
+  gh += '</div><div class="tbl-lbl" id="tl">0 × 0</div>';
+
+  dialog({
+    title: 'Вставити таблицю',
+    help: 'Проведіть по клітинках, щоб обрати розмір таблиці, і натисніть.',
+    html: gh,
+    noOk: true,
+    onHtml: function(d, res, close) {
+      var tg = $('#tg'), tl = $('#tl');
+      var cells = tg.querySelectorAll('div');
+      
+      tg.addEventListener('mouseover', function(e){
+        if(e.target.tagName === 'DIV' && e.target.parentNode === tg){
+          var cr = +e.target.getAttribute('data-r'), cc = +e.target.getAttribute('data-c');
+          cells.forEach(function(x){
+            var xr = +x.getAttribute('data-r'), xc = +x.getAttribute('data-c');
+            x.classList.toggle('on', xr <= cr && xc <= cc);
+          });
+          tl.textContent = cc + ' × ' + cr;
+        }
+      });
+      
+      tg.addEventListener('click', function(e){
+         if(e.target.tagName === 'DIV' && e.target.parentNode === tg){
+            close({r: +e.target.getAttribute('data-r'), c: +e.target.getAttribute('data-c')});
+         }
+      });
+    }
+  }).then(function(v){
+    if(!v || !v.r) return;
+    var R = v.r, C = v.c;
+    var h = '<div class="rt-table-wrap"><table class="rt-table"><tbody>';
+    for(var i=0; i<R; i++){
+      h += '<tr>';
+      for(var j=0; j<C; j++) h += (i===0?'<th>':'<td>') + (i===0?'Заголовок':'<br>') + (i===0?'</th>':'</td>');
+      h += '</tr>';
+    }
+    insertBlockAfterLine(h + '</tbody></table></div>', 'th');
   });
 }
+
 function askDivider(){
   dialog({title:'Розділювач',help:'Оберіть вигляд лінії.',choices:[{label:'Тонка',h:'<div class="rt-hr rt-hr-thin" contenteditable="false"></div>'},{label:'Товста',h:'<div class="rt-hr rt-hr-thick" contenteditable="false"></div>'},{label:'Пунктир',h:'<div class="rt-hr rt-hr-dots" contenteditable="false"></div>'},{label:'Зірочки',h:'<div class="rt-hr rt-hr-stars" contenteditable="false"></div>'},{label:'Хвиляста',h:'<div class="rt-hr rt-hr-wave" contenteditable="false"></div>'},{label:'З написом…',text:true}]}).then(function(v){
     if(!v)return;
