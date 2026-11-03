@@ -125,10 +125,10 @@ details.h code{background:var(--input-bg);border:1px solid var(--border);border-
       <b>Варіант 2 (Google Диск):</b> відкрийте файл → «Доступ» → «Усі, хто має посилання». З посилання <code>drive.google.com/file/d/<b>ABC123</b>/view</code> візьміть ABC123 і напишіть <code>https://drive.google.com/uc?export=view&amp;id=ABC123</code>.<br>
       <b>Варіант 3:</b> будь-яке пряме посилання на картинку з інтернету.<br>Підпис (alt) — короткий опис для тих, у кого картинка не завантажилась.</div></details>
     <details class="h"><summary>▦ Таблиця</summary><div>«▦» → проведіть по сітці, щоб обрати розмір. Перший рядок автоматично стає шапкою. Усередині клітинок можна друкувати й оформлювати текст, а також вирівнювати його (кнопки зліва/по центру/справа). Кнопки «＋ряд» / «＋стовпець» з'являються, коли курсор у таблиці.</div></details>
-    <details class="h"><summary>▭ Картка, колонки, розкривний блок</summary><div><b>Картка</b> — текст у рамці з заголовком. <b>Колонки</b> — 2–4 блоки поруч (ціни, «було/стало»). <b>Розкривний блок</b> — заголовок, під яким текст ховається; відкривається дотиком. Після вставки просто пишіть усередині блоку.</div></details>
+    <details class="h"><summary>▭ Картка, колонки, розкривний блок</summary><div><b>Картка</b> — текст у рамці з заголовком. <b>Колонки</b> — 2–4 blocks поруч (ціни, «було/стало»). <b>Розкривний блок</b> — заголовок, під яким текст ховається; відкривається дотиком. Після вставки просто пишіть усередині блоку.</div></details>
     <details class="h"><summary>➖ Розділювачі, відступ</summary><div>«➖» → оберіть вигляд лінії (тонка, товста, пунктир, зірочки, хвиляста або з написом). «␣» додає порожній проміжок потрібної висоти. Щоб видалити блок — поставте курсор у нього й натисніть «🗑».</div></details>
     <details class="h"><summary>‹› Код (скопіювати по дотику)</summary><div>Виділіть, наприклад, промокод → «‹›». У застосунку по дотику на нього код копіюється в буфер.</div></details>
-    <details class="h"><summary>⚠️ Важливо</summary><div>Введений вами власноруч символ <code>|</code> (вертикальна риска) безпечно обробляється, але краще уникати його надмірного використання. Усі теги кольору й форматування генеруються автоматично без вад.</div></details>
+    <details class="h"><summary>⚠️ Важливо</summary><div>Не вживайте у тексті символ <code>|</code> (вертикальна риска) — у таблиці він означає новий рядок. Решта символів безпечні: редактор сам їх «екранує».</div></details>
   </div>
 </div>
 </div>
@@ -193,8 +193,8 @@ function ensureLine(){
 /* ---------------- DOM → код ---------------- */
 var BLOCK_TAGS={DIV:1,P:1,UL:1,OL:1,TABLE:1,DETAILS:1,H1:1,H2:1,H3:1,H4:1,BLOCKQUOTE:1,HR:1,LI:1,TR:1,TD:1,TH:1};
 function escText(t){
-  // Екрануємо пайпи |, щоб користувацькі | не ламали таблицю, але теги залишались робочими
-  return t.replace(/\\/g,'\\\\').replace(/[*_~^{}`\[\]|]/g,'\\$&').replace(/(\/\/|==|\+\+)/g,function(m){return '\\'+m[0]+m.slice(1)});
+  // ВИПРАВЛЕНО: дужки {} більше не екрануються (залишаються як є), а символ | екранується, щоб не ламати таблиці
+  return t.replace(/\\/g,'\\\\').replace(/[*_~^`\[\]|]/g,'\\$&').replace(/(\/\/|==|\+\+)/g,function(m){return '\\'+m[0]+m.slice(1)});
 }
 function wrapLines(mark,close,s){
   return s.split('\n').map(function(line){
@@ -243,12 +243,13 @@ function inlLines(nodes){
   return s.split('\n').map(function(x){return x.trim()});
 }
 function lead(l){return l.replace(/^(#{1,3}\s|[-•]\s|>\s|\|)/,function(m){return '\\'+m}).replace(/^([+=])/,'\\$1')}
-function alignOf(el){var a=(el.style&&el.style.textAlign)||el.getAttribute('align')||'';return a==='center'?'[центр] ':a==='right'?'[право] ':''}
 
-// Виправлена функція: не псує теги пайпами і не додає сміттєві блокові теги [центр]
+// ВИПРАВЛЕНО: прибрано заміну символів на ¦. Тепер теги виводяться без пошкоджень
 function cellText(c){
   return inlLines(Array.prototype.slice.call(c.childNodes)).filter(Boolean).join(' ').trim();
 }
+
+function alignOf(el){var a=(el.style&&el.style.textAlign)||el.getAttribute('align')||'';return a==='center'?'[центр] ':a==='right'?'[право] ':''}
 
 function blocksOf(node){
   var out=[],buf=[];
@@ -305,12 +306,12 @@ function block(el,out){
     out.push('[+] '+(at?cellText(at):'Детальніше'));if(ab)blocksOf(ab).forEach(function(l){out.push(l)});out.push('[/+]');return;
   }
   
-  // Повністю виправлена логіка таблиць: правильна генерація вирівнювання через код :---: 
+  // ВИПРАВЛЕНО: генерація таблиць із правильним вирівнюванням стовпців Markdown
   if(cl.contains('rt-table-wrap')||tag==='TABLE'){
     var tb = tag==='TABLE' ? el : el.querySelector('table');
     var rows = tb.querySelectorAll('tr');
-    var aligns = []; 
-    
+    var aligns = [];
+
     Array.prototype.forEach.call(rows, function(r, i){
       var cells = Array.prototype.map.call(r.children, function(c, cIdx){
         if (i === 0) {
@@ -323,9 +324,9 @@ function block(el,out){
         }
         return cellText(c).replace(/\n/g, ' ');
       });
-      
+
       out.push('| '+cells.join(' | ')+' |');
-      
+
       if(i === 0 && r.querySelector('th')) {
         out.push('| ' + cells.map(function(_, cIdx){
           var a = aligns[cIdx];
@@ -416,7 +417,7 @@ ed.addEventListener('keydown',function(e){
 });
 
 /* ---------------- діалоги ---------------- */
-// Додана підтримка кастомного HTML для зручної сітки-таблиці
+// ВИПРАВЛЕНО: додано підтримку кастомного HTML для вікна сітки
 function dialog(o){
   return new Promise(function(res){
     var d=$('#dlg'),h='<h3>'+o.title+'</h3>'+(o.help?'<div class="help">'+o.help+'</div>':'');
@@ -435,7 +436,6 @@ function dialog(o){
     var chosen=o.pick?0:-1;
     function close(v){$('#ov').classList.remove('on');res(v)}
     
-    // Callback для підключення подій сітки
     if(o.html && o.onHtml) o.onHtml(d, res, close);
     
     if(o.choices)$('#chs').addEventListener('click',function(e){
@@ -521,7 +521,7 @@ function listCmd(kind){
   update();
 }
 
-// Виправлене вирівнювання: працює як для параграфів, так і для клітинок таблиці
+// ВИПРАВЛЕНО: вирівнювання тепер працює і для клітинок таблиці
 function align(a){
   restore();
   var s=selInfo();
@@ -595,7 +595,7 @@ function askCode(){
   document.execCommand('insertHTML',false,'<span class="rt-code" data-copy="'+esc(t)+'" contenteditable="false">'+esc(t)+'</span>&nbsp;');update();
 }
 
-// Інтерактивне вікно з сіткою (як у Word) для створення таблиці
+// ВИПРАВЛЕНО: додано зручну сітку побудови таблиці
 function askTable(){
   var gh = '<div class="tbl-grid" id="tg">';
   for(var r=1;r<=8;r++){
