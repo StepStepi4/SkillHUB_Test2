@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Як додати SkillHUB на екран телефону</title>
+<title>SkillHUB — встановіть на екран телефону</title>
 <meta name="theme-color" content="#f2f2f7">
 <link rel="icon" href="assets/brand/icon-192.png">
 <link rel="apple-touch-icon" href="assets/brand/icon-192.png">
@@ -61,15 +61,17 @@ section{display:none}section.on{display:block}
 .note{background:var(--soft);border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:14px}
 .tg{background:#17212b;color:#fff}.tg .t{color:#8b9aa8}.tg .ic{color:#fff}
 .sf{border-top:1px solid var(--border);justify-content:space-around;padding:12px 8px}
-.link{display:block;text-align:center;margin-top:8px}
-.link a{display:inline-block;background:var(--primary);color:#fff;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:14px;font-size:15px}
+.link{display:flex;flex-direction:column;gap:10px;align-items:stretch}
+.link .primary{border:0;background:var(--primary);color:#fff;font:inherit;font-weight:800;padding:15px 22px;border-radius:14px;font-size:16px;cursor:pointer}
+.link .ghost{display:block;text-align:center;color:var(--muted);text-decoration:none;font-weight:700;padding:12px;font-size:14px}
+.link [hidden]{display:none}
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <header>
-  <img src="assets/brand/icon-192.png" alt="SkillHUB">
+  <img src="assets/brand/icon-512.png" alt="SkillHUB">
   <div><h1>SkillHUB на екрані телефону</h1><p>Відкрийте посилання з Telegram — і за 4 дотики іконка на столі</p></div>
 </header>
 
@@ -78,7 +80,7 @@ section{display:none}section.on{display:block}
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.5l1.6-2.8a.4.4 0 00-.7-.4l-1.6 2.8A9.8 9.8 0 0012 8a9.8 9.8 0 00-4.9 1.1L5.5 6.3a.4.4 0 00-.7.4l1.6 2.8A9.3 9.3 0 002 17h20a9.3 9.3 0 00-4.4-7.5zM8 14.5a1 1 0 110-2 1 1 0 010 2zm8 0a1 1 0 110-2 1 1 0 010 2z"/></svg>Android
   </button>
   <button id="tIos" onclick="pick('ios')">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.4 2-3.5 2-3.6a4.3 4.3 0 00-3.4-1.8c-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8a4.4 4.4 0 00-3.7 2.3c-1.6 2.7-.4 6.800 1.100 9 .8 1.100 1.600 2.300 2.800 2.300s1.500-.7 2.900-.7 1.700.7 2.900.7 2-1.100 2.700-2.200a9.700 9.700 0 001.200-2.500 3.900 3.900 0 01-2-3.600zM14.200 5.800A3.700 3.700 0 0015 3a3.800 3.800 0 00-2.500 1.300 3.500 3.500 0 00-.9 2.700 3.100 3.100 0 002.600-1.200z"/></svg>iPhone
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.37 12.5c-.03-2.6 2.12-3.85 2.22-3.91-1.21-1.77-3.09-2.01-3.76-2.04-1.6-.16-3.12.94-3.93.94-.81 0-2.06-.92-3.39-.89-1.74.03-3.35 1.01-4.25 2.57-1.81 3.14-.46 7.78 1.3 10.33.86 1.25 1.89 2.65 3.24 2.6 1.3-.05 1.79-.84 3.36-.84 1.57 0 2.02.84 3.39.81 1.4-.03 2.29-1.27 3.14-2.52.99-1.45 1.4-2.85 1.42-2.92-.03-.01-2.72-1.04-2.75-4.13zM13.8 4.9c.71-.86 1.19-2.06 1.06-3.25-1.02.04-2.26.68-2.99 1.54-.66.76-1.23 1.98-1.08 3.15 1.14.09 2.3-.58 3.01-1.44z"/></svg>iPhone
   </button>
 </div>
 
@@ -124,7 +126,7 @@ section{display:none}section.on{display:block}
     <p>Натисніть <b>«Установити»</b>. Якщо питає про додавання на екран — <b>«Додати»</b>.</p>
     <div class="mock">
       <div class="dialog">
-        <div class="row"><img src="assets/brand/icon-192.png" alt=""><div><div class="nm">Установити застосунок?</div><div class="u">SkillHUB</div></div></div>
+        <div class="row"><img src="assets/brand/icon-512.png" alt=""><div><div class="nm">Установити застосунок?</div><div class="u">SkillHUB</div></div></div>
         <div class="btns"><span>Скасувати</span><span class="go">Установити</span></div>
       </div>
     </div>
@@ -135,7 +137,7 @@ section{display:none}section.on{display:block}
     <p>Іконка <b>SkillHUB</b> з'явилась на робочому столі. Відкривайте звідти — як звичайний застосунок.</p>
     <div class="home">
       <div><i></i>Камера</div><div><i></i>Телефон</div><div><i></i>Пошта</div>
-      <div><img src="assets/brand/icon-192.png" alt="SkillHUB">SkillHUB</div>
+      <div><img src="assets/brand/icon-512.png" alt="SkillHUB">SkillHUB</div>
     </div>
   </div>
 </section>
@@ -199,7 +201,7 @@ section{display:none}section.on{display:block}
     <div class="mock">
       <div class="bar"><span style="color:var(--muted)">Скасувати</span><span class="sp"></span><b>Додати на екран</b><span class="sp"></span><span class="hl" style="color:#0a84ff;font-weight:800;padding:0 4px">Додати</span></div>
       <div class="dialog" style="margin-top:0">
-        <div class="row"><img src="assets/brand/icon-192.png" alt=""><div><div class="nm">SkillHUB</div><div class="u">skillhub…github.io</div></div></div>
+        <div class="row"><img src="assets/brand/icon-512.png" alt=""><div><div class="nm">SkillHUB</div><div class="u">skillhub…github.io</div></div></div>
       </div>
     </div>
   </div>
@@ -209,30 +211,63 @@ section{display:none}section.on{display:block}
     <p>Іконка <b>SkillHUB</b> на головному екрані. Відкривайте звідти.</p>
     <div class="home">
       <div><i></i>Камера</div><div><i></i>Фото</div><div><i></i>Пошта</div>
-      <div><img src="assets/brand/icon-192.png" alt="SkillHUB">SkillHUB</div>
+      <div><img src="assets/brand/icon-512.png" alt="SkillHUB">SkillHUB</div>
     </div>
   </div>
 </section>
 
 <div class="done">🎉 Тепер SkillHUB відкривається одним дотиком</div>
-<div class="link"><a href="./">Відкрити SkillHUB</a></div>
+<div class="link">
+  <button id="nativeInstall" class="primary" hidden>Установити SkillHUB</button>
+  <a href="./" id="goBrowser" class="ghost">Продовжити в браузері</a>
+</div>
 
 </div>
 <script>
+/* Екран «Встановіть застосунок».
+   Показується при відкритті в браузері, поки застосунок не встановлено. Після встановлення зникає назавжди. */
+function isStandalone(){
+  return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;
+}
+function markInstalled(){ try{localStorage.setItem('skillhub_installed','1')}catch(e){} }
+function goApp(){
+  var h='';try{h=sessionStorage.getItem('skillhub_target_hash')||''}catch(e){}
+  location.replace('./'+h);
+}
+if(isStandalone()){ markInstalled(); goApp(); }
+
 function pick(k){
   document.getElementById('and').classList.toggle('on',k==='and');
   document.getElementById('ios').classList.toggle('on',k==='ios');
   document.getElementById('tAnd').classList.toggle('on',k==='and');
   document.getElementById('tIos').classList.toggle('on',k==='ios');
-  try{localStorage.setItem('install_tab',k)}catch(e){}
 }
-// Автовибір за пристроєм (або за ?os=ios / ?os=android у посиланні)
 (function(){
   var q=(location.search.match(/os=(ios|android)/)||[])[1];
   var ua=navigator.userAgent||'';
   var ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   pick(q?(q==='ios'?'ios':'and'):(ios?'ios':'and'));
 })();
+
+// «Продовжити в браузері»: не показуємо екран до кінця цього сеансу
+document.getElementById('goBrowser').addEventListener('click',function(e){
+  e.preventDefault();
+  try{sessionStorage.setItem('skillhub_start_skip','1')}catch(err){}
+  goApp();
+});
+
+// Android/Chrome: власна кнопка «Установити», якщо браузер дозволяє
+var deferred=null;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();deferred=e;
+  document.getElementById('nativeInstall').hidden=false;
+});
+document.getElementById('nativeInstall').addEventListener('click',function(){
+  if(!deferred)return;
+  deferred.prompt();
+  deferred.userChoice.finally(function(){deferred=null;document.getElementById('nativeInstall').hidden=true;});
+});
+window.addEventListener('appinstalled',function(){ markInstalled(); });
 </script>
 </body>
 </html>
