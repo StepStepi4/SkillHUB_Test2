@@ -1856,8 +1856,10 @@
         let parsed = formatWithCustomEmoji(currentProductData.product, '📘');
         document.getElementById('theoryTitle').innerText = parsed.title;
 
-        let rawLines = String(currentProductData.info || "Теоретичний матеріал відсутній.").split('\n').filter(l => l.trim() !== "");
-        let contentHtml = `<div class="theory-box">` + rawLines.map(line => `<div class="theory-line">${line}</div>`).join('') + `</div>`;
+        // Розмітка тексту з таблиці (заголовки, жирний, колір, картки...) - js/core/richtext.js
+        let contentHtml = `<div class="theory-box">` + RichText.render(String(currentProductData.info || "Теоретичний матеріал відсутній."), {
+            plain: line => `<div class="theory-line">${RichText.inline(line)}</div>`
+        }) + `</div>`;
 
         // Кнопка «Детальніше про цей курс» - внизу блоку теорії (замість «Додаткових матеріалів»)
         if (currentProductData.skillhubLink) {

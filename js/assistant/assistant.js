@@ -1733,11 +1733,15 @@ window.saveDefaultStore = function() {
     function parseDescriptionLines(descE) {
         let safeDesc = descE ? String(descE).trim() : "";
         if (!safeDesc || safeDesc === "Опис відсутній...") return `<div class="desc-line" style="color: var(--text-muted); font-style: italic; justify-content: center;">Опис відсутній...</div>`;
-        let html = ``;
-        html += safeDesc.replace(/\|/g, '\n').split(/\r?\n/).map(line => {
+        // Розмітка тексту (заголовки, розділювачі, картки, колонки, жирний, колір...) - js/core/richtext.js, див. docs/FORMATTING.md
+        // Старий формат зберігається: | = новий рядок, "+" підзаголовок, "=" мітка, емодзі на початку = іконка
+        return RichText.render(safeDesc, { pipeSplit: true, plain: renderDescLine });
+    }
+
+    function renderDescLine(line) {
             const l = line.trim(); if (!l) return '';
-            if (l.startsWith('+')) return `<div style="font-weight:700; font-size:14px; color:var(--text-main); margin: 12px 0 6px 0;">${l.substring(1).trim()}</div>`;
-            if (l.startsWith('=')) return `<div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin: 12px 0 6px 0;">${l.substring(1).trim()}</div>`;
+            if (l.startsWith('+')) return `<div style="font-weight:700; font-size:14px; color:var(--text-main); margin: 12px 0 6px 0;">${RichText.inline(l.substring(1).trim())}</div>`;
+            if (l.startsWith('=')) return `<div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin: 12px 0 6px 0;">${RichText.inline(l.substring(1).trim())}</div>`;
 
             let match = l.match(/^(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/);
             let e = match ? match[0] : "🔹";
@@ -1768,12 +1772,10 @@ window.saveDefaultStore = function() {
             <div class="desc-line" style="display:flex; align-items:center; width:100%; justify-content:space-between; padding: 10px 0;">
                 <div style="display:flex; align-items:center; gap:10px; flex:1; padding-right:10px;">
                     <div class="desc-icon-box" style="display:flex; align-items:center; justify-content:center; flex-shrink:0;">${window.renderIcon(e)}</div>
-                    <div style="font-size: 13px; line-height: 1.4; color: var(--text-main); font-weight: 500; word-break: break-word;">${t}</div>
+                    <div style="font-size: 13px; line-height: 1.4; color: var(--text-main); font-weight: 500; word-break: break-word;">${RichText.inline(t)}</div>
                 </div>
                 ${priceBadge}
             </div>`;
-        }).join('');
-        return html;
     }
 
     function generateDescToggleHTML(descE, codeF) {
@@ -2510,7 +2512,7 @@ window.saveDefaultStore = function() {
                 l = l.replace(/([\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g, '<span style="font-size: 1.5em; vertical-align: middle; line-height: 1;">$1</span>');
 
                 let margin = blockHtml !== '' ? "margin-top: 6px;" : "";
-                blockHtml += `<div style="${lineStyle} ${margin}">${l}</div>`;
+                blockHtml += `<div style="${lineStyle} ${margin}">${RichText.inline(l)}</div>`;
             });
 
             if (blockHtml) {

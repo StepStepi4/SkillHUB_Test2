@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkillHUB — оформлення тексту</title>
+<link rel="icon" href="assets/brand/icon-192.png">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/richtext.css">
+<style>
+:root{--bg:#f2f2f7;--card-bg:#fff;--text-main:#164f58;--text-muted:#6b7280;--primary:#164f58;--border:#e5e5ea;--input-bg:#f3f4f6;--success:#10b981}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--card-bg:#1c1c1e;--text-main:#f5f5f5;--text-muted:#98989d;--primary:#2fa4b3;--border:#38383a;--input-bg:#2c2c2e;--success:#34d399}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text-main);font-family:'Inter',system-ui,sans-serif;padding:16px 16px 60px}
+.wrap{max-width:760px;margin:0 auto}
+h1{font-size:22px;margin:10px 0 4px}h2{font-size:15px;margin:26px 0 10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+p.sub{margin:0 0 14px;color:var(--text-muted);font-size:14px}
+.box{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:14px}
+textarea{width:100%;min-height:210px;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);color:var(--text-main);font:14px/1.5 ui-monospace,Menlo,monospace;padding:12px;resize:vertical}
+.row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+button{border:0;background:var(--primary);color:#fff;font:inherit;font-weight:800;font-size:14px;padding:10px 16px;border-radius:12px;cursor:pointer}
+button.g{background:var(--input-bg);color:var(--text-main);border:1px solid var(--border)}
+.grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:700px){.grid{grid-template-columns:1fr 1fr}}
+.pv{min-height:120px}
+table.ref{width:100%;border-collapse:collapse;font-size:13px}
+table.ref td{padding:9px 6px;border-bottom:1px solid var(--border);vertical-align:top}
+table.ref td:first-child{width:46%}
+table.ref code{white-space:pre-wrap;font:12.5px ui-monospace,Menlo,monospace;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:3px 7px;display:inline-block}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>✍️ Оформлення тексту в таблиці</h1>
+<p class="sub">Пишіть у клітинці таблиці — застосунок сам зробить заголовки, жирний, кольори, розділювачі та блоки. Нижче — редактор для спроб і шпаргалка.</p>
+
+<div class="grid">
+  <div class="box"><textarea id="src" spellcheck="false"></textarea>
+    <div class="row"><button id="copy">Копіювати для таблиці</button><button class="g" id="sample">Приклад</button><button class="g" id="clear">Очистити</button></div></div>
+  <div class="box pv" id="out"></div>
+</div>
+
+<h2>Шпаргалка</h2>
+<div class="box"><table class="ref" id="ref"></table></div>
+
+<h2>Правила</h2>
+<div class="box"><div id="rules"></div></div>
+</div>
+
+<script src="js/core/richtext.js"></script>
+<script>
+var REF=[
+ ['Рядкове оформлення'],
+ ['/текст/','заголовні літери'],
+ ['//текст//','жирні ЗАГОЛОВНІ'],
+ ['*текст*','жирний'],
+ ['_текст_','курсив'],
+ ['++текст++','підкреслений'],
+ ['~текст~','закреслений'],
+ ['==текст==','виділення маркером'],
+ ['^текст^','більший розмір'],
+ ['`КОД-123`','код: торкнутися = скопіювати'],
+ ['Колір і стиль'],
+ ['{r|текст}','червоний (r червоний, g зелений, b синій, y жовтий, o помаранчевий, p фіолетовий, s сірий, t бірюзовий)'],
+ ['{зелений|текст}','колір можна писати словом'],
+ ['{#ff6600|текст}','або кодом'],
+ ['{r,ж,велико|Увага}','колір + жирний + великий (ж жирний, к курсив, п підкреслений, з закреслений, верх ЗАГОЛОВНІ, велико, величезно, мало, моно)'],
+ ['{g!|НОВИНКА}','знак ! = кольорова плашка'],
+ ['Рядки і розділювачі'],
+ ['# Великий заголовок'],
+ ['## Середній заголовок'],
+ ['### Малий заголовок'],
+ ['---','тонка лінія'],
+ ['===','товста лінія'],
+ ['...','пунктирна'],
+ ['***','зірочки'],
+ ['~~~','хвиляста'],
+ ['---Розділ---','лінія з назвою'],
+ ['[br]','порожній проміжок; [br 30] = 30 пікселів'],
+ ['[центр] текст','вирівнювання: [центр] [право] [ліво]'],
+ ['Списки'],
+ ['- перший\n- другий','маркований список'],
+ ['1. крок\n2. крок','нумерований'],
+ ['[x] зроблено\n[ ] не зроблено','чекліст'],
+ ['Виноски'],
+ ['> цитата'],
+ ['i> Корисно знати','синя'],
+ ['!> Увага!','жовта'],
+ ['x> Не можна!','червона'],
+ ['+> Все добре','зелена'],
+ ['Блоки'],
+ ['[[ Заголовок картки\nтекст\n- пункт\n]]','картка (рамка)'],
+ ['[2]\nЛіва колонка\n[|]\nПрава колонка\n[/]','колонки: [2] [3] [4], між ними [|], кінець [/]'],
+ ['[+] Детальніше\nприхований текст\n[/+]','розгортається по дотику'],
+ ['| Назва | Ціна |\n|---|---|\n| Товар | 100 |','таблиця (рядок |---| робить шапку)'],
+ ['Посилання і картинки'],
+ ['[сайт](https://skillhub.ua)','посилання'],
+ ['[>Відкрити](https://skillhub.ua)','кнопка'],
+ ['[>Академія](app:academy)','кнопка: відкрити «Академію»'],
+ ['![](https://адреса/картинки.jpg)','картинка'],
+ ['\\*не жирний\\*','слеш \\ перед знаком = показати його як є']
+];
+var RULES=[
+ 'Позначки пишуться впритул до тексту: <code>*так*</code>, а не <code>* так *</code>.',
+ 'Усередині слова або числа позначки не діють: <code>км/год</code>, <code>10/11/2026</code>, <code>5*3</code> лишаються як є.',
+ 'Позначки можна вкладати: <code>//Увага: *важливо*//</code>.',
+ 'У старих описах послуг працює і старе: <code>|</code> = новий рядок, <code>+Підзаголовок</code>, <code>=МІТКА</code>, емодзі на початку = іконка, <code>"Назва послуги"</code> = ціна.',
+ 'Розмітка діє в описах послуг, оновленнях (changelog) та теорії курсів Академії.'
+];
+var SAMPLE="# Налаштування смартфона\n[центр] {g!|НОВИНКА} {s,мало|оновлено сьогодні}\n---\n//Що входить//\n- Перенесення даних\n- *Захист* від вірусів\n- Налаштування {b|пошти}\n\n!> Перед початком зробіть резервну копію.\n\n[2]\n**Стандарт**\n500 грн\n[|]\n**Преміум**\n900 грн\n[/]\n\n[+] Що потрібно мати\nПаспорт і пароль від акаунта.\n[/+]\n\n| Послуга | Ціна |\n|---|---|\n| Налаштування | 500 |\n| Захист | 300 |\n\nКод акції: `SKILL10`";
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+var ref=document.getElementById('ref'),h='';
+REF.forEach(function(r){
+  if(r.length===1){h+='<tr><td colspan="2" style="padding-top:16px;font-weight:800;color:var(--primary)">'+r[0]+'</td></tr>';return}
+  var res=RichText.render(r[0]);
+  h+='<tr><td><code>'+esc(r[0])+'</code></td><td>'+res+(r[1]?'<div style="color:var(--text-muted);font-size:12px;margin-top:4px">'+r[1]+'</div>':'')+'</td></tr>';
+});
+ref.innerHTML=h;
+document.getElementById('rules').innerHTML=RULES.map(function(x){return '<p style="margin:6px 0;font-size:14px;line-height:1.5">'+x+'</p>'}).join('');
+var src=document.getElementById('src'),out=document.getElementById('out');
+function draw(){out.innerHTML=RichText.render(src.value,{pipeSplit:false});try{localStorage.setItem('format_draft',src.value)}catch(e){}}
+src.addEventListener('input',draw);
+document.getElementById('sample').onclick=function(){src.value=SAMPLE;draw()};
+document.getElementById('clear').onclick=function(){src.value='';draw()};
+document.getElementById('copy').onclick=function(){var b=this;navigator.clipboard&&navigator.clipboard.writeText(src.value).then(function(){b.textContent='Скопійовано ✓';setTimeout(function(){b.textContent='Копіювати для таблиці'},1300)})};
+try{src.value=localStorage.getItem('format_draft')||SAMPLE}catch(e){src.value=SAMPLE}
+draw();
+</script>
+</body>
+</html>
