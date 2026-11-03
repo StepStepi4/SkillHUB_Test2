@@ -7,6 +7,21 @@
 <meta name="theme-color" content="#f2f2f7">
 <link rel="icon" href="assets/brand/icon-192.png">
 <link rel="apple-touch-icon" href="assets/brand/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<script>
+/* Якщо застосунок вже встановлено (або Start відкрито з іконки на екрані) - одразу в застосунок, без показу інструкції */
+(function(){
+  try{
+    var sa=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;
+    if(sa) localStorage.setItem('skillhub_installed','1');
+    if(sa||localStorage.getItem('skillhub_installed')==='1'){
+      document.documentElement.style.visibility='hidden';
+      var h='';try{h=sessionStorage.getItem('skillhub_target_hash')||''}catch(e){}
+      location.replace('./'+h);
+    }
+  }catch(e){}
+})();
+</script>
 <link rel="stylesheet" href="css/fonts.css">
 <style>
 :root{--bg:#f2f2f7;--card:#fff;--text:#164f58;--muted:#6b7280;--primary:#164f58;--accent:#10b981;--border:#e5e5ea;--soft:#eef6f7;--hl:#ef4444;--ui:#f9fafb}
@@ -63,7 +78,6 @@ section{display:none}section.on{display:block}
 .sf{border-top:1px solid var(--border);justify-content:space-around;padding:12px 8px}
 .link{display:flex;flex-direction:column;gap:10px;align-items:stretch}
 .link .primary{border:0;background:var(--primary);color:#fff;font:inherit;font-weight:800;padding:15px 22px;border-radius:14px;font-size:16px;cursor:pointer}
-.link .ghost{display:block;text-align:center;color:var(--muted);text-decoration:none;font-weight:700;padding:12px;font-size:14px}
 .link [hidden]{display:none}
 </style>
 </head>
@@ -219,22 +233,13 @@ section{display:none}section.on{display:block}
 <div class="done">🎉 Тепер SkillHUB відкривається одним дотиком</div>
 <div class="link">
   <button id="nativeInstall" class="primary" hidden>Установити SkillHUB</button>
-  <a href="./" id="goBrowser" class="ghost">Продовжити в браузері</a>
 </div>
 
 </div>
 <script>
 /* Екран «Встановіть застосунок».
    Показується при відкритті в браузері, поки застосунок не встановлено. Після встановлення зникає назавжди. */
-function isStandalone(){
-  return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;
-}
 function markInstalled(){ try{localStorage.setItem('skillhub_installed','1')}catch(e){} }
-function goApp(){
-  var h='';try{h=sessionStorage.getItem('skillhub_target_hash')||''}catch(e){}
-  location.replace('./'+h);
-}
-if(isStandalone()){ markInstalled(); goApp(); }
 
 function pick(k){
   document.getElementById('and').classList.toggle('on',k==='and');
@@ -248,13 +253,6 @@ function pick(k){
   var ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   pick(q?(q==='ios'?'ios':'and'):(ios?'ios':'and'));
 })();
-
-// «Продовжити в браузері»: не показуємо екран до кінця цього сеансу
-document.getElementById('goBrowser').addEventListener('click',function(e){
-  e.preventDefault();
-  try{sessionStorage.setItem('skillhub_start_skip','1')}catch(err){}
-  goApp();
-});
 
 // Android/Chrome: власна кнопка «Установити», якщо браузер дозволяє
 var deferred=null;
