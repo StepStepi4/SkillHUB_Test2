@@ -73,3 +73,4 @@
 .rt-table th { background: var(--input-bg, #f3f4f6); font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
 
 @media (max-width: 380px) { .rt-cols-3, .rt-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.rt-table th[style*="center"],.rt-table td[style*="center"]{vertical-align:middle}

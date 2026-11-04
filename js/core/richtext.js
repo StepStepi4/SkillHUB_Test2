@@ -226,11 +226,18 @@
                     out.push(cur.trim()); return out;
                 };
                 const sepIdx = rows.findIndex(r => cells(r).every(c => /^:?-{2,}:?$/.test(c)));
+                const colAl = sepIdx >= 0 ? cells(rows[sepIdx]).map(c => /^:-+:$/.test(c) ? 'center' : /^-+:$/.test(c) ? 'right' : /^:-+$/.test(c) ? 'left' : '') : [];
                 let html = '<div class="rt-table-wrap"><table class="rt-table">';
                 rows.forEach((r, idx) => {
                     if (idx === sepIdx) return;
                     const head = sepIdx > 0 && idx < sepIdx;
-                    html += '<tr>' + cells(r).map(c => '<' + (head ? 'th' : 'td') + '>' + inline(c) + '</' + (head ? 'th' : 'td') + '>').join('') + '</tr>';
+                    html += '<tr>' + cells(r).map((c, ci) => {
+                        const t = head ? 'th' : 'td';
+                        let al = colAl[ci] || '';
+                        const am = c.match(/^\[(центр|право|ліво|c|r|l)\]\s*([\s\S]*)$/i);
+                        if (am) { al = { 'центр': 'center', c: 'center', 'право': 'right', r: 'right', 'ліво': 'left', l: 'left' }[am[1].toLowerCase()]; c = am[2]; }
+                        return '<' + t + (al ? ' style="text-align:' + al + '"' : '') + '>' + inline(c) + '</' + t + '>';
+                    }).join('') + '</tr>';
                 });
                 out += html + '</table></div>';
                 i = j - 1; continue;
