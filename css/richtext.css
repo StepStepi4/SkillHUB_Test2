@@ -14,7 +14,7 @@
 .rt-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--input-bg, #f3f4f6); border: 1px solid var(--border, #e5e5ea); padding: 1px 7px; border-radius: 7px; font-weight: 700; cursor: pointer; white-space: nowrap; }
 .rt-code.copied { background: var(--success, #10b981); color: #fff; border-color: transparent; }
 .rt-link { color: var(--primary); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
-.rt-btn { display: block; text-align: center; margin: 10px 0; padding: 13px 16px; border-radius: 14px; background: var(--primary); color: #fff !important; font-weight: 800; text-decoration: none; }
+.rt-btn { box-sizing: border-box; display: block; text-align: center; margin: 10px 0; padding: 13px 16px; border-radius: 14px; background: var(--primary); color: #fff !important; font-weight: 800; text-decoration: none; }
 .rt-img { max-width: 100%; border-radius: 12px; display: block; margin: 8px auto; }
 
 .rt-h { font-weight: 800; color: var(--text-main); margin: 16px 0 6px; line-height: 1.2; letter-spacing: -.01em; }
@@ -74,3 +74,18 @@
 
 @media (max-width: 380px) { .rt-cols-3, .rt-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .rt-table th[style*="center"],.rt-table td[style*="center"]{vertical-align:middle}
+
+/* розмір тексту числом {18|текст} */
+.rt-fs { line-height: 1.25; }
+/* кнопки: рядом, вирівнювання, вкладені картинки */
+.rt-btn.rt-btn-inline { display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin: 6px 6px 6px 0; vertical-align: top; max-width: 100%; }
+.rt-btn.rt-a-c { margin-left: auto; margin-right: auto; }
+.rt-btn.rt-a-r { margin-left: auto; margin-right: 0; }
+div:has(> .rt-btn.rt-a-c) { text-align: center; }
+.rt-btn .rt-img { display: inline-block; margin: 0 4px; max-height: 1.8em; width: auto; border-radius: 6px; vertical-align: middle; }
+/* картинки: положення */
+.rt-img.rt-a-l { margin-left: 0; margin-right: auto; }
+.rt-img.rt-a-c { margin-left: auto; margin-right: auto; }
+.rt-img.rt-a-r { margin-left: auto; margin-right: 0; }
+.rt-table.rt-fixed { table-layout: fixed; }
+.rt-table.rt-fixed td, .rt-table.rt-fixed th { overflow-wrap: anywhere; }

@@ -68,20 +68,40 @@
     function wrapStyle(spec, open, close) {
         const tokens = spec.split(',').map(x => x.trim()).filter(Boolean);
         if (!tokens.length) return null;
-        let color = '', bg = '';
+        let color = '', bg = '', size = 0;
         const cls = [];
         for (const tk of tokens) {
             let name = tk.toLowerCase(), pill = false;
             if (name.length > 1 && name.endsWith('!')) { pill = true; name = name.slice(0, -1); }
             if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/.test(name)) { if (pill) bg = name; else color = name; continue; }
+            if (/^\d{1,2}$/.test(name) && +name >= 8 && +name <= 64) { size = +name; continue; }
             if (COLORS[name]) { if (pill) bg = COLORS[name]; else color = COLORS[name]; continue; }
             if (FLAGS[name]) { cls.push('rt-' + FLAGS[name]); continue; }
             return null;                                         // невідомий токен - це не розмітка
         }
         let style = '';
-        if (bg) style = 'background:' + bg + ';color:' + (color || '#fff') + ';';
-        else if (color) style = 'color:' + color + ';';
-        return open('<span class="' + (bg ? 'rt-pill ' : '') + cls.join(' ') + '"' + (style ? ' style="' + style + '"' : '') + '>') + '\u0000' + close('</span>');
+        if (size) style += 'font-size:' + size + 'px;';
+        if (bg) style += 'background:' + bg + ';color:' + (color || '#fff') + ';';
+        else if (color) style += 'color:' + color + ';';
+        return open('<span class="' + (bg ? 'rt-pill ' : '') + (size ? 'rt-fs ' : '') + cls.join(' ') + '"' + (style ? ' style="' + style + '"' : '') + '>') + '\u0000' + close('</span>');
+    }
+
+    // параметри в лапках після адреси: (url "w=200 h=48 a=c c=g t=w")
+    function optStyle(str, kind) {
+        const o = {};
+        String(str || '').replace(/([a-z]+)=([^\s,]+)/gi, (m, k, v) => { o[k.toLowerCase()] = v; return m; });
+        const col = v => COLORS[String(v).toLowerCase()] || (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v) ? v : '');
+        const dim = v => /^\d{1,4}(px|%)?$/.test(v) ? (/[%x]$/.test(v) ? v : v + 'px') : '';
+        let st = '', cls = '';
+        if (o.w && dim(o.w)) st += 'width:' + dim(o.w) + ';';
+        if (o.h && dim(o.h)) st += (kind === 'btn' ? 'min-height:' : 'height:') + dim(o.h) + ';';
+        if (kind === 'btn') {
+            if (col(o.c)) st += 'background:' + col(o.c) + ';';
+            if (col(o.t)) st += 'color:' + col(o.t) + ' !important;';
+            if (o.w || o.i) cls += ' rt-btn-inline';
+            if (o.a === 'c' || o.a === 'r') cls += ' rt-a-' + o.a;
+        } else if (o.a === 'c' || o.a === 'r' || o.a === 'l') cls += ' rt-a-' + o.a;
+        return { st, cls };
     }
 
     function inline(src) {
@@ -96,17 +116,19 @@
         // 3. `код` (торкнутися = копіювати)
         s = s.replace(/`([^`\n]+)`/g, (m, c) => keep('<span class="rt-code rt-copy" data-copy="' + esc(c) + '" title="Копіювати">' + esc(c) + '</span>'));
         // 4. картинки ![alt](url)
-        s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (m, alt, url) => {
+        s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g, (m, alt, url, opt) => {
             const u = safeUrl(url); if (!u) return m;
-            return keep('<img class="rt-img" loading="lazy" src="' + esc(u) + '" alt="' + esc(alt) + '">');
+            const o = optStyle(opt, 'img');
+            return keep('<img class="rt-img' + o.cls + '" loading="lazy" src="' + esc(u) + '" alt="' + esc(alt) + '"' + (o.st ? ' style="' + o.st + '"' : '') + '>');
         });
         // 5. посилання [текст](url), кнопка [>текст](url)
-        s = s.replace(/\[(>?)([^\]\n]+)\]\(([^)\s]+)\)/g, (m, btn, text, url) => {
+        s = s.replace(/\[(>?)([^\]\n]+)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g, (m, btn, text, url, opt) => {
             const u = safeUrl(url); if (!u) return m;
+            const o = btn ? optStyle(opt, 'btn') : { st: '', cls: '' };
             const inner = inline(text);
             const ac = /^#academy$/i.test(u) ? ' data-academy="1"' : '';
             const tgt = /^https?:/i.test(u) ? ' target="_blank" rel="noopener noreferrer"' : '';
-            return keep('<a class="' + (btn ? 'rt-btn' : 'rt-link') + '" href="' + esc(u) + '"' + tgt + ac + '>' + inner + '</a>');
+            return keep('<a class="' + (btn ? 'rt-btn' : 'rt-link') + o.cls + '"' + (o.st ? ' style="' + o.st + '"' : '') + ' href="' + esc(u) + '"' + tgt + ac + '>' + inner + '</a>');
         });
         // 6. голі посилання
         s = s.replace(/\bhttps?:\/\/[^\s<>"')]+/g, m => keep('<a class="rt-link" href="' + esc(m) + '" target="_blank" rel="noopener noreferrer">' + esc(m) + '</a>'));
@@ -174,7 +196,7 @@
     }
 
     function blocks(lines, plain) {
-        let out = '';
+        let out = '', pendW = null;
         for (let i = 0; i < lines.length; i++) {
             const l = lines[i];
             if (!l) continue;
@@ -208,6 +230,8 @@
                 out += '<details class="rt-acc"><summary>' + inline(m[1] || 'Детальніше') + '</summary><div class="rt-acc-body">' + blocks(lines.slice(i + 1, stop), plain) + '</div></details>';
                 i = stop; continue;
             }
+            // --- ширина стовпців наступної таблиці: [ширина 30 40 30]
+            if ((m = l.match(/^\[ширина\s+([\d.\s]+)\]$/i))) { pendW = m[1].trim().split(/\s+/).map(Number).filter(n => n > 0 && n <= 100); continue; }
             // --- таблиця
             if (isTableRow(l)) {
                 const rows = []; let j = i;
@@ -227,7 +251,8 @@
                 };
                 const sepIdx = rows.findIndex(r => cells(r).every(c => /^:?-{2,}:?$/.test(c)));
                 const colAl = sepIdx >= 0 ? cells(rows[sepIdx]).map(c => /^:-+:$/.test(c) ? 'center' : /^-+:$/.test(c) ? 'right' : /^:-+$/.test(c) ? 'left' : '') : [];
-                let html = '<div class="rt-table-wrap"><table class="rt-table">';
+                const widths = pendW; pendW = null;
+                let html = '<div class="rt-table-wrap"><table class="rt-table' + (widths ? ' rt-fixed' : '') + '">';
                 rows.forEach((r, idx) => {
                     if (idx === sepIdx) return;
                     const head = sepIdx > 0 && idx < sepIdx;
@@ -236,7 +261,9 @@
                         let al = colAl[ci] || '';
                         const am = c.match(/^\[(центр|право|ліво|c|r|l)\]\s*([\s\S]*)$/i);
                         if (am) { al = { 'центр': 'center', c: 'center', 'право': 'right', r: 'right', 'ліво': 'left', l: 'left' }[am[1].toLowerCase()]; c = am[2]; }
-                        return '<' + t + (al ? ' style="text-align:' + al + '"' : '') + '>' + inline(c) + '</' + t + '>';
+                        const wst = (widths && idx === 0 && widths[ci]) ? 'width:' + widths[ci] + '%;' : (widths && head && idx === 0 ? '' : '');
+                        const stl = (al ? 'text-align:' + al + ';' : '') + wst;
+                        return '<' + t + (stl ? ' style="' + stl + '"' : '') + '>' + inline(c) + '</' + t + '>';
                     }).join('') + '</tr>';
                 });
                 out += html + '</table></div>';
