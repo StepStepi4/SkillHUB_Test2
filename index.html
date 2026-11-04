@@ -550,8 +550,9 @@
     </div>
 
     <!-- Панель фільтрів -->
-    <div id="filterPanel" style="display: none; background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 14px; flex-shrink: 0; flex-direction: column; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-        <div style="font-size: 12px; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 4px;">Фільтрація співробітників</div>
+    <div id="filterPanel" style="display: none; background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; flex-shrink: 0; flex-direction: column; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+        <div onclick="toggleFilterMenu()" style="font-size: 12px; font-weight: 800; color: var(--primary); text-transform: uppercase; display:flex; justify-content:space-between; align-items:center; cursor:pointer;"><span>Фільтрація співробітників</span><span style="font-size:14px;">▲ Згорнути</span></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 8px;">
         
         <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
             <input type="checkbox" id="f_assigned" onchange="applyFilters()">
@@ -573,6 +574,7 @@
             <div class="custom-checkmark"></div>
             <span>Зустрічі Google Meet</span>
         </label>
+        </div>
         
         <div style="margin-top: 8px;">
             <label class="input-label" style="margin-bottom: 6px;">Керівник</label>

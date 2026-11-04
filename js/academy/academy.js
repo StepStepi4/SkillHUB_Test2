@@ -166,6 +166,13 @@
         }
     }
 
+    document.addEventListener('scroll', function (e) {
+        if (e.target && e.target.id === 'statsModalUsersList' && e.target.scrollTop > 30) {
+            var fp = document.getElementById('filterPanel');
+            if (fp && fp.style.display === 'flex') fp.style.display = 'none';
+        }
+    }, true);
+
     function applyFilters() {
         let q = document.getElementById('empSearchInput').value.toLowerCase();
         renderStatsModalEmployees(q);

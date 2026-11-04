@@ -112,7 +112,7 @@
         s = s.replace(/\bhttps?:\/\/[^\s<>"')]+/g, m => keep('<a class="rt-link" href="' + esc(m) + '" target="_blank" rel="noopener noreferrer">' + esc(m) + '</a>'));
 
         // 7. {стиль|текст}
-        s = s.replace(/\{([^{}|\n]{1,40})\|([^{}\n]+?)\}/g, (m, spec, text) => {
+        s = s.replace(/\{([^{}|¦\n]{1,40})[|¦]([^{}\n]+?)\}/g, (m, spec, text) => {
             const r = wrapStyle(spec, keep, keep);
             return r ? r.replace('\u0000', () => text) : m;
         });
@@ -212,7 +212,19 @@
             if (isTableRow(l)) {
                 const rows = []; let j = i;
                 while (j < lines.length && isTableRow(lines[j])) { rows.push(lines[j]); j++; }
-                const cells = r => r.replace(/^\||\|$/g, '').split('|').map(x => x.trim());
+                const cells = r => {
+                    r = r.trim().replace(/^\|/, '').replace(/\|$/, '');
+                    const out = []; let cur = '', depth = 0, tick = false;
+                    for (let i = 0; i < r.length; i++) {
+                        const ch = r[i];
+                        if (ch === '\\' && i + 1 < r.length) { cur += ch + r[++i]; continue; }
+                        if (ch === '`') tick = !tick;
+                        else if (!tick && ch === '{') depth++;
+                        else if (!tick && ch === '}' && depth) depth--;
+                        if (ch === '|' && !depth && !tick) { out.push(cur.trim()); cur = ''; } else cur += ch;
+                    }
+                    out.push(cur.trim()); return out;
+                };
                 const sepIdx = rows.findIndex(r => cells(r).every(c => /^:?-{2,}:?$/.test(c)));
                 let html = '<div class="rt-table-wrap"><table class="rt-table">';
                 rows.forEach((r, idx) => {

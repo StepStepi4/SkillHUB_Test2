@@ -271,8 +271,8 @@
         #academyApp .deadline-expired #deadlineText { color: var(--danger) !important; }
         #academyApp .deadline-expired { background: rgba(239, 68, 68, 0.12) !important; border-color: rgba(239, 68, 68, 0.3) !important; }
 
-        #academyApp .theory-box { background: var(--card-bg); border-radius: 24px; border: 1px solid var(--border); margin-bottom: 24px; padding: 8px 0; box-shadow: 0 8px 24px rgba(0,0,0,0.04); }
-        #academyApp .theory-line { padding: 14px 20px; border-bottom: 1px solid var(--input-bg); font-size: 15px; line-height: 1.5; }
+        #academyApp .theory-box { background: var(--card-bg); border-radius: 24px; border: 1px solid var(--border); margin-bottom: 24px; padding: 10px 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); }
+        #academyApp .theory-line { padding: 12px 0; border-bottom: 1px solid var(--input-bg); font-size: 15px; line-height: 1.5; }
         #academyApp .theory-line:last-child { border-bottom: none; }
         
         #academyApp .question-card { background: var(--card-bg); border-radius: 24px; padding: 24px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); }
@@ -450,3 +450,6 @@
 }
 #academyApp[hidden] { display: none !important; }
 body.academy-open { overflow: hidden; }
+
+#academyApp .theory-box > .rt-h1:first-child,#academyApp .theory-box > .rt-h2:first-child,#academyApp .theory-box > .rt-h3:first-child{margin-top:8px}
+#academyApp .theory-box > *{max-width:100%;box-sizing:border-box}

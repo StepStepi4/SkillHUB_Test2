@@ -1558,7 +1558,7 @@ window.saveDefaultStore = function() {
                             ${optionsHtml}
                         </select>
                     </div>
-                    <div id="discountReasonDesc" style="display: none; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--primary-light); padding: 12px; margin-bottom: 12px;"></div>
+                    <div id="discountReasonDesc" style="display: none; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--primary-light); padding: 14px 18px; margin-bottom: 12px; overflow: hidden;"></div>
                 </div>`;
             }
 
