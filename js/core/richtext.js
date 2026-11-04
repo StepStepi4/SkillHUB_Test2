@@ -251,7 +251,7 @@
                 const kind = { '': 'quote', i: 'info', '!': 'warn', x: 'danger', '+': 'ok' }[m[1]];
                 const body = [m[2]];
                 while (i + 1 < lines.length && lines[i + 1] && RE.callout.test(lines[i + 1]) && lines[i + 1].match(RE.callout)[1] === m[1]) { i++; body.push(lines[i].match(RE.callout)[2]); }
-                out += '<div class="rt-callout rt-' + kind + '">' + body.map(x => '<div>' + inline(x) + '</div>').join('') + '</div>';
+                out += '<div class="rt-callout rt-' + kind + '">' + body.map(x => { const h = x.match(/^(#{1,3})\s+(.+)$/); return h ? '<div class="rt-h rt-h' + h[1].length + '">' + inline(h[2]) + '</div>' : '<div>' + inline(x) + '</div>'; }).join('') + '</div>';
                 continue;
             }
             // --- списки

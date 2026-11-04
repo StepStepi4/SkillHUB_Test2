@@ -273,7 +273,7 @@ function block(el,out){
   if(cl.contains('rt-callout')){
     var k=cl.contains('rt-info')?'i> ':cl.contains('rt-warn')?'!> ':cl.contains('rt-danger')?'x> ':cl.contains('rt-ok')?'+> ':'> ';
     var ls=blocksOf(el).filter(function(x){return x!==''});if(!ls.length)ls=[''];
-    ls.forEach(function(l){out.push(k+l.replace(/^\\(?=[#>+=|-])/,''))});return;
+    ls.forEach(function(l){out.push(/^[i!x+]?> /.test(l)?l:k+l.replace(/^\\(?=[#>+=|-])/,''))});return;
   }
   if(tag==='BLOCKQUOTE'){blocksOf(el).filter(Boolean).forEach(function(l){out.push('> '+l)});return}
   if(tag==='UL'||tag==='OL'){
@@ -382,6 +382,13 @@ ed.addEventListener('click',function(e){
   var a=e.target.closest&&e.target.closest('a');if(a)e.preventDefault();
 });
 ed.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!e.shiftKey&&!e.ctrlKey){var sl=getSelection();if(sl.rangeCount&&sl.isCollapsed){var ln=sl.anchorNode;var SEL='.rt-callout,.rt-card,.rt-col,.rt-acc-body';while(ln&&ln.parentNode&&ln.parentNode!==ed&&!(ln.parentNode.matches&&ln.parentNode.matches(SEL)))ln=ln.parentNode;
+    var box=ln&&ln.parentNode&&ln.parentNode.matches&&ln.parentNode.matches(SEL)?ln.parentNode:null;
+    if(box&&ln.nodeType===1&&ln.textContent.replace(/\u200b/g,'').trim()===''&&!ln.querySelector('img,hr')){
+      e.preventDefault();
+      if(box.children.length>1)box.removeChild(ln);
+      var nl=document.createElement('div');nl.innerHTML='<br>';var host=box.matches('.rt-callout')?box:(closest(box,'.rt-cols,.ed-acc,.rt-card')||box);host.parentNode.insertBefore(nl,host.nextSibling);
+      var rr=document.createRange();rr.setStart(nl,0);rr.collapse(true);sl.removeAllRanges();sl.addRange(rr);saved=rr.cloneRange();update();return}}}
   if(e.key==='Enter'&&!e.shiftKey){var tt=closest(getSelection().anchorNode,'.rt-card-title,.ed-acc-title');if(tt&&tt.nextElementSibling){e.preventDefault();var nb=tt.nextElementSibling;var r0=document.createRange();r0.selectNodeContents(nb.tagName==='DIV'&&nb.classList.contains('rt-acc-body')?nb.firstElementChild||nb:nb);r0.collapse(true);var g0=getSelection();g0.removeAllRanges();g0.addRange(r0);return}}
   if(e.key==='Tab'){var td=closest(getSelection().anchorNode,'td,th');if(td){e.preventDefault();var n=td.nextElementSibling||(td.parentNode.nextElementSibling&&td.parentNode.nextElementSibling.firstElementChild);if(n){var r=document.createRange();r.selectNodeContents(n);var s=getSelection();s.removeAllRanges();s.addRange(r)}}}
 });
@@ -459,10 +466,16 @@ function insertBlockAfterLine(html,focusSel){
 function convertLine(open,close,cls){ // ряд -> виноска
   restore();var l=ensureLine();if(!l){toast('Поставте курсор у рядок');return}
   var ex=closest(l,'.rt-callout');
-  if(ex){var same=ex.classList.contains(cls);var kids=Array.prototype.slice.call(ex.childNodes);kids.forEach(function(k){ex.parentNode.insertBefore(k,ex)});ex.parentNode.removeChild(ex);if(same){update();return}}
+  if(ex){var same=ex.classList.contains(cls);
+    var kids=Array.prototype.slice.call(ex.children),idx=kids.indexOf(l);
+    if(idx>-1&&kids.length>1){
+      var after=kids.slice(idx+1);
+      if(after.length){var ex2=document.createElement('div');ex2.className=ex.className;after.forEach(function(k){ex2.appendChild(k)});ex.parentNode.insertBefore(ex2,ex.nextSibling)}
+      ex.parentNode.insertBefore(l,ex.nextSibling);if(!ex.children.length)ex.parentNode.removeChild(ex);
+    }else{var ks=Array.prototype.slice.call(ex.childNodes);ks.forEach(function(k){ex.parentNode.insertBefore(k,ex)});ex.parentNode.removeChild(ex);if(ks.indexOf(l)<0)l=ks[0]||l}
+    if(same){var r1=document.createRange();r1.selectNodeContents(l);r1.collapse(false);var g1=getSelection();g1.removeAllRanges();g1.addRange(r1);update();return}}
   var t=document.createElement('div');t.className='rt-callout '+cls;
   var inner=document.createElement('div');
-  l=ensureLine()||l;
   while(l.firstChild)inner.appendChild(l.firstChild);if(!inner.firstChild)inner.innerHTML='<br>';
   t.appendChild(inner);l.parentNode.replaceChild(t,l);
   var r=document.createRange();r.selectNodeContents(inner);r.collapse(false);var s=getSelection();s.removeAllRanges();s.addRange(r);
