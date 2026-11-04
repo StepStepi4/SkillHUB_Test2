@@ -2581,4 +2581,13 @@ window.saveDefaultStore = function() {
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(() => {}); });
+        // Нова версія застосунку: після зміни Service Worker перезавантажуємо сторінку,
+        // щойно користувач повертається в застосунок (щоб одразу діяли нові файли).
+        const hadController = !!navigator.serviceWorker.controller;
+        let updatePending = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) updatePending = true; });
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && updatePending) { updatePending = false; location.reload(); }
+        });
+        window.addEventListener('load', () => { setTimeout(() => { navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => {}); }, 1500); });
     }
