@@ -7,7 +7,7 @@ from urllib.parse import quote
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INCLUDE_DIRS = ['css', 'js', 'assets']
-INCLUDE_FILES = ['index.html', 'Start.html', 'Format.html', 'Education.html', 'manifest.json']
+INCLUDE_FILES = ['index.html', 'Start.html', 'Format.html', 'Objections.html', 'Education.html', 'manifest.json']
 SKIP_PARTS = ('assets/icons/archive/',)          # невикористовувані файли в офлайн-кеш не потрапляють
 SKIP_NAMES = ('.DS_Store', 'Thumbs.db')
 
