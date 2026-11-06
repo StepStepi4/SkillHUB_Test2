@@ -117,6 +117,7 @@ function parseFile(text){var w={};new Function('window',text)(w);if(!Array.isArr
 /* ---------- GitHub API ---------- */
 function api(path,opt){
   opt=opt||{};
+  if(!cfg.token){var e0=new Error('поле «Токен» порожнє — вставте токен і натисніть «Зберегти налаштування»');e0.status=401;return Promise.reject(e0)}
   return fetch('https://api.github.com/repos/'+cfg.repo+'/contents/'+path+(opt.method==='PUT'?'':'?ref='+encodeURIComponent(cfg.branch)),{
     method:opt.method||'GET',
     headers:{'Accept':'application/vnd.github+json','Authorization':'Bearer '+cfg.token,'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},
@@ -262,9 +263,9 @@ window.addEventListener('beforeunload',function(e){if(dirty()){e.preventDefault(
 
 /* ---------- налаштування ---------- */
 function fillCfg(){$('#cRepo').value=cfg.repo;$('#cBranch').value=cfg.branch;$('#cToken').value=cfg.token}
-function readCfg(){cfg.repo=$('#cRepo').value.trim();cfg.branch=$('#cBranch').value.trim()||'main';cfg.token=$('#cToken').value.trim()}
+function readCfg(){cfg.repo=$('#cRepo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,'');cfg.branch=$('#cBranch').value.trim()||'main';cfg.token=$('#cToken').value.trim().replace(/^(Bearer|token)\s+/i,'').replace(/\s+/g,'')}
 $('#cSave').addEventListener('click',function(){readCfg();try{localStorage.setItem(CFGKEY,JSON.stringify(cfg))}catch(e){}msg($('#cMsg'),'Збережено в цьому браузері','ok');if(!dirty())loadInitial()});
-$('#cTest').addEventListener('click',function(){readCfg();msg($('#cMsg'),'Перевірка…');api(FILE).then(function(){msg($('#cMsg'),'✓ Підключення працює','ok')}).catch(function(e){msg($('#cMsg'),'Помилка: '+e.message,'err')})});
+$('#cTest').addEventListener('click',function(){readCfg();msg($('#cMsg'),'Перевірка…');api(FILE).then(function(){msg($('#cMsg'),'✓ Підключення працює','ok')}).catch(function(e){msg($('#cMsg'),e.message==='Bad credentials'?'Помилка: GitHub не прийняв токен. Він недійсний, прострочений або скопійований не повністю. Створіть новий токен і вставте його повністю.':'Помилка: '+e.message,'err')})});
 
 fillCfg();paintRate();loadInitial();
 })();
