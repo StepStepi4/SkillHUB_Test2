@@ -102,7 +102,7 @@ function render(){
     answers.forEach(function(a,idx){
       var cls='ans r'+a.rate+(reveal?' show':'');
       if(st.mode==='train'&&st.picked!==null){if(st.picked===idx)cls+=' picked';else if(a.rate!==2)cls+=' dim'}
-      h+='<button class="'+cls+'" data-ans="'+idx+'"'+(st.mode==='train'&&st.picked!==null?' disabled':'')+'><span class="lbl">'+LABEL[a.rate]+'</span>'+esc(a.t)+'<span class="why"><b>Чому:</b> '+esc(a.why)+'</span></button>';
+      h+='<button class="'+cls+'" data-ans="'+idx+'"'+(st.mode==='train'&&st.picked!==null?' disabled':'')+'><span class="lbl">'+LABEL[a.rate]+'</span>'+esc(a.t)+(a.why?'<span class="why"><b>Чому:</b> '+esc(a.why)+'</span>':'')+'</button>';
     });
     var idx0=t2.items.indexOf(it),nxt=t2.items[idx0+1];
     h+='<div class="actions">';
