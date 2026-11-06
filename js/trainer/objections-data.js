@@ -376,7 +376,7 @@ window.OBJ_DATA = [
   },
   {
     "id": "не-хочу-c7bqvv",
-    "icon": "💬",
+    "icon": "⚠️",
     "title": "Не хочу",
     "hint": "",
     "items": [
