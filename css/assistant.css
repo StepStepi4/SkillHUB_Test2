@@ -473,23 +473,3 @@
             color: var(--text-main);
         }
     
-
-/* ===== Кнопка «Пропозиція / Заперечення» на картці сервісу ===== */
-.sc-talk-btn { display: inline-flex; align-items: center; justify-content: center; align-self: flex-end; width: 38px; height: 30px; margin-top: 8px; padding: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--input-bg); cursor: pointer; transition: transform .12s ease, background .15s ease; -webkit-tap-highlight-color: transparent; }
-.sc-talk-btn img { width: 20px; height: 20px; object-fit: contain; pointer-events: none; }
-.sc-talk-btn:active { transform: scale(.94); background: var(--border); }
-
-/* ===== Вікно «Пропозиція / Заперечення» ===== */
-.talk-content { height: auto; max-height: 88vh; min-height: 40vh; }
-.talk-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; flex-shrink: 0; }
-.talk-tab { display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 0; padding: 10px 8px; border: 1.5px solid var(--border); border-radius: 14px; background: var(--card-bg); color: var(--text-main); font: inherit; font-weight: 800; font-size: 13.5px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.talk-tab img { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
-.talk-tab span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.talk-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
-.talk-body { padding-bottom: 14px; }
-.talk-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 4px 16px; }
-.talk-line { padding: 10px 0; border-bottom: 1px solid var(--input-bg); font-size: 15px; line-height: 1.5; overflow-wrap: anywhere; }
-.talk-line:last-child { border-bottom: none; }
-.talk-box > * { max-width: 100%; box-sizing: border-box; }
-.talk-box > .rt-h1:first-child, .talk-box > .rt-h2:first-child, .talk-box > .rt-h3:first-child { margin-top: 10px; }
-.talk-empty { padding: 28px 12px; text-align: center; color: var(--text-muted); font-weight: 600; font-size: 14px; }

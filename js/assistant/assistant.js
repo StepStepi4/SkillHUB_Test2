@@ -172,7 +172,6 @@
         data.rezervyData = data.rezervyData || [];
         data.rezervyDate = data.rezervyDate || "";
         data.serviceBrands = data.serviceBrands || {};
-        data.serviceTalks = data.serviceTalks || [];
         data.trainingData = data.trainingData || [];
         data.skillHubButtons = data.skillHubButtons || [];
         data.sellerRatings = data.sellerRatings || [];
@@ -448,7 +447,7 @@
     }
 
     function checkOpenModals() {
-        const modals = ['talkModal', 'descModal', 'compareModal', 'rezervItemModal', 'galleryModal', 'sellerModal', 'certManualModal', 'ratingModal', 'klochCalcModal', 'favSelectModal', 'favQuickMenuModal', 'updateProgressModal'];
+        const modals = ['descModal', 'compareModal', 'rezervItemModal', 'galleryModal', 'sellerModal', 'certManualModal', 'ratingModal', 'klochCalcModal', 'favSelectModal', 'favQuickMenuModal', 'updateProgressModal'];
         for (let id of modals) {
             let el = document.getElementById(id);
             if (el && el.classList.contains('show')) return true;
@@ -470,7 +469,7 @@
 
     scrollTopBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    const normalize = (str) => window.SearchUtil ? window.SearchUtil.norm(str) : (str ? String(str).toLowerCase().trim().replace(/[‘’'"`]/g, "") : "");
+    const normalize = (str) => str ? String(str).toLowerCase().trim().replace(/[‘’'"`]/g, "") : "";
 
     window.escapeHTML = function(str) {
         if (!str) return '';
@@ -1216,7 +1215,7 @@ window.saveDefaultStore = function() {
         const store = document.getElementById('storeFilter').value;
         const cont = document.getElementById('rezervyList');
         const searchInput = document.getElementById('topReservesSearchInput');
-        const searchQuery = searchInput ? searchInput.value.trim() : '';
+        const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
         const dateContainer = document.getElementById('rezervyDateContainer');
         const dateText = document.getElementById('rezervyDateText');
 
@@ -1234,7 +1233,11 @@ window.saveDefaultStore = function() {
         let matches = db.rezervyData.filter(r => r.store === store);
 
         if (searchQuery) {
-            matches = window.SearchUtil.filter(matches, searchQuery, r => [r.name, r.cat]);
+            matches = matches.filter(r => {
+                let shortName = r.name.replace(/^(Телевізор|Ноутбук|Смартфон|Мобільний телефон|Планшет|Холодильник|Пральна машина|Мікрохвильова піч|Кавомашина|Пилосос)\s*/i, '').toLowerCase();
+                let catName = r.cat.toLowerCase();
+                return shortName.includes(searchQuery) || catName.includes(searchQuery) || r.name.toLowerCase().includes(searchQuery);
+            });
         }
 
         if (matches.length === 0) { safeUpdateHTML(cont, `<div style="padding:20px; text-align:center; color:var(--text-muted); font-weight:600;">Немає товарів</div>`); return; }
@@ -1588,11 +1591,13 @@ window.saveDefaultStore = function() {
             }
             if (val.length < 2) { elSuggList.style.display = 'none'; return; }
 
-            const rawVal = elCatInput.value;
-            let catMatches = window.SearchUtil.filter(db.categories, rawVal, c => [c.ua, c.ru, c.en].filter(Boolean))
-                .map(c => ({...c, searchType: 'category', icon: '📦'}));
+            let catMatches = db.categories.filter(c =>
+                (c.ua && normalize(c.ua).includes(val)) ||
+                (c.ru && normalize(c.ru).includes(val)) ||
+                (c.en && normalize(c.en).includes(val))
+            ).map(c => ({...c, searchType: 'category', icon: '📦'}));
 
-            let servMatches = window.SearchUtil.filter(window.allServicesSearchList, rawVal, s => s.searchStr);
+            let servMatches = window.allServicesSearchList.filter(s => normalize(s.searchStr).includes(val));
 
             let matches = [...catMatches, ...servMatches].slice(0, 15);
 
@@ -1870,60 +1875,6 @@ window.saveDefaultStore = function() {
         return dataForSort;
     }
 
-    /* ===== Пропозиція / Заперечення (дані з вкладки «Навчання») ===== */
-    let talkIndex = null, talkState = { name: '', talk: null, tab: 'offer' };
-    function talkKey(n) {
-        return window.SearchUtil.norm(String(n || '').replace(/🇺🇦\s*/g, '').replace(/^UA\s+/i, '').replace(/^\[.*?\]\s*/, ''));
-    }
-    window.findServiceTalk = function (name) {
-        const list = db && db.serviceTalks;
-        if (!list || !list.length || !name) return null;
-        if (!talkIndex || talkIndex.src !== list) {
-            const map = new Map();
-            list.forEach(t => {
-                if (!t || (!String(t.offer || '').trim() && !String(t.objection || '').trim())) return;
-                const k = talkKey(t.product); if (!k) return;
-                const prev = map.get(k);
-                map.set(k, prev ? { product: prev.product, offer: prev.offer || t.offer, objection: prev.objection || t.objection } : t);
-            });
-            talkIndex = { src: list, map: map };
-        }
-        const k = talkKey(name); if (!k) return null;
-        const exact = talkIndex.map.get(k); if (exact) return exact;
-        for (const [kk, v] of talkIndex.map) {
-            if (kk.length >= 6 && k.length >= 6 && (kk.includes(k) || k.includes(kk))) return v;
-        }
-        return null;
-    };
-    function renderTalkText(text) {
-        const t = String(text || '').trim();
-        if (!t) return '<div class="talk-empty">Цей розділ ще не заповнено</div>';
-        let html;
-        try {
-            html = window.RichText.render(t, { plain: line => '<div class="talk-line">' + window.RichText.inline(line) + '</div>' });
-        } catch (e) {
-            html = t.split(/\n/).map(l => '<div class="talk-line">' + window.escapeHTML(l) + '</div>').join('');
-        }
-        return '<div class="talk-box">' + html + '</div>';
-    }
-    function paintTalk() {
-        const tk = talkState.talk || {};
-        document.getElementById('talkTabOffer').classList.toggle('active', talkState.tab === 'offer');
-        document.getElementById('talkTabObj').classList.toggle('active', talkState.tab === 'objection');
-        const body = document.getElementById('talkBody');
-        body.innerHTML = renderTalkText(talkState.tab === 'offer' ? tk.offer : tk.objection);
-        body.scrollTop = 0;
-    }
-    window.setTalkTab = function (tab) { talkState.tab = tab === 'objection' ? 'objection' : 'offer'; paintTalk(); };
-    window.openServiceTalk = function (name) {
-        const talk = window.findServiceTalk(name); if (!talk) return;
-        const title = String(name).replace(/🇺🇦\s*/g, '').replace(/^UA\s+/i, '').replace(/^\[.*?\]\s*/, '');
-        talkState = { name: name, talk: talk, tab: String(talk.offer || '').trim() ? 'offer' : 'objection' };
-        document.getElementById('talkTitle').textContent = title;
-        paintTalk();
-        window.openModalBase('talkModal');
-    };
-
     function generateServiceCardHTML(s, isModalCtx = false, disableCompare = false) {
         if(!s) return '';
         let isSelected = false; let compareModeActive = false;
@@ -1956,11 +1907,6 @@ window.saveDefaultStore = function() {
             discountHtml = `<div class="sc-discount-badge">До -${cleanDisc}</div>`;
         }
 
-        let talkHtml = '';
-        if (window.findServiceTalk && window.findServiceTalk(s.name)) {
-            talkHtml = `<button type="button" class="sc-talk-btn" aria-label="Пропозиція та заперечення" title="Пропозиція та заперечення" onclick="event.stopPropagation(); window.openServiceTalk('${safeName}')"><img src="assets/icons/skillhub/dialogue.svg" alt=""></button>`;
-        }
-
         let brandHtml = s.brand ? `<div class="sc-brand ${s.cls}" style="margin-bottom:0;">${s.brand}</div>` : '';
 
         let tagsHtml = '';
@@ -1981,7 +1927,6 @@ window.saveDefaultStore = function() {
                 <div style="display:flex; flex-direction:column; align-items:flex-end; flex-shrink:0;">
                     <div class="sc-price">${s.label}</div>
                     ${discountHtml}
-                    ${talkHtml}
                 </div>
             </div>
             ${availHtml}
