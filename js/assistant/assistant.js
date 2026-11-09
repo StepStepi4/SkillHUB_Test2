@@ -469,7 +469,7 @@
 
     scrollTopBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    const normalize = (str) => str ? String(str).toLowerCase().trim().replace(/[‘’'"`]/g, "") : "";
+    const normalize = (str) => window.SearchUtil ? window.SearchUtil.norm(str) : (str ? String(str).toLowerCase().trim().replace(/[‘’'"`]/g, "") : "");
 
     window.escapeHTML = function(str) {
         if (!str) return '';
@@ -1215,7 +1215,7 @@ window.saveDefaultStore = function() {
         const store = document.getElementById('storeFilter').value;
         const cont = document.getElementById('rezervyList');
         const searchInput = document.getElementById('topReservesSearchInput');
-        const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const searchQuery = searchInput ? searchInput.value.trim() : '';
         const dateContainer = document.getElementById('rezervyDateContainer');
         const dateText = document.getElementById('rezervyDateText');
 
@@ -1233,11 +1233,7 @@ window.saveDefaultStore = function() {
         let matches = db.rezervyData.filter(r => r.store === store);
 
         if (searchQuery) {
-            matches = matches.filter(r => {
-                let shortName = r.name.replace(/^(Телевізор|Ноутбук|Смартфон|Мобільний телефон|Планшет|Холодильник|Пральна машина|Мікрохвильова піч|Кавомашина|Пилосос)\s*/i, '').toLowerCase();
-                let catName = r.cat.toLowerCase();
-                return shortName.includes(searchQuery) || catName.includes(searchQuery) || r.name.toLowerCase().includes(searchQuery);
-            });
+            matches = window.SearchUtil.filter(matches, searchQuery, r => [r.name, r.cat]);
         }
 
         if (matches.length === 0) { safeUpdateHTML(cont, `<div style="padding:20px; text-align:center; color:var(--text-muted); font-weight:600;">Немає товарів</div>`); return; }
@@ -1591,21 +1587,23 @@ window.saveDefaultStore = function() {
             }
             if (val.length < 2) { elSuggList.style.display = 'none'; return; }
 
-            let catMatches = db.categories.filter(c =>
-                (c.ua && normalize(c.ua).includes(val)) ||
-                (c.ru && normalize(c.ru).includes(val)) ||
-                (c.en && normalize(c.en).includes(val))
-            ).map(c => ({...c, searchType: 'category', icon: '📦'}));
+            const rawVal = elCatInput.value;
+            let catMatches = window.SearchUtil.filter(db.categories, rawVal, c => [c.ua, c.ru, c.en].filter(Boolean))
+                .map(c => ({...c, searchType: 'category', icon: '📦'}));
 
-            let servMatches = window.allServicesSearchList.filter(s => normalize(s.searchStr).includes(val));
+            let servMatches = window.SearchUtil.filter(window.allServicesSearchList, rawVal, s => s.searchStr);
 
-            let matches = [...catMatches, ...servMatches].slice(0, 15);
+            let menuMatches = window.SearchUtil.filter((db.skillHubButtons || []).filter(b => b && b.name), rawVal, b => [b.name, b.desc].filter(Boolean))
+                .slice(0, 4).map(b => ({ searchType: 'menu', btn: b, name: b.name, desc: b.desc, icon: b.emoji || '🧭' }));
+
+            let matches = [...catMatches, ...menuMatches, ...servMatches].slice(0, 15);
 
             requestAnimationFrame(() => {
                 if (matches.length > 0) {
                     elSuggList.style.display = 'block';
                     let html = matches.map((m, idx) => {
                         let text = m.searchType === 'category' ? m.ua : m.name;
+                        if (m.searchType === 'menu') text = `${m.name}${m.desc ? `<span style="display:block; font-size:11px; font-weight:500; color:var(--text-muted);">${m.desc}</span>` : ''}`;
                         let brandBadge = '';
                         if (m.searchType === 'service' && m.brandText) {
                             brandBadge = `<div class="sc-brand ${m.cls}" style="margin: 0; font-size: 9px; padding: 2px 6px; flex-shrink: 0;">${m.brandText}</div>`;
@@ -1637,6 +1635,14 @@ window.saveDefaultStore = function() {
     elOkBtn.onclick = () => elPriceInput.blur();
 
     function selectItem(item) {
+        if (item.searchType === 'menu') {
+            elCatInput.value = ""; elClearBtn.style.display = "none"; elSuggList.style.display = "none";
+            elCatInput.blur();
+            const act = getSkillHubActionStr(item.btn, false);
+            if (act) { const tmp = document.createElement('button'); tmp.setAttribute('onclick', act.replace(/^onclick="|"$/g, '').replace(/&quot;/g, '"')); document.body.appendChild(tmp); tmp.click(); tmp.remove(); }
+            else window.switchTab('tab-skillhub');
+            return;
+        }
         if(item.searchType === 'service') {
             currentCategoryData = null;
             currentServiceData = { name: item.name, origName: item.origName, icon: item.icon };
