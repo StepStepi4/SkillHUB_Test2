@@ -1,6 +1,6 @@
 // SkillHUB Assistant - Service Worker (offline-first)
 // ВАЖЛИВО: при кожному релізі міняйте VERSION - тоді всі пристрої підтягнуть нові файли.
-const VERSION = 'v-59b229993f';
+const VERSION = 'v-1323b6ba4b';
 const SHELL_CACHE = 'skillhub-shell-' + VERSION;   // "оболонка": сторінки, іконки, бібліотеки
 const RUNTIME_CACHE = 'skillhub-runtime-v1';       // шрифти, картинки досягнень та інше, що завантажується під час роботи
 
@@ -115,16 +115,59 @@ const SHELL = [
   "./manifest.json"
 ];
 
+// Ядро: без цих файлів застосунок не працює офлайн. Якщо хоч один не закешувався - нова версія НЕ встановлюється,
+// а працює попередня (повторна спроба при наступній перевірці оновлень). Решта файлів - "по можливості" + перевірка цілісності.
+const CORE = (url) => /\.(?:js|css|json|html)$/i.test(url) || url === './' || /\/fonts\//.test(url);
+
+async function putOne(cache, url) {
+  const res = await fetch(new Request(url, { cache: 'reload' }));
+  if (!res || !res.ok) throw new Error(url + ' -> ' + (res && res.status));
+  await cache.put(url, res);
+}
+async function putWithRetry(cache, url, tries) {
+  let err;
+  for (let i = 0; i < tries; i++) {
+    try { await putOne(cache, url); return null; } catch (e) { err = e; await new Promise(r => setTimeout(r, 400 * (i + 1))); }
+  }
+  return err;
+}
+
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(SHELL_CACHE);
-    // кожен файл окремо: один відсутній файл не ламає встановлення
-    await Promise.all(SHELL.map(async (url) => {
-      try { await cache.add(new Request(url, { cache: 'reload' })); }
-      catch (e) { console.warn('SW: не вдалося закешувати', url, e); }
-    }));
+    const failed = [];
+    // невеликими групами, щоб не перевантажувати мережу
+    for (let i = 0; i < SHELL.length; i += 8) {
+      await Promise.all(SHELL.slice(i, i + 8).map(async (url) => {
+        const err = await putWithRetry(cache, url, 3);
+        if (err) failed.push(url);
+      }));
+    }
+    const coreFailed = failed.filter(CORE);
+    if (coreFailed.length) {
+      await caches.delete(SHELL_CACHE);                      // неповний кеш не залишаємо
+      throw new Error('SW: не вдалося закешувати ядро: ' + coreFailed.slice(0, 5).join(', '));
+    }
+    if (failed.length) console.warn('SW: не закешовано (буде докачано):', failed);
     await self.skipWaiting();
   })());
+});
+
+// Перевірка цілісності кешу: чого бракує - докачуємо. Викликається зі сторінки (message {type:'verify'}).
+async function verifyShell() {
+  const cache = await caches.open(SHELL_CACHE);
+  const missing = [];
+  for (const url of SHELL) { if (!(await cache.match(url))) missing.push(url); }
+  let fixed = 0;
+  if (missing.length && self.navigator.onLine !== false) {
+    await Promise.all(missing.map(async (url) => { if (!(await putWithRetry(cache, url, 2))) fixed++; }));
+  }
+  return { version: VERSION, total: SHELL.length, missing: missing.length, fixed: fixed, left: missing.length - fixed };
+}
+self.addEventListener('message', (event) => {
+  const d = event.data || {};
+  if (d.type === 'verify') event.waitUntil(verifyShell().then((r) => { if (event.source) event.source.postMessage(Object.assign({ type: 'verify-result' }, r)); }).catch(() => {}));
+  if (d.type === 'version' && event.source) event.source.postMessage({ type: 'version-result', version: VERSION });
 });
 
 self.addEventListener('activate', (event) => {
@@ -154,7 +197,7 @@ async function networkFirstWithTimeout(request, timeoutMs) {
     if (isCacheable(res)) cache.put(request, res.clone());
     return res;
   } catch (e) {
-    return (await fromCache()) || (await cache.match('./index.html')) || Response.error();
+    return (await fromCache()) || (await cache.match(new URL('./index.html', self.registration.scope).href)) || Response.error();
   }
 }
 

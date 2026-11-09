@@ -67,6 +67,9 @@
         <div style="display: flex; flex-direction: column; justify-content: center; height: 100%; flex: 1;">
             <div class="header-row" id="mainHeader" style="margin-bottom: 4px; justify-content: space-between; align-items: center;">
                 <h2 id="headerTitle" style="line-height: 1; font-size: 24px; margin: 0;">Пошук</h2>
+                <button id="newsBtn" class="fav-btn-top news-btn" onclick="window.openNews()" style="margin-left:auto; margin-right:8px;" aria-label="Новини">
+                    <img src="assets/icons/skillhub/News.svg" alt="Новини" style="width: 24px; height: 24px; object-fit: contain;">
+                </button>
                 <button id="topFavBtn" class="fav-btn-top" onclick="window.openFavoritesQuickMenu()" style="display:none;">
                     <img src="assets/icons/ui/favorite.svg" alt="Fav" style="width: 20px; height: 20px; object-fit: contain;">
                 </button>
@@ -147,20 +150,35 @@
 
     <div id="tab-settings" class="app-tab">
         <div class="list-group">
-            <div class="list-item">
+            <button class="list-item" id="cabinetBtn" data-func="Особистий кабінет" onclick="window.Academy.open()">
+                <img class="set-ico" src="assets/icons/settings/security.svg" alt="">
+                <div class="list-item-content">
+                    <span class="list-item-title" id="cabinetTitle">Особистий кабінет</span>
+                    <span class="list-item-subtitle" id="cabinetSub">Увійти за логіном і паролем від керівника</span>
+                </div>
+                <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+            </button>
+        </div>
+
+        <div class="list-group">
+            <div class="list-item" data-func="Тема">
+                <img class="set-ico" src="assets/icons/settings/themes.svg" alt="">
                 <div class="list-item-content">
                     <span class="list-item-title">Темна тема</span>
-                    <span class="list-item-subtitle">Змінити оформлення додатку</span>
+                    <span class="list-item-subtitle">День / ніч</span>
                 </div>
                 <button id="themeToggle" class="toggle-switch">
                     <div class="toggle-knob"></div>
                 </button>
             </div>
 
-            <div class="list-item" style="flex-direction:column; align-items:flex-start;">
-                <div class="list-item-content" style="margin-bottom: 10px; width:100%;">
-                    <span class="list-item-title">Розмір тексту</span>
-                    <span class="list-item-subtitle">Налаштуйте масштаб інтерфейсу</span>
+            <div class="list-item" data-func="Розмір тексту" style="flex-direction:column; align-items:flex-start;">
+                <div style="display:flex; align-items:center; width:100%; margin-bottom:10px;">
+                    <img class="set-ico" src="assets/icons/settings/font-size.svg" alt="">
+                    <div class="list-item-content">
+                        <span class="list-item-title">Розмір тексту</span>
+                        <span class="list-item-subtitle">Налаштуйте масштаб інтерфейсу</span>
+                    </div>
                 </div>
                 <div style="display:flex; align-items:center; width:100%; gap:12px; color:var(--text-muted);">
                     <span style="font-size: 13px; font-weight:700;">A</span>
@@ -169,39 +187,41 @@
                 </div>
             </div>
 
-            <div class="list-item" style="flex-direction:column; align-items:flex-start;">
-                <div class="list-item-content" style="margin-bottom: 10px; width:100%;">
-                    <span class="list-item-title">🏪 Магазин на якому Ви працюєте?</span>
-                    <span class="list-item-subtitle">Для швидкого доступу до резервів</span>
+            <div class="list-item" data-func="Магазин за замовчуванням" style="flex-direction:column; align-items:flex-start;">
+                <div style="display:flex; align-items:center; width:100%; margin-bottom:10px;">
+                    <img class="set-ico" src="assets/icons/settings/shop.svg" alt="">
+                    <div class="list-item-content">
+                        <span class="list-item-title">Магазин за замовчуванням</span>
+                        <span class="list-item-subtitle">Лише для показу резервів вашого магазину. Змінити можна і у вкладці «Резерви»</span>
+                    </div>
                 </div>
                 <select id="defaultStoreSelect" onchange="window.saveDefaultStore()" style="background: var(--input-bg); margin-bottom: 0;"></select>
             </div>
         </div>
 
         <div class="list-group">
-            <button class="list-item" id="forceUpdateBtn">
+            <button class="list-item" id="forceUpdateBtn" data-func="Оновити базу">
+                <img class="set-ico" src="assets/icons/settings/system-update.svg" alt="">
                 <div class="list-item-content">
-                    <span class="list-item-title">🔄 Оновити базу даних</span>
-                    <span class="list-item-subtitle">Очистити кеш та завантажити свіжі дані</span>
+                    <span class="list-item-title">Оновити додаток і базу даних</span>
+                    <span class="list-item-subtitle">Перевірити файли в кеші та завантажити свіжі дані</span>
                 </div>
-                <div class="list-item-arrow">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.92-10.24l5.58 5.58"/></svg>
-                </div>
+                <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
             </button>
 
-            <button class="list-item" onclick="window.open('https://forms.gle/aSYSoVy1ew3voSih7', '_blank')">
+            <button class="list-item" data-func="Зворотній зв'язок" onclick="window.open('https://forms.gle/aSYSoVy1ew3voSih7', '_blank')">
+                <div class="set-ico set-emoji">💬</div>
                 <div class="list-item-content">
-                    <span class="list-item-title">💬 Зворотній зв'язок</span>
+                    <span class="list-item-title">Зворотній зв'язок</span>
                     <span class="list-item-subtitle">Надіслати відгук, зауваження або оцінити додаток</span>
                 </div>
-                <div class="list-item-arrow">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </div>
+                <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
             </button>
 
-            <button class="list-item" onclick="window.factoryReset()">
+            <button class="list-item" data-func="Скинути налаштування" onclick="window.factoryReset()">
+                <img class="set-ico" src="assets/icons/settings/Factory reset.svg" alt="">
                 <div class="list-item-content">
-                    <span class="list-item-title" style="color: var(--danger);">⚠️ Скинути налаштування</span>
+                    <span class="list-item-title" style="color: var(--danger);">Скинути налаштування</span>
                     <span class="list-item-subtitle">Повернути додаток до заводського стану</span>
                 </div>
             </button>
@@ -218,19 +238,23 @@
 </div>
 
 <nav class="bottom-nav">
-    <button class="nav-item" onclick="window.switchTab('tab-search')">
+    <button class="nav-item" data-func="Пошук" onclick="window.switchTab('tab-search')">
         <div class="nav-icon icon-search"></div>
         <span>Пошук</span>
     </button>
-    <button class="nav-item" onclick="window.switchTab('tab-reserves')">
+    <button class="nav-item" data-func="Резерви" onclick="window.switchTab('tab-reserves')">
         <div class="nav-icon icon-rezerv"></div>
         <span>Резерви</span>
     </button>
-    <button class="nav-item" onclick="window.switchTab('tab-skillhub')">
+    <button class="nav-item" data-func="SkillHUB" onclick="window.switchTab('tab-skillhub')">
         <div class="nav-icon icon-bulb"></div>
         <span>SkillHUB</span>
     </button>
-    <button class="nav-item" onclick="window.switchTab('tab-settings')">
+    <button class="nav-item nav-academy" data-func="Академія" onclick="window.openAcademyTab()">
+        <div class="nav-icon icon-academy"></div>
+        <span>Академія</span>
+    </button>
+    <button class="nav-item" data-func="Опції" onclick="window.switchTab('tab-settings')">
         <div class="nav-icon icon-settings"></div>
         <span>Опції</span>
     </button>
@@ -243,6 +267,18 @@
 
 <div class="floating-top" id="scrollTopBtn">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+</div>
+
+<!-- МОДАЛКА: НОВИНИ -->
+<div id="newsModal" class="modal">
+    <div class="modal-content" style="max-height: 90vh;">
+        <div class="modal-header">
+            <div class="modal-title">📣 Новини</div>
+            <button class="modal-close" onclick="window.closeModalBase('newsModal')"></button>
+        </div>
+        <div class="modal-body" id="newsBody" style="padding-bottom: 12px;"></div>
+        <button class="btn btn-primary" onclick="window.closeModalBase('newsModal')">Зрозуміло</button>
+    </div>
 </div>
 
 <!-- МОДАЛКА: НАЛАШТУВАННЯ ОБРАНОГО -->

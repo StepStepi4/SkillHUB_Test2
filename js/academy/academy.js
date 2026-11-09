@@ -855,6 +855,15 @@
         }
     }
 
+    // Повідомляємо застосунок, хто увійшов (для доступів за ролями й рядка «Особистий кабінет» в Опціях)
+    function announceUser(u) {
+        try {
+            if (u) localStorage.setItem('skillhub_user', JSON.stringify({ login: u.login, name: u.name || '', role: u.role || '' }));
+            else localStorage.removeItem('skillhub_user');
+        } catch (e) {}
+        try { window.dispatchEvent(new CustomEvent('skillhub-user')); } catch (e) {}
+    }
+
     function logout(forced = false, explicit = false, reason = '') {
         stopSessionHeartbeat();
         isTestActive = false; if (testTimerInterval) { clearInterval(testTimerInterval); testTimerInterval = null; }
@@ -869,6 +878,7 @@
 
         currentUser = null; windowViewingEmployee = null; coursesMap = {}; pendingLogin = null;
         clearAuthStore();
+        announceUser(null);
 
         if (explicit) { document.getElementById('loginInput').value = ''; document.getElementById('passInput').value = ''; }
         switchView('loginView');
@@ -1027,6 +1037,7 @@
 
         let user = eduDb.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
         if (!user) return;
+        announceUser(user);
 
         windowUserRole = detectRoleGroup(user.role);
         let firstName = extractFirstNameCapitalized(user);
@@ -2125,6 +2136,7 @@
             root.hidden = false;
             document.body.classList.add('academy-open');
             this.isOpen = true;
+            try { document.querySelectorAll('.nav-academy').forEach(b => b.classList.add('active')); } catch (e) {}
             if (!(opts && opts.fromPopstate)) { try { history.pushState({ academy: 1 }, '', '#academy'); } catch (e) {} }
             if (currentUser) checkSessionNow();
             if (navigator.onLine && auth) fetchFreshDataSilent();
@@ -2135,6 +2147,7 @@
             root.hidden = true;
             document.body.classList.remove('academy-open');
             this.isOpen = false;
+            try { document.querySelectorAll('.nav-academy').forEach(b => b.classList.remove('active')); } catch (e) {}
             if (!(opts && opts.fromPopstate)) {
                 try {
                     if (history.state && history.state.academy) history.back();

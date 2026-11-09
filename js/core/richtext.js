@@ -38,6 +38,16 @@
 
     const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+    // Картинка: звичайне посилання, шлях у репозиторії (assets/...), посилання GitHub (blob → raw) або Google Диска
+    function imgUrl(u) {
+        u = String(u || '').trim();
+        let m = u.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/i);
+        if (m) return 'https://raw.githubusercontent.com/' + m[1] + '/' + m[2] + '/' + m[3];
+        m = u.match(/^https?:\/\/drive\.google\.com\/file\/d\/([^/?#]+)/i) || u.match(/^https?:\/\/drive\.google\.com\/(?:open|uc)\?(?:[^#]*&)?id=([^&#]+)/i);
+        if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w1600';
+        return u;
+    }
+
     function safeUrl(u) {
         u = String(u || '').trim();
         if (/^(https?:|tel:|mailto:|#)/i.test(u)) return u;
@@ -117,7 +127,7 @@
         s = s.replace(/`([^`\n]+)`/g, (m, c) => keep('<span class="rt-code rt-copy" data-copy="' + esc(c) + '" title="Копіювати">' + esc(c) + '</span>'));
         // 4. картинки ![alt](url)
         s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g, (m, alt, url, opt) => {
-            const u = safeUrl(url); if (!u) return m;
+            const u = safeUrl(imgUrl(url)); if (!u) return m;
             const o = optStyle(opt, 'img');
             return keep('<img class="rt-img' + o.cls + '" loading="lazy" src="' + esc(u) + '" alt="' + esc(alt) + '"' + (o.st ? ' style="' + o.st + '"' : '') + '>');
         });

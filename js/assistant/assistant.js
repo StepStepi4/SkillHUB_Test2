@@ -175,6 +175,8 @@
         data.trainingData = data.trainingData || [];
         data.skillHubButtons = data.skillHubButtons || [];
         data.sellerRatings = data.sellerRatings || [];
+        data.news = Array.isArray(data.news) ? data.news : [];
+        data.access = (data.access && typeof data.access === 'object') ? data.access : {};
         data.klochCalcData = data.klochCalcData || { rules: [], relevance: "" };
         return data;
     }
@@ -446,8 +448,76 @@
         window.openModalBase('ratingModal');
     }
 
+
+    /* ====================== Доступи за ролями, особистий кабінет, новини ====================== */
+    const ACCESS_GUEST_KEY = 'Без входу';
+    function currentUserInfo() { try { return JSON.parse(localStorage.getItem('skillhub_user') || 'null'); } catch (e) { return null; } }
+    function deniedList() {
+        const acc = (db && db.access) || {};
+        const u = currentUserInfo();
+        const key = u && u.role ? String(u.role).trim().toLowerCase() : ACCESS_GUEST_KEY.toLowerCase();
+        for (const k in acc) { if (String(k).trim().toLowerCase() === key) return (acc[k] || []).map(x => String(x).trim()); }
+        return [];      // немає рядка ролі в листі «Доступи» → усе дозволено
+    }
+    window.isDenied = function(name) { return deniedList().indexOf(String(name || '').trim()) !== -1; };
+
+    window.applyAccess = function() {
+        const denied = deniedList();
+        document.querySelectorAll('[data-func]').forEach(el => {
+            el.style.display = denied.indexOf(el.getAttribute('data-func')) !== -1 ? 'none' : '';
+        });
+        const nb = document.getElementById('newsBtn');
+        if (nb) nb.style.display = denied.indexOf('Новини') !== -1 ? 'none' : '';
+        // якщо поточна вкладка заборонена — переходимо на першу дозволену
+        const tabFunc = { 'tab-search': 'Пошук', 'tab-reserves': 'Резерви', 'tab-skillhub': 'SkillHUB', 'tab-settings': 'Опції' };
+        const act = document.querySelector('.app-tab.active');
+        if (act && denied.indexOf(tabFunc[act.id]) !== -1) {
+            const first = Object.keys(tabFunc).find(t => denied.indexOf(tabFunc[t]) === -1);
+            if (first) window.switchTab(first);
+        }
+        // підпис рядка «Особистий кабінет»
+        const u = currentUserInfo();
+        const t = document.getElementById('cabinetTitle'), sub = document.getElementById('cabinetSub');
+        if (t && sub) {
+            if (u) { t.innerText = 'Особистий кабінет'; sub.innerText = 'Ви увійшли: ' + (u.name || u.login) + (u.role ? ' · ' + u.role : ''); }
+            else { t.innerText = 'Вхід в особистий кабінет'; sub.innerText = 'Логін і пароль видає керівник'; }
+        }
+        if (window.renderSkillHubTab) window.renderSkillHubTab();
+    };
+    window.addEventListener('skillhub-user', () => { try { window.applyAccess(); } catch (e) {} });
+
+    window.openAcademyTab = function() {
+        if (window.Academy) window.Academy.open();
+    };
+
+    // Новини: A — дата, B — текст (розмітка як в Academy)
+    function newsSeenTs() { try { return parseInt(localStorage.getItem('skillhub_news_seen') || '0', 10) || 0; } catch (e) { return 0; } }
+    window.renderNewsBadge = function() {
+        const btn = document.getElementById('newsBtn');
+        if (!btn) return;
+        const news = (db && db.news) || [];
+        const latest = news.reduce((m, n) => Math.max(m, n.ts || 0), 0);
+        btn.classList.toggle('has-new', latest > newsSeenTs());
+    };
+    window.openNews = function() {
+        const news = (db && db.news) || [];
+        const seen = newsSeenTs();
+        const body = document.getElementById('newsBody');
+        if (!news.length) body.innerHTML = '<div class="news-empty">Поки що новин немає</div>';
+        else body.innerHTML = news.map(n => {
+            const isNew = (n.ts || 0) > seen;
+            return `<div class="news-item${isNew ? ' is-new' : ''}"><div class="news-date">${safeText(n.date)}${isNew ? '<span class="news-new">НОВЕ</span>' : ''}</div>`
+                + RichText.render(String(n.text || ''), { plain: line => `<div class="news-line">${RichText.inline(line)}</div>` }) + `</div>`;
+        }).join('');
+        window.openModalBase('newsModal');
+        const latest = news.reduce((m, n) => Math.max(m, n.ts || 0), 0);
+        try { localStorage.setItem('skillhub_news_seen', String(latest)); } catch (e) {}
+        window.renderNewsBadge();
+    };
+    function safeText(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
     function checkOpenModals() {
-        const modals = ['descModal', 'compareModal', 'rezervItemModal', 'galleryModal', 'sellerModal', 'certManualModal', 'ratingModal', 'klochCalcModal', 'favSelectModal', 'favQuickMenuModal', 'updateProgressModal'];
+        const modals = ['descModal', 'compareModal', 'rezervItemModal', 'galleryModal', 'sellerModal', 'certManualModal', 'ratingModal', 'klochCalcModal', 'favSelectModal', 'favQuickMenuModal', 'updateProgressModal', 'newsModal'];
         for (let id of modals) {
             let el = document.getElementById(id);
             if (el && el.classList.contains('show')) return true;
@@ -605,7 +675,7 @@
     window.openFavoritesSelectionModal = function() {
         if (!db.skillHubButtons) return;
         let favs = window.getFavorites();
-        let html = db.skillHubButtons.map((btn, idx) => {
+        let html = db.skillHubButtons.filter(btn => !window.isDenied(btn.name)).map((btn, idx) => {
             let isChecked = favs.includes(btn.name) ? 'checked' : '';
             return `
             <div class="list-item" style="cursor:pointer; border-bottom:1px solid var(--border); padding: 12px 16px;" onclick="this.querySelector('.fav-checkbox').classList.toggle('checked')">
@@ -644,7 +714,7 @@
         }
 
         let html = db.skillHubButtons
-            .filter(btn => favs.includes(btn.name))
+            .filter(btn => favs.includes(btn.name) && !window.isDenied(btn.name))
             .map(btn => {
                 let actionStr = getSkillHubActionStr(btn, true);
                 return `
@@ -670,7 +740,7 @@
         const container = document.getElementById('dynamicSkillHubButtons');
         if (!container || !db.skillHubButtons) return;
 
-        let html = db.skillHubButtons.map(btn => {
+        let html = db.skillHubButtons.filter(btn => !window.isDenied(btn.name)).map(btn => {
             let actionStr = getSkillHubActionStr(btn, false);
 
             return `
@@ -693,8 +763,12 @@
 
     window.factoryReset = function() {
         if(confirm("Ви впевнені, що хочете повністю скинути всі налаштування, кеш додатку та збережені дані? Це поверне додаток до початкового стану.")) {
+            let wasInstalled = null;
+            try { wasInstalled = localStorage.getItem('skillhub_installed'); } catch (e) {}
             try { localStorage.clear(); } catch (e) {}
             try { sessionStorage.clear(); } catch (e) {}
+            // скидання не повинно знову показувати інструкцію зі встановлення
+            try { if (wasInstalled) localStorage.setItem('skillhub_installed', wasInstalled); sessionStorage.setItem('skillhub_skip_start', '1'); } catch (e) {}
             try { indexedDB.deleteDatabase(IDB_NAME); } catch (e) {}
             setTimeout(() => window.location.reload(), 150);
         }
@@ -1013,6 +1087,8 @@
         enableUI();
         window.populateFilters();
         window.renderSkillHubTab();
+        window.renderNewsBadge();
+        window.applyAccess();
         if (currentCategoryData || currentServiceData) renderServices();
         if (document.getElementById('tab-reserves').classList.contains('active')) window.renderRezervyList();
     }
@@ -1143,10 +1219,14 @@
         }, 300);
 
         try {
+            // нова версія застосунку (якщо є) + свіжі дані + перевірка цілісності файлів у кеші
+            try { const reg = await navigator.serviceWorker.getRegistration(); if (reg) await reg.update(); } catch (e) {}
             await fetchFresh();
+            const vr = await window.verifyAppCache(25000);
             clearInterval(simInt);
             window.updateProgressUI(100, 100, 100, 100);
             setTimeout(() => { window.closeModalBase('updateProgressModal'); }, 800);
+            if (vr && vr.left > 0) setTimeout(() => alert('Не всі файли для роботи офлайн завантажились (' + vr.left + '). Повторіть оновлення, коли інтернет буде стабільнішим.'), 900);
         } catch (e) {
             clearInterval(simInt);
             window.closeModalBase('updateProgressModal');
@@ -1593,7 +1673,7 @@ window.saveDefaultStore = function() {
 
             let servMatches = window.SearchUtil.filter(window.allServicesSearchList, rawVal, s => s.searchStr);
 
-            let menuMatches = window.SearchUtil.filter((db.skillHubButtons || []).filter(b => b && b.name), rawVal, b => [b.name, b.desc].filter(Boolean))
+            let menuMatches = window.SearchUtil.filter((db.skillHubButtons || []).filter(b => b && b.name && !window.isDenied(b.name)), rawVal, b => [b.name, b.desc].filter(Boolean))
                 .slice(0, 4).map(b => ({ searchType: 'menu', btn: b, name: b.name, desc: b.desc, icon: b.emoji || '🧭' }));
 
             let matches = [...catMatches, ...menuMatches, ...servMatches].slice(0, 15);
@@ -2585,13 +2665,29 @@ window.saveDefaultStore = function() {
 
     init();
 
+    // Перевірка цілісності офлайн-кешу: Service Worker звіряє файли з переліком і докачує відсутні
+    window.verifyAppCache = function(timeoutMs) {
+        return new Promise(resolve => {
+            if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return resolve(null);
+            let done = false;
+            const onMsg = e => {
+                if (!e.data || e.data.type !== 'verify-result') return;
+                done = true; navigator.serviceWorker.removeEventListener('message', onMsg); resolve(e.data);
+            };
+            navigator.serviceWorker.addEventListener('message', onMsg);
+            try { navigator.serviceWorker.controller.postMessage({ type: 'verify' }); } catch (e) { return resolve(null); }
+            setTimeout(() => { if (!done) { navigator.serviceWorker.removeEventListener('message', onMsg); resolve(null); } }, timeoutMs || 25000);
+        });
+    };
+    window.addEventListener('load', () => { setTimeout(() => { if (navigator.onLine !== false) window.verifyAppCache(60000); }, 6000); });
+
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(() => {}); });
         // Нова версія застосунку: після зміни Service Worker перезавантажуємо сторінку,
         // щойно користувач повертається в застосунок (щоб одразу діяли нові файли).
         const hadController = !!navigator.serviceWorker.controller;
         let updatePending = false;
-        navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) updatePending = true; });
+        navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) { updatePending = true; try { sessionStorage.setItem('skillhub_skip_start', '1'); } catch (e) {} } });
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && updatePending) { updatePending = false; location.reload(); }
         });
