@@ -1,6 +1,6 @@
 // SkillHUB Assistant - Service Worker (offline-first)
 // ВАЖЛИВО: при кожному релізі міняйте VERSION - тоді всі пристрої підтягнуть нові файли.
-const VERSION = 'v-mw4tkmfl';
+const VERSION = 'v-95107923c5';
 const SHELL_CACHE = 'skillhub-shell-' + VERSION;   // "оболонка": сторінки, іконки, бібліотеки
 const RUNTIME_CACHE = 'skillhub-runtime-v1';       // шрифти, картинки досягнень та інше, що завантажується під час роботи
 
@@ -59,13 +59,16 @@ const SHELL = [
   "./assets/icons/skillhub/chat.svg",
   "./assets/icons/skillhub/check-mark.svg",
   "./assets/icons/skillhub/conditioning.svg",
+  "./assets/icons/skillhub/dialogue.svg",
   "./assets/icons/skillhub/discounting.svg",
   "./assets/icons/skillhub/education.svg",
   "./assets/icons/skillhub/education1.svg",
   "./assets/icons/skillhub/exchange.svg",
   "./assets/icons/skillhub/information.svg",
   "./assets/icons/skillhub/install.svg",
+  "./assets/icons/skillhub/no.svg",
   "./assets/icons/skillhub/password-protection.svg",
+  "./assets/icons/skillhub/presa.svg",
   "./assets/icons/skillhub/puzzle.svg",
   "./assets/icons/skillhub/rating.svg",
   "./assets/icons/skillhub/refresh-time.svg",
@@ -97,6 +100,7 @@ const SHELL = [
   "./js/assistant/assistant.js",
   "./js/core/config.js",
   "./js/core/richtext.js",
+  "./js/core/search.js",
   "./js/core/storage.js",
   "./js/trainer/objections-data.js",
   "./js/vendor/README.md",
