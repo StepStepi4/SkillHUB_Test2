@@ -453,3 +453,7 @@ body.academy-open { overflow: hidden; }
 
 #academyApp .theory-box > .rt-h1:first-child,#academyApp .theory-box > .rt-h2:first-child,#academyApp .theory-box > .rt-h3:first-child{margin-top:8px}
 #academyApp .theory-box > *{max-width:100%;box-sizing:border-box}
+
+/* Нижнє меню застосунку лишається в Академії: даємо місце під нього, «Назад» піднімаємо над меню */
+#academyApp { padding-bottom: calc(var(--nav-height, 76px) + 40px); box-sizing: border-box; }
+#academyApp .floating-exit { bottom: calc(var(--nav-height, 76px) + 34px + env(safe-area-inset-bottom)); }

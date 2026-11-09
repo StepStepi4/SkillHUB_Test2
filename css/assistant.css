@@ -490,3 +490,31 @@
 .news-new { background: var(--danger); color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 999px; letter-spacing: .3px; }
 .news-line { padding: 6px 0; font-size: 15px; line-height: 1.5; }
 .news-empty { text-align: center; color: var(--text-muted); font-weight: 600; padding: 30px 10px; }
+
+/* Нижнє меню лишається видимим в Академії */
+body.academy-open .bottom-nav { z-index: 50100; }
+body.academy-test .bottom-nav { display: none; }
+
+/* Зворотній зв'язок */
+.fb-q { background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; }
+.fb-q-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; line-height: 1.35; }
+.fb-text { width: 100%; box-sizing: border-box; min-height: 84px; resize: vertical; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); border-radius: 12px; padding: 10px 12px; font: inherit; font-size: 15px; margin: 0; }
+.fb-rate { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.fb-rate button { height: 44px; border-radius: 12px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); font: inherit; font-size: 16px; font-weight: 800; cursor: pointer; transition: .15s; }
+.fb-rate button.on { background: var(--rozetka-green-dark, #10b981); border-color: transparent; color: #fff; transform: scale(1.06); }
+.fb-rate-hint { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 6px; }
+.fb-done { color: var(--text-muted); font-size: 14px; font-weight: 600; }
+
+/* Голосування */
+.vt-q { background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; }
+.vt-opt { display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; text-align: left; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); border-radius: 12px; padding: 12px 14px; margin-top: 8px; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+.vt-opt.on { border-color: var(--rozetka-green-dark, #10b981); background: var(--primary-light); }
+.vt-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--text-muted); flex-shrink: 0; }
+.vt-opt.on .vt-dot { border-color: var(--rozetka-green-dark, #10b981); background: radial-gradient(circle, var(--rozetka-green-dark, #10b981) 45%, transparent 50%); }
+.vt-bar { position: relative; margin-top: 8px; border-radius: 12px; background: var(--input-bg); overflow: hidden; padding: 11px 14px; font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; gap: 10px; }
+.vt-bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--primary-light); border-right: 2px solid var(--rozetka-green-dark, #10b981); }
+.vt-bar span { position: relative; }
+.vt-bar.win { font-weight: 800; }
+.vt-tag { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-left: 8px; }
+.vt-tag.open { background: var(--primary-light); color: var(--rozetka-green-dark, #10b981); }
+.vt-tag.closed { background: var(--input-bg); color: var(--text-muted); }

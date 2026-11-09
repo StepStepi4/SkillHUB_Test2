@@ -67,7 +67,10 @@
         <div style="display: flex; flex-direction: column; justify-content: center; height: 100%; flex: 1;">
             <div class="header-row" id="mainHeader" style="margin-bottom: 4px; justify-content: space-between; align-items: center;">
                 <h2 id="headerTitle" style="line-height: 1; font-size: 24px; margin: 0;">Пошук</h2>
-                <button id="newsBtn" class="fav-btn-top news-btn" onclick="window.openNews()" style="margin-left:auto; margin-right:8px;" aria-label="Новини">
+                <button id="voteBtn" class="fav-btn-top" onclick="window.openVote()" style="margin-left:auto; margin-right:8px;" aria-label="Голосування">
+                    <img src="assets/icons/settings/vote.svg" alt="Голосування" style="width: 24px; height: 24px; object-fit: contain;">
+                </button>
+                <button id="newsBtn" class="fav-btn-top news-btn" onclick="window.openNews()" style="margin-right:8px;" aria-label="Новини">
                     <img src="assets/icons/skillhub/News.svg" alt="Новини" style="width: 24px; height: 24px; object-fit: contain;">
                 </button>
                 <button id="topFavBtn" class="fav-btn-top" onclick="window.openFavoritesQuickMenu()" style="display:none;">
@@ -150,17 +153,6 @@
 
     <div id="tab-settings" class="app-tab">
         <div class="list-group">
-            <button class="list-item" id="cabinetBtn" data-func="Особистий кабінет" onclick="window.Academy.open()">
-                <img class="set-ico" src="assets/icons/settings/security.svg" alt="">
-                <div class="list-item-content">
-                    <span class="list-item-title" id="cabinetTitle">Особистий кабінет</span>
-                    <span class="list-item-subtitle" id="cabinetSub">Увійти за логіном і паролем від керівника</span>
-                </div>
-                <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-            </button>
-        </div>
-
-        <div class="list-group">
             <div class="list-item" data-func="Тема">
                 <img class="set-ico" src="assets/icons/settings/themes.svg" alt="">
                 <div class="list-item-content">
@@ -209,11 +201,11 @@
                 <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
             </button>
 
-            <button class="list-item" data-func="Зворотній зв'язок" onclick="window.open('https://forms.gle/aSYSoVy1ew3voSih7', '_blank')">
-                <div class="set-ico set-emoji">💬</div>
+            <button class="list-item" data-func="Зворотній зв'язок" onclick="window.openFeedback()">
+                <img class="set-ico" src="assets/icons/settings/Feedback.svg" alt="">
                 <div class="list-item-content">
                     <span class="list-item-title">Зворотній зв'язок</span>
-                    <span class="list-item-subtitle">Надіслати відгук, зауваження або оцінити додаток</span>
+                    <span class="list-item-subtitle">Оцінити додаток, надіслати відгук або пропозицію</span>
                 </div>
                 <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
             </button>
@@ -267,6 +259,30 @@
 
 <div class="floating-top" id="scrollTopBtn">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+</div>
+
+<!-- МОДАЛКА: ЗВОРОТНИЙ ЗВ'ЯЗОК -->
+<div id="feedbackModal" class="modal">
+    <div class="modal-content" style="max-height: 92vh;">
+        <div class="modal-header">
+            <div class="modal-title">Зворотній зв'язок</div>
+            <button class="modal-close" onclick="window.closeModalBase('feedbackModal')"></button>
+        </div>
+        <div class="modal-body" id="feedbackBody" style="padding-bottom: 12px;"></div>
+        <button class="btn btn-primary" id="feedbackSend" onclick="window.sendFeedback()">Надіслати</button>
+    </div>
+</div>
+
+<!-- МОДАЛКА: ГОЛОСУВАННЯ -->
+<div id="voteModal" class="modal">
+    <div class="modal-content" style="max-height: 92vh;">
+        <div class="modal-header">
+            <div class="modal-title">Голосування</div>
+            <button class="modal-close" onclick="window.closeModalBase('voteModal')"></button>
+        </div>
+        <div class="modal-body" id="voteBody" style="padding-bottom: 12px;"></div>
+        <button class="btn btn-primary" onclick="window.closeModalBase('voteModal')">Зрозуміло</button>
+    </div>
 </div>
 
 <!-- МОДАЛКА: НОВИНИ -->

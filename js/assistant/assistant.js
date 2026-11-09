@@ -220,6 +220,7 @@
     const brandRegex = /^\[(.*?)\]/;
 
     window.switchTab = function(tabId) {
+        if (window.Academy && window.Academy.isOpen) { try { window.Academy.close(); } catch (e) {} }
         document.querySelectorAll('.app-tab').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
 
@@ -452,7 +453,9 @@
     /* ====================== Доступи за ролями, особистий кабінет, новини ====================== */
     const ACCESS_GUEST_KEY = 'Без входу';
     function currentUserInfo() { try { return JSON.parse(localStorage.getItem('skillhub_user') || 'null'); } catch (e) { return null; } }
+    const ACCESS_ENABLED = false;      // доступи за ролями поки вимкнені
     function deniedList() {
+        if (!ACCESS_ENABLED) return [];
         const acc = (db && db.access) || {};
         const u = currentUserInfo();
         const key = u && u.role ? String(u.role).trim().toLowerCase() : ACCESS_GUEST_KEY.toLowerCase();
@@ -487,7 +490,7 @@
     window.addEventListener('skillhub-user', () => { try { window.applyAccess(); } catch (e) {} });
 
     window.openAcademyTab = function() {
-        if (window.Academy) window.Academy.open();
+        if (window.Academy && !window.Academy.isOpen) window.Academy.open();
     };
 
     // Новини: A — дата, B — текст (розмітка як в Academy)
@@ -516,8 +519,122 @@
     };
     function safeText(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
+
+    /* ====================== Зворотній зв'язок і голосування ====================== */
+    function deviceUid() {
+        const u = currentUserInfo();
+        if (u && u.login) return 'u:' + String(u.login).toLowerCase();
+        try {
+            let id = localStorage.getItem('skillhub_uid');
+            if (!id) { id = 'd:' + (crypto.randomUUID ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2))); localStorage.setItem('skillhub_uid', id); }
+            return id;
+        } catch (e) { return 'd:tmp'; }
+    }
+    function dayStr() { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+    function lsJson(k) { try { return JSON.parse(localStorage.getItem(k) || '{}') || {}; } catch (e) { return {}; } }
+    function lsSetJson(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    function postPublic(body) {
+        return fetch(API_URL, { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) }).then(r => r.text()).then(t => JSON.parse(t));
+    }
+    const fbState = {};
+
+    window.openFeedback = function() {
+        const qs = (db && db.feedback) || [];
+        const body = document.getElementById('feedbackBody');
+        const sendBtn = document.getElementById('feedbackSend');
+        for (const k in fbState) delete fbState[k];
+        const rated = lsJson('skillhub_fb_rated'), texts = lsJson('skillhub_fb_text');
+        const today = dayStr();
+        if (!qs.length) { body.innerHTML = '<div class="news-empty">Питань поки немає</div>'; sendBtn.style.display = 'none'; window.openModalBase('feedbackModal'); return; }
+        let active = 0;
+        body.innerHTML = qs.map((q, i) => {
+            const title = `<div class="fb-q-title">${safeText(q.q)}</div>`;
+            const done = q.rate ? !!rated[q.q] : texts[q.q] === today;
+            if (done) return `<div class="fb-q">${title}<div class="fb-done">✓ ${q.rate ? 'Дякуємо, оцінку враховано' : 'Дякуємо! Нову відповідь можна буде надіслати завтра'}</div></div>`;
+            active++;
+            if (q.rate) {
+                return `<div class="fb-q" data-i="${i}">${title}<div class="fb-rate">${[1,2,3,4,5,6,7,8,9,10].map(n => `<button type="button" data-n="${n}" onclick="window.fbRate(${i}, ${n}, this)">${n}</button>`).join('')}</div><div class="fb-rate-hint"><span>1 — дуже погано</span><span>10 — відмінно</span></div></div>`;
+            }
+            return `<div class="fb-q" data-i="${i}">${title}<textarea class="fb-text" maxlength="1500" placeholder="Ваша відповідь…" oninput="window.fbText(${i}, this.value)"></textarea></div>`;
+        }).join('');
+        sendBtn.style.display = active ? '' : 'none';
+        sendBtn.disabled = false; sendBtn.innerText = 'Надіслати';
+        window.openModalBase('feedbackModal');
+    };
+    window.fbRate = function(i, n, el) { fbState[i] = String(n); el.parentNode.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === el)); };
+    window.fbText = function(i, v) { fbState[i] = v; };
+
+    window.sendFeedback = async function() {
+        const qs = (db && db.feedback) || [];
+        const answers = Object.keys(fbState).map(i => ({ q: qs[i].q, value: String(fbState[i] || '').trim(), rate: qs[i].rate })).filter(a => a.value);
+        if (!answers.length) { alert('Заповніть хоча б одну відповідь'); return; }
+        if (navigator.onLine === false) { alert('Немає інтернету. Спробуйте, коли він з\'явиться.'); return; }
+        const btn = document.getElementById('feedbackSend');
+        btn.disabled = true; btn.innerText = 'Надсилаємо…';
+        try {
+            const r = await postPublic({ action: 'feedback_submit', uid: deviceUid(), answers: answers.map(a => ({ q: a.q, value: a.value })) });
+            if (!r || !r.success) throw new Error((r && r.error) || 'error');
+            const rated = lsJson('skillhub_fb_rated'), texts = lsJson('skillhub_fb_text'), today = dayStr();
+            answers.forEach(a => { if (a.rate) rated[a.q] = 1; else texts[a.q] = today; });
+            (r.skipped || []).forEach(q => { const f = qs.find(x => x.q === q); if (f) { if (f.rate) rated[q] = 1; else texts[q] = today; } });
+            lsSetJson('skillhub_fb_rated', rated); lsSetJson('skillhub_fb_text', texts);
+            window.openFeedback();
+            const body = document.getElementById('feedbackBody');
+            body.insertAdjacentHTML('afterbegin', '<div class="fb-q" style="border-color:var(--rozetka-green-dark,#10b981);"><div class="fb-q-title" style="margin:0;">✅ Дякуємо! Відповідь надіслано</div></div>');
+        } catch (e) {
+            btn.disabled = false; btn.innerText = 'Надіслати';
+            alert('Не вдалося надіслати. Перевірте інтернет і спробуйте ще раз.');
+        }
+    };
+
+    // Голосування: дані завжди свіжі з таблиці (не з кешу)
+    let voteChoice = {};
+    window.openVote = async function() {
+        const body = document.getElementById('voteBody');
+        voteChoice = {};
+        body.innerHTML = '<div class="news-empty">Завантаження…</div>';
+        window.openModalBase('voteModal');
+        if (navigator.onLine === false) { body.innerHTML = '<div class="news-empty">Для голосування потрібен інтернет</div>'; return; }
+        try {
+            const r = await fetch(API_URL + '?action=vote&uid=' + encodeURIComponent(deviceUid()), { cache: 'no-store' }).then(x => x.json());
+            renderVote(r && r.questions || []);
+        } catch (e) { body.innerHTML = '<div class="news-empty">Не вдалося завантажити. Спробуйте пізніше</div>'; }
+    };
+    function renderVote(qs) {
+        const body = document.getElementById('voteBody');
+        const voted = lsJson('skillhub_voted');
+        if (!qs.length) { body.innerHTML = '<div class="news-empty">Голосувань поки немає</div>'; return; }
+        body.innerHTML = qs.map((q, qi) => {
+            const closed = q.status === 'closed';
+            const tag = `<span class="vt-tag ${closed ? 'closed' : 'open'}">${closed ? 'Закрито' : 'Відкрито'}</span>`;
+            const head = `<div class="fb-q-title">${safeText(q.q)}${tag}</div>`;
+            if (closed) {
+                const total = q.options.reduce((s, o) => s + (o.votes || 0), 0);
+                const max = Math.max(0, ...q.options.map(o => o.votes || 0));
+                return `<div class="vt-q">${head}${q.options.map(o => { const p = total ? Math.round((o.votes || 0) * 100 / total) : 0; return `<div class="vt-bar${max > 0 && o.votes === max ? ' win' : ''}"><i style="width:${p}%"></i><span>${safeText(o.text)}</span><span>${o.votes || 0} · ${p}%</span></div>`; }).join('')}<div class="fb-rate-hint"><span>Всього голосів: ${total}</span></div></div>`;
+            }
+            if (q.voted >= 0 || voted[q.id]) return `<div class="vt-q">${head}<div class="fb-done">✓ Ваш голос враховано. Результати з'являться після закриття голосування</div></div>`;
+            return `<div class="vt-q" data-q="${qi}">${head}${q.options.map((o, oi) => `<button type="button" class="vt-opt" onclick="window.pickVote(${qi}, ${oi}, this)"><span class="vt-dot"></span>${safeText(o.text)}</button>`).join('')}<button class="btn btn-primary" style="margin-top:12px;" onclick="window.submitVote(${qi}, this)">Проголосувати</button></div>`;
+        }).join('');
+        body._qs = qs;
+    }
+    window.pickVote = function(qi, oi, el) { voteChoice[qi] = oi; el.parentNode.querySelectorAll('.vt-opt').forEach(b => b.classList.toggle('on', b === el)); };
+    window.submitVote = async function(qi, btn) {
+        const body = document.getElementById('voteBody'), q = body._qs[qi];
+        if (voteChoice[qi] == null) { alert('Оберіть варіант'); return; }
+        btn.disabled = true; btn.innerText = 'Надсилаємо…';
+        try {
+            const r = await postPublic({ action: 'vote_submit', uid: deviceUid(), qid: q.id, option: voteChoice[qi] });
+            if (r && (r.success || r.error === 'already_voted')) {
+                const v = lsJson('skillhub_voted'); v[q.id] = 1; lsSetJson('skillhub_voted', v);
+                window.openVote();
+            } else if (r && r.error === 'closed') { alert('Голосування вже закрито'); window.openVote(); }
+            else throw new Error('x');
+        } catch (e) { btn.disabled = false; btn.innerText = 'Проголосувати'; alert('Не вдалося проголосувати. Перевірте інтернет.'); }
+    };
+
     function checkOpenModals() {
-        const modals = ['descModal', 'compareModal', 'rezervItemModal', 'galleryModal', 'sellerModal', 'certManualModal', 'ratingModal', 'klochCalcModal', 'favSelectModal', 'favQuickMenuModal', 'updateProgressModal', 'newsModal'];
+        const modals = ['descModal', 'compareModal', 'rezervItemModal', 'galleryModal', 'sellerModal', 'certManualModal', 'ratingModal', 'klochCalcModal', 'favSelectModal', 'favQuickMenuModal', 'updateProgressModal', 'newsModal', 'feedbackModal', 'voteModal'];
         for (let id of modals) {
             let el = document.getElementById(id);
             if (el && el.classList.contains('show')) return true;

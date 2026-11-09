@@ -560,7 +560,9 @@
         academyScrollTop();
 
         const exitBtn = document.getElementById('floatingExitBtn');
-        exitBtn.style.display = (viewId === 'testView') ? 'none' : 'flex';
+        // «Назад» лишається тільки у вкладених екранах; з входу й кабінету виходять нижнім меню
+        exitBtn.style.display = (viewId === 'testView' || viewId === 'loginView' || (viewId === 'cabinetView' && !windowViewingEmployee)) ? 'none' : 'flex';
+        document.body.classList.toggle('academy-test', viewId === 'testView');
 
         requestAnimationFrame(() => {
             document.documentElement.classList.remove('edu-fast-boot');
@@ -2136,7 +2138,7 @@
             root.hidden = false;
             document.body.classList.add('academy-open');
             this.isOpen = true;
-            try { document.querySelectorAll('.nav-academy').forEach(b => b.classList.add('active')); } catch (e) {}
+            try { document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); document.querySelectorAll('.nav-academy').forEach(b => b.classList.add('active')); } catch (e) {}
             if (!(opts && opts.fromPopstate)) { try { history.pushState({ academy: 1 }, '', '#academy'); } catch (e) {} }
             if (currentUser) checkSessionNow();
             if (navigator.onLine && auth) fetchFreshDataSilent();
@@ -2147,7 +2149,12 @@
             root.hidden = true;
             document.body.classList.remove('academy-open');
             this.isOpen = false;
-            try { document.querySelectorAll('.nav-academy').forEach(b => b.classList.remove('active')); } catch (e) {}
+            try {
+                document.body.classList.remove('academy-test');
+                document.querySelectorAll('.nav-academy').forEach(b => b.classList.remove('active'));
+                const t = sessionStorage.getItem('skillhub_active_tab') || 'tab-search';
+                const nb = document.querySelector('.nav-item[onclick*="' + t + '"]'); if (nb) nb.classList.add('active');
+            } catch (e) {}
             if (!(opts && opts.fromPopstate)) {
                 try {
                     if (history.state && history.state.academy) history.back();
