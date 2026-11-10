@@ -1693,7 +1693,7 @@
         };
 
         const bgColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#1c1c1e' : '#ffffff';
-        const colorPassed = '#164f58', colorProgress = '#3a9c9f', colorRemaining = document.documentElement.getAttribute('data-theme') === 'dark' ? '#38383a' : '#e5e7eb';
+        const colorPassed = document.documentElement.getAttribute('data-theme') === 'dark' ? '#f5f5f5' : '#000000', colorProgress = '#3a9c9f', colorRemaining = document.documentElement.getAttribute('data-theme') === 'dark' ? '#38383a' : '#e5e7eb';
 
         window.progressChartInstance = new Chart(ctx, {
             type: 'doughnut',

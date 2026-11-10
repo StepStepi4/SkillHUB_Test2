@@ -6,7 +6,7 @@
         :root {
             --bg: #f2f2f7;
             --card-bg: #ffffff;
-            --text-main: #164f58;
+            --text-main: #000000;
             --text-muted: #8e8e93;
             --primary: #10b981;
             --primary-light: #d1fae5;
@@ -163,7 +163,7 @@
             align-items: center;
             z-index: 9990;
             box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-            padding: 0 16px;
+            padding: 0 8px;
         }
         [data-theme="dark"] .bottom-nav {
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
@@ -173,8 +173,8 @@
 
         .nav-item {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 5px;
-            flex: 1;
+            gap: 4px;
+            flex: 1 1 0; min-width: 0; width: 0;
             height: 100%;
             background: transparent; border: none; outline: none;
             color: var(--text-muted); cursor: pointer;
@@ -184,7 +184,7 @@
         }
 
         .nav-icon {
-            width: 24px; height: 24px;
+            width: 26px; height: 26px; flex: 0 0 26px;
             background-color: currentColor;
             -webkit-mask-size: contain; mask-size: contain;
             -webkit-mask-position: center; mask-position: center;
@@ -194,11 +194,11 @@
 
         .icon-search { -webkit-mask-image: url('../assets/icons/ui/search.svg'); mask-image: url('../assets/icons/ui/search.svg'); }
         .icon-rezerv { -webkit-mask-image: url('../assets/icons/ui/rezerv.svg'); mask-image: url('../assets/icons/ui/rezerv.svg'); }
-        .icon-bulb { -webkit-mask-image: url('../assets/icons/ui/bulb.svg'); mask-image: url('../assets/icons/ui/bulb.svg'); width: 28px; height: 28px; }
+        .icon-bulb { -webkit-mask-image: url('../assets/icons/ui/bulb.svg'); mask-image: url('../assets/icons/ui/bulb.svg'); }
         .icon-academy { -webkit-mask-image: url('../assets/icons/ui/Academy-Main.svg'); mask-image: url('../assets/icons/ui/Academy-Main.svg'); }
         .icon-settings { -webkit-mask-image: url('../assets/icons/ui/settings.svg'); mask-image: url('../assets/icons/ui/settings.svg'); }
 
-        .nav-item span { font-size: 11px; font-weight: 500; transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); }
+        .nav-item span { display: block; height: 14px; line-height: 14px; max-width: 100%; text-align: center; white-space: nowrap; overflow: visible; font-size: 11px; font-weight: 500; transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); }
         .nav-item.active { color: var(--rozetka-green-dark); }
         [data-theme="dark"] .nav-item.active { color: var(--primary); }
         .nav-item.active .nav-icon { transform: translateY(-2px) scale(1.15); filter: drop-shadow(0px 4px 8px rgba(0, 160, 70, 0.35)); }
@@ -518,3 +518,18 @@ body.academy-test .bottom-nav { display: none; }
 .vt-tag { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-left: 8px; }
 .vt-tag.open { background: var(--primary-light); color: var(--rozetka-green-dark, #10b981); }
 .vt-tag.closed { background: var(--input-bg); color: var(--text-muted); }
+
+/* Іконки-гліфи (одноколірні #164f58): світла тема — чорні, темна — білі (інвертація).
+   Кольорові іконки виключені зі списку. */
+img[src*="assets/icons/"]:not([src*="Factory"]):not([src*="Discount"]):not([src*="discount"]):not([src*="Client"]):not([src*="archive/chat"]):not([src*="archive/edu"]):not([src*="archive/rozetka"]):not([src*="Check.svg"]):not([src*="aim.svg"]):not([src*="analytics"]):not([src*="install"]):not([src*="puzzle"]):not([src*="statistics.svg"]):not([src*="test.svg"]):not([src*="website"]):not([src*="medal"]):not([src*="ukraine"]) { filter: brightness(0); }
+[data-theme="dark"] img[src*="assets/icons/"]:not([src*="Factory"]):not([src*="Discount"]):not([src*="discount"]):not([src*="Client"]):not([src*="archive/chat"]):not([src*="archive/edu"]):not([src*="archive/rozetka"]):not([src*="Check.svg"]):not([src*="aim.svg"]):not([src*="analytics"]):not([src*="install"]):not([src*="puzzle"]):not([src*="statistics.svg"]):not([src*="test.svg"]):not([src*="website"]):not([src*="medal"]):not([src*="ukraine"]) { filter: brightness(0) invert(1); }
+
+/* Новина зверху на «Пошук» і «Резерви» */
+.news-top { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 12px 16px; margin: 0 0 14px; cursor: pointer; position: relative; overflow: hidden; max-height: 170px; box-shadow: 0 6px 18px rgba(0,0,0,0.04); }
+.news-top.is-new { border-color: var(--danger); }
+.news-top::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 38px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.news-top .news-more { position: absolute; right: 14px; bottom: 8px; z-index: 1; font-size: 12px; font-weight: 800; color: var(--rozetka-green-dark); }
+.fb-slider-wrap { padding: 4px 2px 0; }
+.fb-slider-val { text-align: center; font-size: 28px; font-weight: 800; color: var(--rozetka-green-dark); margin-bottom: 4px; min-height: 34px; }
+.fb-slider-val.empty { font-size: 13px; font-weight: 600; color: var(--text-muted); line-height: 34px; }
+.fb-slider { width: 100%; margin: 6px 0 0; accent-color: var(--rozetka-green-dark); height: 28px; }

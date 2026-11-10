@@ -465,6 +465,7 @@
     window.isDenied = function(name) { return deniedList().indexOf(String(name || '').trim()) !== -1; };
 
     window.applyAccess = function() {
+        if (!ACCESS_ENABLED) { if (window.renderVoteRow) window.renderVoteRow(); return; }
         const denied = deniedList();
         document.querySelectorAll('[data-func]').forEach(el => {
             el.style.display = denied.indexOf(el.getAttribute('data-func')) !== -1 ? 'none' : '';
@@ -502,6 +503,19 @@
         const latest = news.reduce((m, n) => Math.max(m, n.ts || 0), 0);
         btn.classList.toggle('has-new', latest > newsSeenTs());
     };
+    function newsHtml(n, isNew) {
+        return `<div class="news-date">${safeText(n.date)}${isNew ? '<span class="news-new">НОВЕ</span>' : ''}</div>`
+            + RichText.render(String(n.text || ''), { plain: line => `<div class="news-line">${RichText.inline(line)}</div>` });
+    }
+    window.renderNewsTop = function() {
+        const news = (db && db.news) || [];
+        const html = news.length ? `<div class="news-top${(news[0].ts || 0) > newsSeenTs() ? ' is-new' : ''}" onclick="window.openNews()">${newsHtml(news[0], (news[0].ts || 0) > newsSeenTs())}<span class="news-more">Усі новини ›</span></div>` : '';
+        document.querySelectorAll('.news-top-slot').forEach(el => { el.innerHTML = html; });
+    };
+    window.renderVoteRow = function() {
+        const row = document.getElementById('voteRow');
+        if (row) row.style.display = (db && db.voteOpen) ? '' : 'none';
+    };
     window.openNews = function() {
         const news = (db && db.news) || [];
         const seen = newsSeenTs();
@@ -516,6 +530,7 @@
         const latest = news.reduce((m, n) => Math.max(m, n.ts || 0), 0);
         try { localStorage.setItem('skillhub_news_seen', String(latest)); } catch (e) {}
         window.renderNewsBadge();
+        window.renderNewsTop();
     };
     function safeText(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
@@ -538,35 +553,45 @@
     }
     const fbState = {};
 
-    window.openFeedback = function() {
-        const qs = (db && db.feedback) || [];
+    function fbIsRate(q) { return !!q.rate || /оцін|оцен/i.test(q.q || ''); }
+    let fbQs = [];
+    window.openFeedback = async function() {
         const body = document.getElementById('feedbackBody');
         const sendBtn = document.getElementById('feedbackSend');
         for (const k in fbState) delete fbState[k];
+        fbQs = ((db && db.feedback) || []).slice();
+        body.innerHTML = '<div class="news-empty">Завантаження…</div>';
+        sendBtn.style.display = 'none';
+        window.openModalBase('feedbackModal');
+        // свіжі питання з таблиці (якщо є інтернет)
+        if (navigator.onLine !== false) {
+            try { const r = await fetch(API_URL + '?action=feedback', { cache: 'no-store' }).then(x => x.json()); if (r && Array.isArray(r.questions) && r.questions.length) { fbQs = r.questions; if (db) db.feedback = r.questions; } } catch (e) {}
+        }
+        const qs = fbQs;
         const rated = lsJson('skillhub_fb_rated'), texts = lsJson('skillhub_fb_text');
         const today = dayStr();
-        if (!qs.length) { body.innerHTML = '<div class="news-empty">Питань поки немає</div>'; sendBtn.style.display = 'none'; window.openModalBase('feedbackModal'); return; }
+        if (!qs.length) { body.innerHTML = '<div class="news-empty">Питань поки немає</div>'; return; }
         let active = 0;
         body.innerHTML = qs.map((q, i) => {
+            const rate = fbIsRate(q);
             const title = `<div class="fb-q-title">${safeText(q.q)}</div>`;
-            const done = q.rate ? !!rated[q.q] : texts[q.q] === today;
-            if (done) return `<div class="fb-q">${title}<div class="fb-done">✓ ${q.rate ? 'Дякуємо, оцінку враховано' : 'Дякуємо! Нову відповідь можна буде надіслати завтра'}</div></div>`;
+            const done = rate ? !!rated[q.q] : texts[q.q] === today;
+            if (done) return `<div class="fb-q">${title}<div class="fb-done">✓ ${rate ? 'Дякуємо, оцінку враховано' : 'Дякуємо! Нову відповідь можна буде надіслати завтра'}</div></div>`;
             active++;
-            if (q.rate) {
-                return `<div class="fb-q" data-i="${i}">${title}<div class="fb-rate">${[1,2,3,4,5,6,7,8,9,10].map(n => `<button type="button" data-n="${n}" onclick="window.fbRate(${i}, ${n}, this)">${n}</button>`).join('')}</div><div class="fb-rate-hint"><span>1 — дуже погано</span><span>10 — відмінно</span></div></div>`;
+            if (rate) {
+                return `<div class="fb-q" data-i="${i}">${title}<div class="fb-slider-wrap"><div class="fb-slider-val empty" id="fbVal${i}">Рухайте повзунок</div><input type="range" class="fb-slider" min="1" max="10" step="1" value="5" oninput="window.fbSlide(${i}, this.value)" onchange="window.fbSlide(${i}, this.value)"><div class="fb-rate-hint"><span>1 — дуже погано</span><span>10 — відмінно</span></div></div></div>`;
             }
-            return `<div class="fb-q" data-i="${i}">${title}<textarea class="fb-text" maxlength="1500" placeholder="Ваша відповідь…" oninput="window.fbText(${i}, this.value)"></textarea></div>`;
+            return `<div class="fb-q" data-i="${i}">${title}<textarea class="fb-text" maxlength="1500" placeholder="Ваша розгорнута відповідь…" oninput="window.fbText(${i}, this.value)"></textarea></div>`;
         }).join('');
         sendBtn.style.display = active ? '' : 'none';
         sendBtn.disabled = false; sendBtn.innerText = 'Надіслати';
-        window.openModalBase('feedbackModal');
     };
-    window.fbRate = function(i, n, el) { fbState[i] = String(n); el.parentNode.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === el)); };
+    window.fbSlide = function(i, v) { fbState[i] = String(v); const el = document.getElementById('fbVal' + i); if (el) { el.classList.remove('empty'); el.innerText = v + ' / 10'; } };
     window.fbText = function(i, v) { fbState[i] = v; };
 
     window.sendFeedback = async function() {
-        const qs = (db && db.feedback) || [];
-        const answers = Object.keys(fbState).map(i => ({ q: qs[i].q, value: String(fbState[i] || '').trim(), rate: qs[i].rate })).filter(a => a.value);
+        const qs = fbQs;
+        const answers = Object.keys(fbState).map(i => ({ q: qs[i].q, value: String(fbState[i] || '').trim(), rate: fbIsRate(qs[i]) })).filter(a => a.value);
         if (!answers.length) { alert('Заповніть хоча б одну відповідь'); return; }
         if (navigator.onLine === false) { alert('Немає інтернету. Спробуйте, коли він з\'явиться.'); return; }
         const btn = document.getElementById('feedbackSend');
@@ -576,9 +601,9 @@
             if (!r || !r.success) throw new Error((r && r.error) || 'error');
             const rated = lsJson('skillhub_fb_rated'), texts = lsJson('skillhub_fb_text'), today = dayStr();
             answers.forEach(a => { if (a.rate) rated[a.q] = 1; else texts[a.q] = today; });
-            (r.skipped || []).forEach(q => { const f = qs.find(x => x.q === q); if (f) { if (f.rate) rated[q] = 1; else texts[q] = today; } });
+            (r.skipped || []).forEach(q => { const f = qs.find(x => x.q === q); if (f) { if (fbIsRate(f)) rated[q] = 1; else texts[q] = today; } });
             lsSetJson('skillhub_fb_rated', rated); lsSetJson('skillhub_fb_text', texts);
-            window.openFeedback();
+            await window.openFeedback();
             const body = document.getElementById('feedbackBody');
             body.insertAdjacentHTML('afterbegin', '<div class="fb-q" style="border-color:var(--rozetka-green-dark,#10b981);"><div class="fb-q-title" style="margin:0;">✅ Дякуємо! Відповідь надіслано</div></div>');
         } catch (e) {
@@ -597,13 +622,15 @@
         if (navigator.onLine === false) { body.innerHTML = '<div class="news-empty">Для голосування потрібен інтернет</div>'; return; }
         try {
             const r = await fetch(API_URL + '?action=vote&uid=' + encodeURIComponent(deviceUid()), { cache: 'no-store' }).then(x => x.json());
-            renderVote(r && r.questions || []);
+            const open = (r && r.questions || []).filter(q => q.status !== 'closed');
+            if (db) db.voteOpen = open.length > 0; window.renderVoteRow();
+            renderVote(open);
         } catch (e) { body.innerHTML = '<div class="news-empty">Не вдалося завантажити. Спробуйте пізніше</div>'; }
     };
     function renderVote(qs) {
         const body = document.getElementById('voteBody');
         const voted = lsJson('skillhub_voted');
-        if (!qs.length) { body.innerHTML = '<div class="news-empty">Голосувань поки немає</div>'; return; }
+        if (!qs.length) { body.innerHTML = '<div class="news-empty">Відкритих голосувань зараз немає</div>'; return; }
         body.innerHTML = qs.map((q, qi) => {
             const closed = q.status === 'closed';
             const tag = `<span class="vt-tag ${closed ? 'closed' : 'open'}">${closed ? 'Закрито' : 'Відкрито'}</span>`;
@@ -1205,6 +1232,8 @@
         window.populateFilters();
         window.renderSkillHubTab();
         window.renderNewsBadge();
+        window.renderNewsTop();
+        window.renderVoteRow();
         window.applyAccess();
         if (currentCategoryData || currentServiceData) renderServices();
         if (document.getElementById('tab-reserves').classList.contains('active')) window.renderRezervyList();
