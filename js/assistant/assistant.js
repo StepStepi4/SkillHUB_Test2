@@ -520,7 +520,7 @@
         const news = (db && db.news) || [];
         const seen = newsSeenTs();
         const body = document.getElementById('newsBody');
-        if (!news.length) body.innerHTML = '<div class="news-empty">Поки що новин немає</div>';
+        if (!news.length) body.innerHTML = '<div class="news-empty">Поки що новин немає' + ((db && db.serverRev != null && db.serverRev < NEED_REV) ? '<br><br><span style="color:var(--danger);font-size:13px;">' + OLD_SCRIPT_MSG + '</span>' : '') + '</div>';
         else body.innerHTML = news.map(n => {
             const isNew = (n.ts || 0) > seen;
             return `<div class="news-item${isNew ? ' is-new' : ''}"><div class="news-date">${safeText(n.date)}${isNew ? '<span class="news-new">НОВЕ</span>' : ''}</div>`
@@ -552,6 +552,38 @@
         return fetch(API_URL, { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) }).then(r => r.text()).then(t => JSON.parse(t));
     }
     const fbState = {};
+    const NEED_REV = 6;
+    function fetchJsonT(url, ms) {
+        const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms || 9000);
+        return fetch(url, { cache: 'no-store', signal: ctl.signal }).then(r => r.text()).then(txt => JSON.parse(txt)).finally(() => clearTimeout(t));
+    }
+    const OLD_SCRIPT_MSG = 'Сервер не віддав дані. Схоже, в Apps Script не розгорнуто останню версію скрипта: Розгорнути → Керування розгортаннями → Редагувати → Нова версія.';
+
+    // «Живі» дані: новини, відкрите голосування, питання відгуку (не залежать від кешу каталогу)
+    let extrasAt = 0;
+    window.loadExtras = async function(force) {
+        if (!force && Date.now() - extrasAt < 45000) return;
+        if (navigator.onLine === false || !db) return;
+        extrasAt = Date.now();
+        try {
+            const r = await fetchJsonT(API_URL + '?action=extras', 10000);
+            if (!r || typeof r !== 'object' || r.serverRev == null) { db.serverRev = 0; window.renderServerRev(); return; }
+            db.serverRev = r.serverRev;
+            if (Array.isArray(r.news)) db.news = r.news;
+            if (Array.isArray(r.feedback)) db.feedback = r.feedback;
+            db.voteOpen = !!r.voteOpen;
+            window.renderNewsBadge(); window.renderNewsTop(); window.renderVoteRow(); window.renderServerRev();
+        } catch (e) { extrasAt = 0; }
+    };
+    window.renderServerRev = function() {
+        const el = document.getElementById('serverRevDisp');
+        if (!el || !db) return;
+        const rev = db.serverRev;
+        if (rev == null) { el.innerText = ''; return; }
+        el.innerText = rev >= NEED_REV ? ('Скрипт: v' + rev) : 'Скрипт застарілий — оновіть розгортання в Apps Script';
+        el.style.color = rev >= NEED_REV ? 'var(--text-muted)' : 'var(--danger)';
+    };
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) window.loadExtras(false); });
 
     function fbIsRate(q) { return !!q.rate || /оцін|оцен/i.test(q.q || ''); }
     let fbQs = [];
@@ -560,17 +592,27 @@
         const sendBtn = document.getElementById('feedbackSend');
         for (const k in fbState) delete fbState[k];
         fbQs = ((db && db.feedback) || []).slice();
-        body.innerHTML = '<div class="news-empty">Завантаження…</div>';
-        sendBtn.style.display = 'none';
-        window.openModalBase('feedbackModal');
-        // свіжі питання з таблиці (якщо є інтернет)
-        if (navigator.onLine !== false) {
-            try { const r = await fetch(API_URL + '?action=feedback', { cache: 'no-store' }).then(x => x.json()); if (r && Array.isArray(r.questions) && r.questions.length) { fbQs = r.questions; if (db) db.feedback = r.questions; } } catch (e) {}
+        let failed = false;
+        if (!fbQs.length) {
+            body.innerHTML = '<div class="news-empty">Завантаження…</div>';
+            sendBtn.style.display = 'none';
+            window.openModalBase('feedbackModal');
+            if (navigator.onLine === false) { body.innerHTML = '<div class="news-empty">Потрібен інтернет</div>'; return; }
+            try {
+                const r = await fetchJsonT(API_URL + '?action=feedback', 9000);
+                if (r && Array.isArray(r.questions)) { fbQs = r.questions; if (db) db.feedback = r.questions; if (db) db.serverRev = r.serverRev; }
+                else failed = true;
+            } catch (e) { failed = true; }
+            if (failed) { body.innerHTML = '<div class="news-empty">' + OLD_SCRIPT_MSG + '</div>'; return; }
+        } else {
+            window.openModalBase('feedbackModal');
+            // тихо оновлюємо питання у фоні
+            fetchJsonT(API_URL + '?action=feedback', 9000).then(r => { if (r && Array.isArray(r.questions) && r.questions.length) { if (db) db.feedback = r.questions; } }).catch(() => {});
         }
         const qs = fbQs;
         const rated = lsJson('skillhub_fb_rated'), texts = lsJson('skillhub_fb_text');
         const today = dayStr();
-        if (!qs.length) { body.innerHTML = '<div class="news-empty">Питань поки немає</div>'; return; }
+        if (!qs.length) { body.innerHTML = '<div class="news-empty">Питань поки немає. Додайте шапки в рядок 1 листа «Зворотній зв\'язок і пропозиції».</div>'; return; }
         let active = 0;
         body.innerHTML = qs.map((q, i) => {
             const rate = fbIsRate(q);
@@ -621,11 +663,12 @@
         window.openModalBase('voteModal');
         if (navigator.onLine === false) { body.innerHTML = '<div class="news-empty">Для голосування потрібен інтернет</div>'; return; }
         try {
-            const r = await fetch(API_URL + '?action=vote&uid=' + encodeURIComponent(deviceUid()), { cache: 'no-store' }).then(x => x.json());
+            const r = await fetchJsonT(API_URL + '?action=vote&uid=' + encodeURIComponent(deviceUid()), 10000);
+            if (!r || !Array.isArray(r.questions)) throw new Error('old');
             const open = (r && r.questions || []).filter(q => q.status !== 'closed');
             if (db) db.voteOpen = open.length > 0; window.renderVoteRow();
             renderVote(open);
-        } catch (e) { body.innerHTML = '<div class="news-empty">Не вдалося завантажити. Спробуйте пізніше</div>'; }
+        } catch (e) { body.innerHTML = '<div class="news-empty">' + OLD_SCRIPT_MSG + '</div>'; }
     };
     function renderVote(qs) {
         const body = document.getElementById('voteBody');
@@ -1234,7 +1277,9 @@
         window.renderNewsBadge();
         window.renderNewsTop();
         window.renderVoteRow();
+        window.renderServerRev();
         window.applyAccess();
+        setTimeout(() => window.loadExtras(true), 400);
         if (currentCategoryData || currentServiceData) renderServices();
         if (document.getElementById('tab-reserves').classList.contains('active')) window.renderRezervyList();
     }
