@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="css/fonts.css">
 <link rel="stylesheet" href="css/richtext.css">
 <style>
-:root{--bg:#f2f2f7;--card-bg:#fff;--text-main:#164f58;--text-muted:#6b7280;--primary:#164f58;--border:#e5e5ea;--input-bg:#f3f4f6;--success:#10b981;--danger:#ef4444}
+:root{--bg:#f2f2f7;--card-bg:#fff;--text-main:#000;--text-muted:#6b7280;--primary:#000;--border:#e5e5ea;--input-bg:#f3f4f6;--success:#10b981;--danger:#ef4444}
 @media (prefers-color-scheme:dark){:root{--bg:#000;--card-bg:#1c1c1e;--text-main:#f5f5f5;--text-muted:#98989d;--primary:#2fa4b3;--border:#38383a;--input-bg:#2c2c2e;--success:#34d399}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text-main);font-family:'Inter',system-ui,sans-serif;padding:14px 12px 70px}
@@ -159,7 +159,7 @@ try{document.execCommand('defaultParagraphSeparator',false,'div')}catch(e){}
 try{document.execCommand('styleWithCSS',false,true)}catch(e){}
 
 /* ---------------- довідники ---------------- */
-var PALETTE=[['r','Червоний','#ef4444'],['o','Помаранчевий','#f97316'],['y','Жовтий','#eab308'],['g','Зелений','#10b981'],['t','Бірюзовий','#164f58'],['b','Синій','#3b82f6'],['p','Фіолетовий','#a855f7'],['s','Сірий','#8e8e93'],['k','Чорний','#111827']];
+var PALETTE=[['r','Червоний','#ef4444'],['o','Помаранчевий','#f97316'],['y','Жовтий','#eab308'],['g','Зелений','#10b981'],['t','Бірюзовий','#0d9488'],['b','Синій','#3b82f6'],['p','Фіолетовий','#a855f7'],['s','Сірий','#8e8e93'],['k','Чорний','#111827']];
 var hex2key={'#ffffff':'w'};PALETTE.forEach(function(p){hex2key[p[2]]=p[0]});
 var baseColor=null;
 function toHex(c){
@@ -647,7 +647,7 @@ function askColor(){
   if(!needSel())return;
   dialog({title:'Колір тексту',help:'Виділений текст стане кольоровим.',choices:PALETTE.map(function(p){return {label:p[1],key:p[0],hex:p[2],sw:p[2]}}).concat([{label:'Звичайний колір',key:'',hex:''}])}).then(function(v){
     if(!v)return;restore();
-    document.execCommand('foreColor',false,v.choice.hex||baseColor||'#164f58');update();
+    document.execCommand('foreColor',false,v.choice.hex||baseColor||'#000000');update();
   });
 }
 function askPill(){

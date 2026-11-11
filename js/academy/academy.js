@@ -1256,7 +1256,7 @@
             let m = computeUserMetrics(u);
             let borderCol = 'var(--border)';
             if (m.totalAssigned > 0) {
-                if (m.completed === m.totalAssigned) borderCol = 'rgba(22, 79, 88, 0.7)';
+                if (m.completed === m.totalAssigned) borderCol = 'rgba(128, 128, 128, 0.7)';
                 else if (m.started > 0) borderCol = 'rgba(245, 158, 11, 0.6)';
             }
             let storeTxt = (u.store && u.store !== "-") ? `📍 ${escapeHTMLAttr(u.store)}` : "";
@@ -1693,7 +1693,7 @@
         };
 
         const bgColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#1c1c1e' : '#ffffff';
-        const colorPassed = document.documentElement.getAttribute('data-theme') === 'dark' ? '#f5f5f5' : '#000000', colorProgress = '#3a9c9f', colorRemaining = document.documentElement.getAttribute('data-theme') === 'dark' ? '#38383a' : '#e5e7eb';
+        const colorPassed = document.documentElement.getAttribute('data-theme') === 'dark' ? '#f5f5f5' : '#000000', colorProgress = '#8e8e93', colorRemaining = document.documentElement.getAttribute('data-theme') === 'dark' ? '#38383a' : '#e5e7eb';
 
         window.progressChartInstance = new Chart(ctx, {
             type: 'doughnut',
@@ -1718,7 +1718,7 @@
             <div class="stats-grid-8">
                 <div class="stat-item"><div class="stat-val-modern">${m.totalAssigned}</div><div class="stat-label-modern">Загалом назначено курсів</div></div>
                 <div class="stat-item"><div class="stat-val-modern" style="color: #3b82f6;">${m.started}</div><div class="stat-label-modern">Розпочато курсів</div></div>
-                <div class="stat-item" style="border-color: rgba(22, 79, 88, 0.4);"><div class="stat-val-modern" style="color: var(--success);">${m.completed}</div><div class="stat-label-modern">Пройдено курсів</div></div>
+                <div class="stat-item" style="border-color: rgba(128, 128, 128, 0.4);"><div class="stat-val-modern" style="color: var(--success);">${m.completed}</div><div class="stat-label-modern">Пройдено курсів</div></div>
                 <div class="stat-item" style="border-color: rgba(245, 158, 11, 0.4);"><div class="stat-val-modern" style="color: #f59e0b;">${m.remaining}</div><div class="stat-label-modern">Залишилось курсів</div></div>
                 <div class="stat-item"><div class="stat-val-modern">${m.attempts}</div><div class="stat-label-modern">Кількість спроб</div></div>
                 <div class="stat-item"><div class="stat-val-modern">${m.avgScoreFormatted}</div><div class="stat-label-modern">Середній бал</div></div>

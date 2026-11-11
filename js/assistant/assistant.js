@@ -507,16 +507,31 @@
         return `<div class="news-date">${safeText(n.date)}${isNew ? '<span class="news-new">НОВЕ</span>' : ''}</div>`
             + RichText.render(String(n.text || ''), { plain: line => `<div class="news-line">${RichText.inline(line)}</div>` });
     }
-    window.renderNewsTop = function() {
+    window.renderNewsTop = function() {};   // верхня картка новин прибрана
+    // При запуску: якщо є непрочитана новина — один раз показуємо вікно. Не прочитав → кнопка в шапці пульсує червоним.
+    let newsPopupDone = false;
+    window.maybeShowNewsPopup = function() {
+        if (newsPopupDone) return;
         const news = (db && db.news) || [];
-        const html = news.length ? `<div class="news-top${(news[0].ts || 0) > newsSeenTs() ? ' is-new' : ''}" onclick="window.openNews()">${newsHtml(news[0], (news[0].ts || 0) > newsSeenTs())}<span class="news-more">Усі новини ›</span></div>` : '';
-        document.querySelectorAll('.news-top-slot').forEach(el => { el.innerHTML = html; });
+        if (!news.length) return;
+        if ((news[0].ts || 0) <= newsSeenTs()) { newsPopupDone = true; return; }
+        try { if (sessionStorage.getItem('skillhub_news_popup') === '1') { newsPopupDone = true; return; } sessionStorage.setItem('skillhub_news_popup', '1'); } catch (e) {}
+        newsPopupDone = true;
+        const academyOpen = window.Academy && window.Academy.isOpen;
+        if (academyOpen || document.querySelector('.modal.show')) return;
+        setTimeout(() => window.openNews(true), 700);
     };
+    window.ackNews = function() { markNewsRead(); window.closeModalBase('newsModal'); };
+    function markNewsRead() {
+        const latest = ((db && db.news) || []).reduce((m, n) => Math.max(m, n.ts || 0), 0);
+        try { localStorage.setItem('skillhub_news_seen', String(latest)); } catch (e) {}
+        window.renderNewsBadge();
+    }
     window.renderVoteRow = function() {
         const row = document.getElementById('voteRow');
         if (row) row.style.display = (db && db.voteOpen) ? '' : 'none';
     };
-    window.openNews = function() {
+    window.openNews = function(auto) {
         const news = (db && db.news) || [];
         const seen = newsSeenTs();
         const body = document.getElementById('newsBody');
@@ -527,10 +542,7 @@
                 + RichText.render(String(n.text || ''), { plain: line => `<div class="news-line">${RichText.inline(line)}</div>` }) + `</div>`;
         }).join('');
         window.openModalBase('newsModal');
-        const latest = news.reduce((m, n) => Math.max(m, n.ts || 0), 0);
-        try { localStorage.setItem('skillhub_news_seen', String(latest)); } catch (e) {}
-        window.renderNewsBadge();
-        window.renderNewsTop();
+        if (!auto) markNewsRead();     // відкрив сам — вважаємо прочитаним; автопоказ — лише після «Зрозуміло»
     };
     function safeText(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
@@ -572,7 +584,8 @@
             if (Array.isArray(r.news)) db.news = r.news;
             if (Array.isArray(r.feedback)) db.feedback = r.feedback;
             db.voteOpen = !!r.voteOpen;
-            window.renderNewsBadge(); window.renderNewsTop(); window.renderVoteRow(); window.renderServerRev();
+            window.renderNewsBadge(); window.renderVoteRow(); window.renderServerRev();
+            window.maybeShowNewsPopup();
         } catch (e) { extrasAt = 0; }
     };
     window.renderServerRev = function() {
@@ -580,8 +593,8 @@
         if (!el || !db) return;
         const rev = db.serverRev;
         if (rev == null) { el.innerText = ''; return; }
-        el.innerText = rev >= NEED_REV ? ('Скрипт: v' + rev) : 'Скрипт застарілий — оновіть розгортання в Apps Script';
-        el.style.color = rev >= NEED_REV ? 'var(--text-muted)' : 'var(--danger)';
+        el.innerText = rev >= NEED_REV ? '' : 'Скрипт застарілий — оновіть розгортання в Apps Script';
+        el.style.color = 'var(--danger)';
     };
     document.addEventListener('visibilitychange', () => { if (!document.hidden) window.loadExtras(false); });
 
@@ -1260,6 +1273,15 @@
     function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
     function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
+    // HUD-завантаження: title — напис зверху, text — підпис, pct — 0..100
+    function hudSet(pct, text, title) {
+        const bar = document.getElementById('progressBar'), pc = document.getElementById('hudPct');
+        if (bar) bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+        if (pc) pc.innerText = Math.floor(Math.max(0, Math.min(100, pct))) + '%';
+        if (text != null) safeUpdateHTML('mainLoaderText', text);
+        if (title != null) { const t = document.getElementById('hudTitle'); if (t) t.innerText = title; }
+    }
+    window.hudSet = hudSet;
     function showBlockingLoader() {
         document.documentElement.classList.remove('fast-boot');
         const l = document.getElementById('appLoader');
@@ -1280,6 +1302,7 @@
         window.renderServerRev();
         window.applyAccess();
         setTimeout(() => window.loadExtras(true), 400);
+        window.maybeShowNewsPopup();
         if (currentCategoryData || currentServiceData) renderServices();
         if (document.getElementById('tab-reserves').classList.contains('active')) window.renderRezervyList();
     }
@@ -1367,17 +1390,17 @@
                 setAppStatus('loading', 'Підготовка');
                 safeUpdateHTML('mainLoaderText', 'Підготовка');
                 pCont.style.display = 'block';
-                pBar.style.width = '10%';
+                hudSet(10, 'Підготовка', 'LOADING');
                 let progress = 10;
                 pInt = setInterval(() => {
-                    if (progress < 90) { progress += Math.random() * 15; pBar.style.width = Math.min(90, progress) + '%'; }
+                    if (progress < 90) { progress += Math.random() * 15; hudSet(Math.min(90, progress)); }
                 }, 300);
             } else {
                 setAppStatus('loading', 'Оновлення');
             }
 
             await fetchFresh();
-            if (blocking) pBar.style.width = '100%';
+            if (blocking) hudSet(100, 'Готово');
         } catch (e) {
             console.error('Refresh Error:', e);
             if (isUsableDb(db)) {
@@ -1395,39 +1418,73 @@
         }
     }
 
-    // Ручне оновлення: кеш НЕ видаляється, замінюється лише новими валідними даними
+    // Ручне оновлення: свіжі дані -> повне очищення кешу застосунку -> перевстановлення -> перевірка цілісності -> тестовий перезапуск
+    function showHud() { const l = document.getElementById('appLoader'); document.documentElement.classList.remove('fast-boot'); l.classList.remove('hidden'); l.style.display = 'flex'; l.style.opacity = '1'; l.style.pointerEvents = 'auto'; document.getElementById('progressContainer').style.display = 'block'; }
+    function hideHud() { const l = document.getElementById('appLoader'); l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; l.classList.add('hidden'); }, 250); }
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
     document.getElementById('forceUpdateBtn').addEventListener('click', async function() {
         if (_refreshing) return;
+        if (navigator.onLine === false) { alert('Немає інтернету. Оновлення потребує підключення — поточні дані й кеш збережено.'); return; }
         _refreshing = true;
-        window.openModalBase('updateProgressModal');
-        let s1 = 0, s2 = 0, s3 = 0, s4 = 0;
-        let simInt = setInterval(() => {
-            if (s1 < 95) s1 += Math.random() * 15;
-            else if (s2 < 95) s2 += Math.random() * 10;
-            else if (s3 < 95) s3 += Math.random() * 10;
-            else if (s4 < 90) s4 += Math.random() * 5;
-            window.updateProgressUI(Math.min(95, s1), Math.min(95, s2), Math.min(95, s3), Math.min(90, s4));
-        }, 300);
-
+        showHud(); hudSet(2, 'Завантаження свіжих даних…', 'UPDATING');
+        let tick = null;
         try {
-            // нова версія застосунку (якщо є) + свіжі дані + перевірка цілісності файлів у кеші
-            try { const reg = await navigator.serviceWorker.getRegistration(); if (reg) await reg.update(); } catch (e) {}
+            // 1) спершу свіжі дані: якщо не вдасться — нічого не чіпаємо
+            let p = 2; tick = setInterval(() => { if (p < 38) { p += 2; hudSet(p); } }, 120);
             await fetchFresh();
-            const vr = await window.verifyAppCache(25000);
-            clearInterval(simInt);
-            window.updateProgressUI(100, 100, 100, 100);
-            setTimeout(() => { window.closeModalBase('updateProgressModal'); }, 800);
-            if (vr && vr.left > 0) setTimeout(() => alert('Не всі файли для роботи офлайн завантажились (' + vr.left + '). Повторіть оновлення, коли інтернет буде стабільнішим.'), 900);
+            clearInterval(tick); hudSet(40, 'Очищення кешу…');
+
+            // 2) повне очищення кешу застосунку і перевстановлення Service Worker
+            if ('caches' in window) { const keys = await caches.keys(); await Promise.all(keys.map(k => caches.delete(k))); }
+            hudSet(55, 'Перевстановлення додатка…');
+            if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(regs.map(r => r.unregister()));
+                const reg = await navigator.serviceWorker.register('sw.js');
+                // чекаємо, поки новий SW встановить усі файли і активується (прямо за станом, без .ready)
+                await new Promise(res => {
+                    const sw = reg.installing || reg.waiting || reg.active;
+                    if (!sw || sw.state === 'activated') return res();
+                    sw.addEventListener('statechange', () => { if (sw.state === 'activated') res(); if (sw.state === 'redundant') res(); });
+                    setTimeout(res, 30000);
+                });
+            }
+            hudSet(75, 'Перевірка цілісності файлів…');
+            const vr = await window.verifyAppCache(20000);
+            if (vr && vr.left > 0) throw new Error('Не всі файли завантажились (' + vr.left + '). Повторіть оновлення.');
+
+            // 3) тестовий перезапуск
+            hudSet(92, 'Тестовий перезапуск…');
+            try { sessionStorage.setItem('skillhub_post_update', '1'); sessionStorage.setItem('skillhub_skip_start', '1'); } catch (e) {}
+            await sleep(250);
+            hudSet(100, 'Готово');
+            await sleep(200);
+            location.reload();
         } catch (e) {
-            clearInterval(simInt);
-            window.closeModalBase('updateProgressModal');
-            if (isUsableDb(db)) setAppStatus('ok', 'Не оновлено (з кешу)');
-            else setAppStatus('error', 'Помилка');
-            alert("Помилка оновлення: " + e.message + (isUsableDb(db) ? "\n\nЗбережені дані залишились доступними." : ""));
-        } finally {
+            if (tick) clearInterval(tick);
+            hideHud();
+            if (isUsableDb(db)) setAppStatus('ok', 'Не оновлено (з кешу)'); else setAppStatus('error', 'Помилка');
+            alert('Помилка оновлення: ' + e.message + (isUsableDb(db) ? '\n\nЗбережені дані залишились доступними.' : ''));
             _refreshing = false;
         }
     });
+
+    // Після тестового перезапуску: швидка самоперевірка і короткий підсумок
+    (function postUpdateCheck() {
+        let flag = null; try { flag = sessionStorage.getItem('skillhub_post_update'); sessionStorage.removeItem('skillhub_post_update'); } catch (e) {}
+        if (!flag) return;
+        showHud(); hudSet(100, 'Перевірка після перезапуску…', 'CHECK');
+        const t0 = Date.now();
+        const iv = setInterval(async () => {
+            if (!isUsableDb(db) && Date.now() - t0 < 8000) return;
+            clearInterval(iv);
+            const vr = await window.verifyAppCache(8000);
+            const ok = isUsableDb(db) && (!vr || vr.left === 0);
+            hudSet(100, ok ? '✓ Додаток оновлено, усе працює' : '⚠ Оновлено, але дані потребують інтернету', ok ? 'DONE' : 'CHECK');
+            setTimeout(hideHud, ok ? 900 : 2200);
+        }, 250);
+    })();
 
     // Повернувся інтернет / повернулись у додаток - тихо оновлюємо
     window.addEventListener('online', () => { if (isUsableDb(db)) refreshData(false, false); else init(); });
@@ -1452,33 +1509,22 @@
         }
     }
 
-window.saveDefaultStore = function() {
-        const val = document.getElementById('defaultStoreSelect').value;
-        try { localStorage.setItem('skillhub_default_store', val); } catch(e){}
-        const reserveFilter = document.getElementById('storeFilter');
-        if (reserveFilter) {
-            reserveFilter.value = val;
-            if (document.getElementById('tab-reserves').classList.contains('active')) window.renderRezervyList();
-        }
-    }
+window.saveStore = function() {
+        const val = document.getElementById('storeFilter').value;
+        try { localStorage.setItem('skillhub_default_store', val); } catch (e) {}
+        window.renderRezervyList();
+    };
 
     window.populateFilters = function() {
         const storeSel = document.getElementById('storeFilter');
-        const defaultSel = document.getElementById('defaultStoreSelect');
-
         if (db.rezervyData) {
             const stores = [...new Set(db.rezervyData.map(r => r.store))].sort();
             let h = '<option value="">-- Оберіть магазин --</option>';
             stores.forEach(s => { if (s && s !== "Не вказано") h += `<option value="${s}">${s}</option>`; });
-
-            let currentStoreSelVal = storeSel.value;
-            let currentDefaultSelVal = defaultSel.value;
-
+            const current = storeSel.value;
             safeUpdateHTML(storeSel, h);
-            safeUpdateHTML(defaultSel, h.replace('Оберіть магазин', 'Не вибрано'));
-
-            let savedStore = currentStoreSelVal || currentDefaultSelVal || (function(){ try { return localStorage.getItem('skillhub_default_store'); } catch(e){ return null; } })();
-            if (savedStore) { storeSel.value = savedStore; defaultSel.value = savedStore; }
+            const saved = current || (function(){ try { return localStorage.getItem('skillhub_default_store'); } catch(e){ return null; } })();
+            if (saved) storeSel.value = saved;
         }
     }
 
@@ -2859,14 +2905,18 @@ window.saveDefaultStore = function() {
     // Перевірка цілісності офлайн-кешу: Service Worker звіряє файли з переліком і докачує відсутні
     window.verifyAppCache = function(timeoutMs) {
         return new Promise(resolve => {
-            if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return resolve(null);
+            if (!('serviceWorker' in navigator)) return resolve(null);
             let done = false;
             const onMsg = e => {
                 if (!e.data || e.data.type !== 'verify-result') return;
                 done = true; navigator.serviceWorker.removeEventListener('message', onMsg); resolve(e.data);
             };
             navigator.serviceWorker.addEventListener('message', onMsg);
-            try { navigator.serviceWorker.controller.postMessage({ type: 'verify' }); } catch (e) { return resolve(null); }
+            navigator.serviceWorker.getRegistration().then(reg => {
+                const w = navigator.serviceWorker.controller || (reg && reg.active);
+                if (!w) { navigator.serviceWorker.removeEventListener('message', onMsg); done = true; return resolve(null); }
+                try { w.postMessage({ type: 'verify' }); } catch (e) { resolve(null); }
+            }).catch(() => resolve(null));
             setTimeout(() => { if (!done) { navigator.serviceWorker.removeEventListener('message', onMsg); resolve(null); } }, timeoutMs || 25000);
         });
     };

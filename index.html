@@ -54,9 +54,11 @@
 </div>
 
 <div id="appLoader" class="app-loader">
-    <div class="loader-text" id="mainLoaderText">Підготовка</div>
-    <div class="progress-container" id="progressContainer">
-        <div class="progress-bar" id="progressBar"></div>
+    <div class="hud-wrap">
+        <div class="hud-title" id="hudTitle">LOADING</div>
+        <div class="hud-bar" id="progressContainer"><div class="hud-fill" id="progressBar"></div></div>
+        <div class="hud-lines"><i></i><i></i><i></i></div>
+        <div class="hud-info"><span class="loader-text" id="mainLoaderText">Підготовка</span><b id="hudPct">0%</b></div>
     </div>
 </div>
 
@@ -81,8 +83,7 @@
     </div>
 
     <div id="tab-search" class="app-tab">
-        <div class="news-top-slot"></div>
-        <div class="status-container" id="statusContainer">
+                <div class="status-container" id="statusContainer">
             <div class="status-badge" id="mainStatusBadge">
                 <div id="statusDot" class="dot yellow pulse"></div>
                 <span id="statusText">Підключення</span>
@@ -116,14 +117,13 @@
     </div>
 
     <div id="tab-reserves" class="app-tab">
-        <div class="news-top-slot"></div>
-        <div id="rezervyDateContainer" style="font-size: 12px; color: var(--text-muted); text-align: left; margin-bottom: 12px; font-weight: 600; display:none; align-items:center; gap:6px;">
+                <div id="rezervyDateContainer" style="font-size: 12px; color: var(--text-muted); text-align: left; margin-bottom: 12px; font-weight: 600; display:none; align-items:center; gap:6px;">
             <img src="assets/icons/ui/refresh-time.svg" alt="clock" style="width:16px; height:16px;">
             <span>Останнє оновлення: <span id="rezervyDateText" style="color:var(--text-main);"></span></span>
         </div>
 
         <div class="input-group" style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
-            <select id="storeFilter" onchange="window.renderRezervyList()" style="flex: 1; margin-bottom: 0;">
+            <select id="storeFilter" onchange="window.saveStore()" style="flex: 1; margin-bottom: 0;">
                 <option value="">-- Оберіть магазин --</option>
             </select>
             <button id="openTopSearchBtn" class="reserves-search-trigger">
@@ -176,17 +176,6 @@
                     <input type="range" id="fontSizeSlider" min="0.85" max="1.3" step="0.05" value="1" oninput="window.updateFontScale(this.value)">
                     <span style="font-size: 20px; font-weight:700;">A</span>
                 </div>
-            </div>
-
-            <div class="list-item" data-func="Магазин за замовчуванням" style="flex-direction:column; align-items:flex-start;">
-                <div style="display:flex; align-items:center; width:100%; margin-bottom:10px;">
-                    <img class="set-ico" src="assets/icons/settings/shop.svg" alt="">
-                    <div class="list-item-content">
-                        <span class="list-item-title">Магазин за замовчуванням</span>
-                        <span class="list-item-subtitle">Лише для показу резервів вашого магазину. Змінити можна і у вкладці «Резерви»</span>
-                    </div>
-                </div>
-                <select id="defaultStoreSelect" onchange="window.saveDefaultStore()" style="background: var(--input-bg); margin-bottom: 0;"></select>
             </div>
         </div>
 
@@ -302,7 +291,7 @@
             <button class="modal-close" onclick="window.closeModalBase('newsModal')"></button>
         </div>
         <div class="modal-body" id="newsBody" style="padding-bottom: 12px;"></div>
-        <button class="btn btn-primary" onclick="window.closeModalBase('newsModal')">Зрозуміло</button>
+        <button class="btn btn-primary" onclick="window.ackNews()">Зрозуміло</button>
     </div>
 </div>
 
