@@ -70,7 +70,7 @@
             <div class="header-row" id="mainHeader" style="margin-bottom: 4px; justify-content: space-between; align-items: center;">
                 <h2 id="headerTitle" style="line-height: 1; font-size: 24px; margin: 0;">Пошук</h2>
                 <button id="newsBtn" class="fav-btn-top news-btn" onclick="window.openNews()" style="margin-left:auto; margin-right:8px;" aria-label="Новини">
-                    <svg class="news-badge" viewBox="0 0 45 38" width="45" height="38" role="img" aria-label="Новини">
+                    <svg class="news-badge" viewBox="0 0 45 38" width="32" height="27" role="img" aria-label="Новини">
                         <rect class="nb-bg" x="1.5" y="1.5" width="42" height="35" rx="10" fill="#e50914"/>
                         <rect class="nb-run" x="1.5" y="1.5" width="42" height="35" rx="10" fill="none" stroke="#ffb400" stroke-width="3" stroke-linecap="round" pathLength="100"/>
                         <text x="22.5" y="19" text-anchor="middle" dominant-baseline="central" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="15" fill="#fff" letter-spacing="-0.3">New</text>
@@ -154,6 +154,19 @@
         <div class="list-group" id="dynamicSkillHubButtons"></div>
 
         <div class="list-group" style="margin-top:16px;">
+            <button class="list-item" id="newsRow" data-func="Новини" onclick="window.openNews()">
+                <span class="news-row-ico"><svg class="news-badge" viewBox="0 0 45 38" width="32" height="27" aria-hidden="true">
+                        <rect class="nb-bg" x="1.5" y="1.5" width="42" height="35" rx="10" fill="#e50914"/>
+                        <rect class="nb-run" x="1.5" y="1.5" width="42" height="35" rx="10" fill="none" stroke="#ffb400" stroke-width="3" stroke-linecap="round" pathLength="100"/>
+                        <text x="22.5" y="19" text-anchor="middle" dominant-baseline="central" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="15" fill="#fff" letter-spacing="-0.3">New</text>
+                    </svg></span>
+                <div class="list-item-content">
+                    <span class="list-item-title">Новини</span>
+                    <span class="list-item-subtitle">Останні новини та оновлення</span>
+                </div>
+                <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+            </button>
+
             <button class="list-item" data-func="Зворотній зв'язок" onclick="window.openFeedback()">
                 <img class="set-ico" src="assets/icons/settings/Feedback.svg" alt="">
                 <div class="list-item-content">

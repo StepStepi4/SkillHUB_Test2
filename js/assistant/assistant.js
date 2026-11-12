@@ -497,11 +497,12 @@
     // Новини: A — дата, B — текст (розмітка як в Academy)
     function newsSeenTs() { try { return parseInt(localStorage.getItem('skillhub_news_seen') || '0', 10) || 0; } catch (e) { return 0; } }
     window.renderNewsBadge = function() {
-        const btn = document.getElementById('newsBtn');
-        if (!btn) return;
+        const btn = document.getElementById('newsBtn') || document.createElement('i');
         const news = (db && db.news) || [];
         const latest = news.reduce((m, n) => Math.max(m, n.ts || 0), 0);
-        btn.classList.toggle('has-new', latest > newsSeenTs());
+        const unread = latest > newsSeenTs();
+        btn.classList.toggle('has-new', unread);
+        const row = document.getElementById('newsRow'); if (row) row.classList.toggle('has-new', unread);
     };
     function newsHtml(n, isNew) {
         return `<div class="news-date">${safeText(n.date)}${isNew ? '<span class="news-new">НОВЕ</span>' : ''}</div>`

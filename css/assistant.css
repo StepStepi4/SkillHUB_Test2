@@ -552,10 +552,15 @@ img[src*="assets/icons/"]:not([src*="Factory"]):not([src*="Discount"]):not([src*
 
 /* Кнопка «Новини»: бейдж New без фону, жовта обводка біжить по контуру */
 .news-btn, .news-btn:active { background: none !important; border: none !important; box-shadow: none !important; width: auto; height: auto; padding: 0; display: inline-flex; align-items: center; justify-content: center; animation: none !important; }
-.news-btn .news-badge { display: block; width: 45px; height: 38px; overflow: visible; }
-/* Як у прикладі: суцільний червоний -> темнішає, жовта дуга біжить по контуру -> знову червоний */
-.news-badge .nb-bg { animation: nbBg 3.6s ease-in-out infinite; }
-.news-badge .nb-run { stroke-dasharray: 30 70; opacity: 0; animation: nbRun 3.6s linear infinite; }
+.news-btn .news-badge { display: block; width: 32px; height: 27px; overflow: visible; }
+/* У шапці бейдж видно лише поки є непрочитана новина */
+#newsBtn:not(.has-new) { display: none !important; }
+.news-row-ico { width: 36px; height: 36px; flex-shrink: 0; margin-right: 12px; display: flex; align-items: center; justify-content: center; }
+.news-row-ico .news-badge { width: 32px; height: 27px; overflow: visible; }
+/* Пульсація як у прикладі (лише для непрочитаного): червоний -> темніє, жовта дуга біжить по контуру -> червоний */
+.has-new .news-badge .nb-bg { animation: nbBg 3.6s ease-in-out infinite; }
+.has-new .news-badge .nb-run { stroke-dasharray: 30 70; opacity: 0; animation: nbRun 3.6s linear infinite; }
+.news-badge .nb-run { opacity: 0; }
 @keyframes nbBg { 0%, 15% { fill: #e50914; } 30%, 70% { fill: #3b0509; } 85%, 100% { fill: #e50914; } }
-@keyframes nbRun { 0%, 18% { opacity: 0; stroke-dashoffset: 0; } 28% { opacity: 1; } 72% { opacity: 1; } 82%, 100% { opacity: 0; stroke-dashoffset: -150; } 18.01% { stroke-dashoffset: 0; } 82% { stroke-dashoffset: -150; } }
-@media (prefers-reduced-motion: reduce) { .news-badge .nb-bg, .news-badge .nb-run { animation: none; } }
+@keyframes nbRun { 0%, 18% { opacity: 0; stroke-dashoffset: 0; } 28% { opacity: 1; } 72% { opacity: 1; } 82%, 100% { opacity: 0; stroke-dashoffset: -150; } }
+@media (prefers-reduced-motion: reduce) { .has-new .news-badge .nb-bg, .has-new .news-badge .nb-run { animation: none; } }
