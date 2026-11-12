@@ -552,9 +552,10 @@ img[src*="assets/icons/"]:not([src*="Factory"]):not([src*="Discount"]):not([src*
 
 /* Кнопка «Новини»: бейдж New без фону, жовта обводка біжить по контуру */
 .news-btn, .news-btn:active { background: none !important; border: none !important; box-shadow: none !important; width: auto; height: auto; padding: 0; display: inline-flex; align-items: center; justify-content: center; animation: none !important; }
-.news-btn .news-badge { display: block; width: 30px; height: 26px; overflow: visible; }
-.news-badge .nb-run { stroke-dasharray: 28 72; animation: nbRun 1.8s linear infinite; }
-.news-btn.has-new .news-badge { animation: nbPop 1.4s ease-in-out infinite; }
-@keyframes nbRun { to { stroke-dashoffset: -100; } }
-@keyframes nbPop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
-@media (prefers-reduced-motion: reduce) { .news-badge .nb-run, .news-btn.has-new .news-badge { animation: none; } }
+.news-btn .news-badge { display: block; width: 45px; height: 38px; overflow: visible; }
+/* Як у прикладі: суцільний червоний -> темнішає, жовта дуга біжить по контуру -> знову червоний */
+.news-badge .nb-bg { animation: nbBg 3.6s ease-in-out infinite; }
+.news-badge .nb-run { stroke-dasharray: 30 70; opacity: 0; animation: nbRun 3.6s linear infinite; }
+@keyframes nbBg { 0%, 15% { fill: #e50914; } 30%, 70% { fill: #3b0509; } 85%, 100% { fill: #e50914; } }
+@keyframes nbRun { 0%, 18% { opacity: 0; stroke-dashoffset: 0; } 28% { opacity: 1; } 72% { opacity: 1; } 82%, 100% { opacity: 0; stroke-dashoffset: -150; } 18.01% { stroke-dashoffset: 0; } 82% { stroke-dashoffset: -150; } }
+@media (prefers-reduced-motion: reduce) { .news-badge .nb-bg, .news-badge .nb-run { animation: none; } }
