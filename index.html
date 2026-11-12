@@ -70,7 +70,11 @@
             <div class="header-row" id="mainHeader" style="margin-bottom: 4px; justify-content: space-between; align-items: center;">
                 <h2 id="headerTitle" style="line-height: 1; font-size: 24px; margin: 0;">Пошук</h2>
                 <button id="newsBtn" class="fav-btn-top news-btn" onclick="window.openNews()" style="margin-left:auto; margin-right:8px;" aria-label="Новини">
-                    <img src="assets/icons/skillhub/News.svg" alt="Новини" style="width: 24px; height: 24px; object-fit: contain;">
+                    <svg class="news-badge" viewBox="0 0 30 26" width="30" height="26" role="img" aria-label="Новини">
+                        <rect class="nb-bg" x="1.5" y="1.5" width="27" height="23" rx="7" fill="#e50914"/>
+                        <rect class="nb-run" x="1.5" y="1.5" width="27" height="23" rx="7" fill="none" stroke="#ffb400" stroke-width="2.2" stroke-linecap="round" pathLength="100"/>
+                        <text x="15" y="18.2" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="11" fill="#fff" letter-spacing="-0.2">New</text>
+                    </svg>
                 </button>
                 <button id="topFavBtn" class="fav-btn-top" onclick="window.openFavoritesQuickMenu()" style="display:none;">
                     <img src="assets/icons/ui/favorite.svg" alt="Fav" style="width: 20px; height: 20px; object-fit: contain;">
