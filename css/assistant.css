@@ -558,9 +558,11 @@ img[src*="assets/icons/"]:not([src*="Factory"]):not([src*="Discount"]):not([src*
 .news-row-ico { width: 36px; height: 36px; flex-shrink: 0; margin-right: 12px; display: flex; align-items: center; justify-content: center; }
 .news-row-ico .news-badge { width: 32px; height: 27px; overflow: visible; }
 /* Пульсація як у прикладі (лише для непрочитаного): червоний -> темніє, жовта дуга біжить по контуру -> червоний */
+.has-new .news-badge { transform-origin: center; animation: nbScale 3.6s ease-in-out infinite; }
 .has-new .news-badge .nb-bg { animation: nbBg 3.6s ease-in-out infinite; }
 .has-new .news-badge .nb-run { stroke-dasharray: 30 70; opacity: 0; animation: nbRun 3.6s linear infinite; }
 .news-badge .nb-run { opacity: 0; }
+@keyframes nbScale { 0%, 10% { transform: scale(1); } 30%, 70% { transform: scale(1.4); } 90%, 100% { transform: scale(1); } }
 @keyframes nbBg { 0%, 15% { fill: #e50914; } 30%, 70% { fill: #3b0509; } 85%, 100% { fill: #e50914; } }
 @keyframes nbRun { 0%, 18% { opacity: 0; stroke-dashoffset: 0; } 28% { opacity: 1; } 72% { opacity: 1; } 82%, 100% { opacity: 0; stroke-dashoffset: -150; } }
-@media (prefers-reduced-motion: reduce) { .has-new .news-badge .nb-bg, .has-new .news-badge .nb-run { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .has-new .news-badge, .has-new .news-badge .nb-bg, .has-new .news-badge .nb-run { animation: none; } }
