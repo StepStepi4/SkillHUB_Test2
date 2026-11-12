@@ -1084,6 +1084,7 @@
         startSessionHeartbeat();
         switchView('cabinetView');
         switchCabinetTab('stats');
+        setDefaultCabinetMode(user);
     }
 
     function getAccessibleEmployeesList() {
@@ -1123,7 +1124,7 @@
         // Скидання фільтрів при відкритті
         document.getElementById('f_assigned').checked = false;
         document.getElementById('f_deadline').checked = false;
-        document.getElementById('f_oral').checked = false;
+        ['f_goals','f_done','f_goalsdone'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
         document.getElementById('f_meet').checked = false;
         document.getElementById('filterPanel').style.display = 'none';
         document.getElementById('filterActiveDot').style.display = 'none';
@@ -1193,20 +1194,14 @@
     }
 
     function filterEmployeesLogic(employees) {
-        const f_assigned = document.getElementById('f_assigned') ? document.getElementById('f_assigned').checked : false;
-        const f_deadline = document.getElementById('f_deadline') ? document.getElementById('f_deadline').checked : false;
-        const f_meet = document.getElementById('f_meet') ? document.getElementById('f_meet').checked : false;
-        const f_oral = document.getElementById('f_oral') ? document.getElementById('f_oral').checked : false;
+        const chk = id => { const el = document.getElementById(id); return el ? el.checked : false; };
+        const f_assigned = chk('f_assigned'), f_goals = chk('f_goals'), f_meet = chk('f_meet');
+        const f_deadline = chk('f_deadline'), f_done = chk('f_done'), f_goalsdone = chk('f_goalsdone');
         const f_manager = document.getElementById('f_manager') ? document.getElementById('f_manager').value : "";
 
         return employees.filter(u => {
             if (f_assigned && (!u.assigned || u.assigned.length === 0)) return false;
-            
-            if (f_deadline) {
-                let hasD = u.deadlineDays && parseFloat(u.deadlineDays) > 0;
-                let hasD2 = u.deadline && u.deadline.trim() !== "-" && u.deadline.trim() !== "";
-                if (!hasD && !hasD2) return false;
-            }
+            if (f_goals && !hasGoals(u)) return false;
 
             if (f_meet) {
                 let hasL = u.meetLink && String(u.meetLink).trim() !== "" && String(u.meetLink).trim() !== "-";
@@ -1214,15 +1209,21 @@
                 if (!hasL && !hasD) return false;
             }
 
-            if (f_oral) {
-                let o = String(u.oralExam || "").trim().toLowerCase();
-                if (o === "" || o === "-" || o === "немає" || o === "ні" || o === "false" || o === "0") return false;
+            // Закритий дедлайн: дедлайн був призначений і вже вичерпався
+            if (f_deadline) {
+                const ms = computeRemainingDeadlineMs(u);
+                if (ms === null || ms > 0) return false;
             }
+
+            if (f_done) {
+                const m = computeUserMetrics(u);
+                if (!(m.totalAssigned > 0 && m.completed >= m.totalAssigned)) return false;
+            }
+            if (f_goalsdone && !goalsAllDone(u)) return false;
 
             if (f_manager && f_manager !== "") {
                 if (formatManagerName(u.manager) !== f_manager) return false;
             }
-
             return true;
         });
     }
@@ -1237,12 +1238,8 @@
         }
 
         // Встановлення індикатора фільтру
-        const f_assigned = document.getElementById('f_assigned').checked;
-        const f_deadline = document.getElementById('f_deadline').checked;
-        const f_meet = document.getElementById('f_meet').checked;
-        const f_oral = document.getElementById('f_oral').checked;
-        const f_manager = document.getElementById('f_manager').value;
-        let hasActiveFilters = f_assigned || f_deadline || f_meet || f_oral || (f_manager !== "");
+        let hasActiveFilters = ['f_assigned','f_goals','f_meet','f_deadline','f_done','f_goalsdone'].some(id => { const el = document.getElementById(id); return el && el.checked; })
+            || (document.getElementById('f_manager').value !== "");
         document.getElementById('filterActiveDot').style.display = hasActiveFilters ? 'block' : 'none';
 
         document.getElementById('modalEmpCount').innerText = `Знайдено: ${employees.length}`;
@@ -1324,6 +1321,7 @@
 
         switchView('cabinetView');
         switchCabinetTab('stats');
+        setDefaultCabinetMode(emp);
     }
 
     function openMeetModal() {
@@ -1432,6 +1430,98 @@
     let originalMeetLink = "";
     let originalMeetDate = "";
 
+    /* ====================== ЦІЛІ ====================== */
+    const GOAL_DEFS = [
+        { key: 'pcs',   short: 'Шт',               label: 'Ціль в шт.',                 unit: '' },
+        { key: 'uah',   short: 'Грн',              label: 'Ціль в грн.',                unit: '' },
+        { key: 'plan',  short: 'Виконання плану',  label: 'Ціль виконання плану в %',   unit: '%' },
+        { key: 'eff',   short: 'Ефективність',     label: 'Ефективність в %',           unit: '%' },
+        { key: 'share', short: 'Доля',             label: 'Доля в %',                   unit: '%' },
+        { key: 'smart', short: 'Smart',            label: 'Ціль Smart',                 unit: '' },
+        { key: 'cards', short: 'Картки',           label: 'Ціль картки',                unit: '' }
+    ];
+    let originalGoals = {}, pendingGoals = {};
+
+    function goalsOf(u) { return (u && (u.goals || u.goalsFact)) || {}; }
+    function hasGoals(u) {
+        const g = (u && u.goals) || {};
+        return Object.keys(g).some(k => g[k] && g[k].goal !== null && g[k].goal !== undefined);
+    }
+    function goalsAllDone(u) {
+        const g = (u && u.goals) || {};
+        const act = Object.keys(g).filter(k => k !== 'deadline' && g[k] && g[k].goal);
+        return act.length > 0 && act.every(k => g[k].done !== null && g[k].done !== undefined && g[k].done >= 100);
+    }
+    function fmtNum(v) {
+        if (v === null || v === undefined || v === '') return '—';
+        return Number(v).toLocaleString('uk-UA', { maximumFractionDigits: 1 });
+    }
+
+    function renderGoals(user) {
+        const box = document.getElementById('goalsBlock');
+        if (!box) return;
+        const g = (user && user.goals) || null;
+        if (!g) { box.innerHTML = '<div class="goal-empty">Цілі ще не призначені</div>'; return; }
+        let html = '';
+        GOAL_DEFS.forEach(d => {
+            const o = g[d.key] || {};
+            const done = (o.done === null || o.done === undefined) ? null : o.done;
+            const w = done === null ? 0 : Math.max(0, Math.min(100, done));
+            const sub = (o.goal !== null && o.goal !== undefined)
+                ? `${fmtNum(o.fact)}${d.unit} / ${fmtNum(o.goal)}${d.unit}` : 'ціль не задана';
+            html += `<div class="goal-row">
+                <div class="goal-head"><span>${d.short}</span><small>${sub}</small></div>
+                <div class="goal-track"><div class="goal-bar"><div class="goal-fill" style="width:${w}%"></div></div>
+                <div class="goal-pct">${done === null ? '—' : fmtNum(done) + '%'}</div></div>
+            </div>`;
+        });
+        const dl = g.deadline && g.deadline.goal;
+        if (dl) html += `<div class="goal-dl">Дедлайн цілей: ${fmtNum(dl)} дн.</div>`;
+        box.innerHTML = html;
+    }
+
+    function switchCabinetMode(mode) {
+        const goals = mode === 'goals';
+        document.getElementById('modeBtnGoals').classList.toggle('active', goals);
+        document.getElementById('modeBtnLearn').classList.toggle('active', !goals);
+        document.getElementById('modeGoals').classList.toggle('active', goals);
+        document.getElementById('modeLearn').classList.toggle('active', !goals);
+    }
+    function setDefaultCabinetMode(user) { switchCabinetMode(hasGoals(user) ? 'goals' : 'learn'); }
+
+    function buildGoalForm(emp) {
+        const box = document.getElementById('assignGoalsBox');
+        const g = (emp && (emp.goalsFact || emp.goals)) || {};
+        originalGoals = {}; pendingGoals = {};
+        let html = '';
+        GOAL_DEFS.concat([{ key: 'deadline', label: 'Дедлайн в днях', unit: '' }]).forEach(d => {
+            const o = g[d.key] || {};
+            const cur = (o.goal === null || o.goal === undefined) ? '' : String(o.goal);
+            originalGoals[d.key] = cur; pendingGoals[d.key] = cur;
+            const fact = d.key === 'deadline' ? '' : `<div class="goal-fact">Факт: ${fmtNum(o.fact)}${d.unit}</div>`;
+            html += `<div class="goal-field"><label for="goal_${d.key}">${d.label}</label>
+                <input type="number" inputmode="decimal" id="goal_${d.key}" value="${cur}" min="0" step="any" oninput="onGoalInput('${d.key}', this.value)">${fact}</div>`;
+        });
+        box.innerHTML = html;
+        document.getElementById('cancelGoalsBtn').style.display = (windowUserRole === 'owner' && hasGoals(emp)) ? 'block' : 'none';
+    }
+    function onGoalInput(key, val) { pendingGoals[key] = String(val).trim(); checkAssignChanges(); }
+
+    function cancelGoals() {
+        if (windowUserRole !== 'owner' || !windowViewingEmployee) return;
+        if (!confirm('Скасувати всі цілі співробітника?')) return;
+        enqueue({ action: 'cancel_goals', targetLogin: windowViewingEmployee.login });
+        const clear = u => { if (!u) return; u.goals = null; if (u.goalsFact) Object.keys(u.goalsFact).forEach(k => { u.goalsFact[k].goal = null; u.goalsFact[k].done = null; }); };
+        clear(windowViewingEmployee);
+        clear(eduDb.users.find(u => u.login === windowViewingEmployee.login));
+        closeAssignModal();
+        renderGoals(windowViewingEmployee);
+    }
+
+    function goalsChanged() {
+        return Object.keys(pendingGoals).some(k => pendingGoals[k] !== originalGoals[k]);
+    }
+
     function openAssignModal() {
         if (!windowViewingEmployee) return;
         
@@ -1495,6 +1585,7 @@
         }
 
         list.innerHTML = html;
+        buildGoalForm(windowViewingEmployee);
         saveBtn.style.display = 'none';
         
         modal.classList.add('active');
@@ -1525,6 +1616,7 @@
         for (let k in pendingAssignments) {
             if (pendingAssignments[k] !== originalAssignments[k]) { hasChanges = true; break; }
         }
+        if (goalsChanged()) hasChanges = true;
         document.getElementById('saveAssignBtn').style.display = hasChanges ? 'flex' : 'none';
     }
 
@@ -1546,6 +1638,24 @@
         saveBtn.innerHTML = '<img src="assets/icons/academy/save.svg" class="ui-icon" style="width:20px; height:20px; filter: brightness(0) invert(1);"> ЗБЕРЕЖЕННЯ...'; 
         saveBtn.disabled = true;
 
+        if (goalsChanged()) {
+            const gp = {};
+            Object.keys(pendingGoals).forEach(k => { if (pendingGoals[k] !== originalGoals[k]) gp[k] = pendingGoals[k]; });
+            enqueue({ action: 'set_goals', targetLogin: windowViewingEmployee.login, goals: gp });
+            const apply = u => {
+                if (!u) return;
+                u.goalsFact = u.goalsFact || {};
+                Object.keys(gp).forEach(k => {
+                    const o = u.goalsFact[k] || (u.goalsFact[k] = { goal: null, fact: null, done: null });
+                    o.goal = gp[k] === '' ? null : Number(gp[k]);
+                    o.done = (o.goal && o.fact !== null && k !== 'deadline') ? Math.round(o.fact / o.goal * 1000) / 10 : null;
+                });
+                u.goals = JSON.parse(JSON.stringify(u.goalsFact));
+                if (!hasGoals(u)) u.goals = null;
+            };
+            apply(windowViewingEmployee);
+            apply(eduDb.users.find(u => u.login === windowViewingEmployee.login));
+        }
         let payload = { action: 'assign_courses', targetLogin: windowViewingEmployee.login, assignments: changes };
         if (pendingDeadline !== originalDeadline) payload.deadlineDays = pendingDeadline;
 
@@ -1701,7 +1811,7 @@
             options: {
                 layout: { padding: { left: 60, right: 60, top: 25, bottom: 25 } }, responsive: true, maintainAspectRatio: false, cutout: '45%', 
                 plugins: {
-                    legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12, weight: '600' }, color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#fff' : '#111827', padding: 14, usePointStyle: true, pointStyle: 'rect' } },
+                    legend: { position: 'bottom', title: { display: true, text: ' ', font: { size: 1 }, padding: { top: 30 } }, labels: { font: { family: 'Inter', size: 12, weight: '600' }, color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#fff' : '#111827', padding: 14, usePointStyle: true, pointStyle: 'rect' } },
                     tooltip: { backgroundColor: 'rgba(0,0,0,0.82)', titleFont: { family: 'Inter', size: 13 }, bodyFont: { family: 'Inter', size: 13 }, padding: 12, cornerRadius: 8, displayColors: false }
                 }
             },
@@ -1710,6 +1820,7 @@
     }
 
     function renderCabinetStatsAndCourses(user) {
+        try { renderGoals(user); } catch (e) { console.warn('renderGoals', e); }
         let m = computeUserMetrics(user);
         document.getElementById('chartContainerBox').style.display = 'block';
         renderProgressChart(m.completed, m.inProgress, m.notStarted);

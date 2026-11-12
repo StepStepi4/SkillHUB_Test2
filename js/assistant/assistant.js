@@ -221,6 +221,7 @@
 
     window.switchTab = function(tabId) {
         if (window.Academy && window.Academy.isOpen) { try { window.Academy.close(); } catch (e) {} }
+        if (!_hudBusy && isUsableDb(db)) forceHideLoader();
         document.querySelectorAll('.app-tab').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
 
@@ -1273,6 +1274,24 @@
     function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
     function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
+    // Лоадер завжди доходить до 100% і лише потім ховається; при зміні вкладки ховається одразу
+    let _hudBusy = false, _hudHideT = null;
+    function hideLoaderSmooth() {
+        const l = document.getElementById('appLoader');
+        if (!l || l.style.display === 'none') return;
+        hudSet(100);
+        clearTimeout(_hudHideT);
+        _hudHideT = setTimeout(forceHideLoader, 420);
+    }
+    function forceHideLoader() {
+        clearTimeout(_hudHideT);
+        const l = document.getElementById('appLoader');
+        if (!l) return;
+        l.classList.add('hidden'); l.style.display = 'none'; l.style.opacity = '0'; l.style.pointerEvents = 'none';
+    }
+    window.addEventListener('pageshow', () => { if (!_hudBusy && isUsableDb(db)) forceHideLoader(); });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && !_hudBusy && isUsableDb(db)) forceHideLoader(); });
+
     // HUD-завантаження: title — напис зверху, text — підпис, pct — 0..100
     function hudSet(pct, text, title) {
         const bar = document.getElementById('progressBar'), pc = document.getElementById('hudPct');
@@ -1419,8 +1438,8 @@
     }
 
     // Ручне оновлення: свіжі дані -> повне очищення кешу застосунку -> перевстановлення -> перевірка цілісності -> тестовий перезапуск
-    function showHud() { const l = document.getElementById('appLoader'); document.documentElement.classList.remove('fast-boot'); l.classList.remove('hidden'); l.style.display = 'flex'; l.style.opacity = '1'; l.style.pointerEvents = 'auto'; document.getElementById('progressContainer').style.display = 'block'; }
-    function hideHud() { const l = document.getElementById('appLoader'); l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; l.classList.add('hidden'); }, 250); }
+    function showHud() { _hudBusy = true; const l = document.getElementById('appLoader'); document.documentElement.classList.remove('fast-boot'); l.classList.remove('hidden'); l.style.display = 'flex'; l.style.opacity = '1'; l.style.pointerEvents = 'auto'; document.getElementById('progressContainer').style.display = 'block'; }
+    function hideHud() { _hudBusy = false; const l = document.getElementById('appLoader'); l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; l.classList.add('hidden'); }, 250); }
     const sleep = ms => new Promise(r => setTimeout(r, ms));
 
     document.getElementById('forceUpdateBtn').addEventListener('click', async function() {
@@ -1500,9 +1519,7 @@
             safeUpdateHTML('appVersionDisp', `Версія ${db.appVersion}`);
             document.getElementById('appVersionDisp').style.display = 'inline-block';
         }
-        const l = document.getElementById('appLoader');
-        l.classList.add('hidden');
-        l.style.display = 'none';
+        hideLoaderSmooth();
 
         if (document.getElementById('tab-search').classList.contains('active')) {
             document.getElementById('topFavBtn').style.display = 'flex';

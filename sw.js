@@ -1,6 +1,6 @@
 // SkillHUB Assistant - Service Worker (offline-first)
 // ВАЖЛИВО: при кожному релізі міняйте VERSION - тоді всі пристрої підтягнуть нові файли.
-const VERSION = 'v-bb539abced';
+const VERSION = 'v-5759b5390a';
 const SHELL_CACHE = 'skillhub-shell-' + VERSION;   // "оболонка": сторінки, іконки, бібліотеки
 const RUNTIME_CACHE = 'skillhub-runtime-v1';       // шрифти, картинки досягнень та інше, що завантажується під час роботи
 
@@ -31,6 +31,7 @@ const SHELL = [
   "./assets/fonts/Inter-Medium.woff",
   "./assets/fonts/Inter-Regular.woff",
   "./assets/fonts/Inter-SemiBold.woff",
+  "./assets/icons/academy/Target.svg",
   "./assets/icons/academy/achievement.svg",
   "./assets/icons/academy/course.svg",
   "./assets/icons/academy/education.svg",
