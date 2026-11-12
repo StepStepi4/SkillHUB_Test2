@@ -1467,12 +1467,13 @@
             const o = g[d.key] || {};
             const done = (o.done === null || o.done === undefined) ? null : o.done;
             const w = done === null ? 0 : Math.max(0, Math.min(100, done));
+            const isDone = done !== null && done >= 100;
             const sub = (o.goal !== null && o.goal !== undefined)
-                ? `${fmtNum(o.fact)}${d.unit} / ${fmtNum(o.goal)}${d.unit}` : 'ціль не задана';
+                ? `${fmtNum(o.goal)}${d.unit} / ${fmtNum(o.fact)}${d.unit}` : 'ціль не задана';
+            const bub = done === null ? '' : `<div class="goal-bubble" style="left:${w}%">${fmtNum(done)}%</div>`;
             html += `<div class="goal-row">
-                <div class="goal-head"><span>${d.short}</span><small>${sub}</small></div>
-                <div class="goal-track"><div class="goal-bar"><div class="goal-fill" style="width:${w}%"></div></div>
-                <div class="goal-pct">${done === null ? '—' : fmtNum(done) + '%'}</div></div>
+                <div class="goal-head"><span>${d.short}</span><small class="${isDone ? 'goal-ok' : ''}">${sub}</small></div>
+                <div class="goal-slider">${bub}<div class="goal-line"><div class="goal-done" style="width:${w}%"></div></div></div>
             </div>`;
         });
         const dl = g.deadline && g.deadline.goal;
@@ -1809,14 +1810,19 @@
             type: 'doughnut',
             data: { labels: ['Пройдено', 'В процесі', 'Залишилось'], datasets: [{ data: dataArr, backgroundColor: [colorPassed, colorProgress, colorRemaining], borderWidth: 3, borderColor: bgColor, hoverOffset: 4 }] },
             options: {
-                layout: { padding: { left: 60, right: 60, top: 25, bottom: 25 } }, responsive: true, maintainAspectRatio: false, cutout: '45%', 
+                layout: { padding: { left: 44, right: 44, top: 14, bottom: 14 } }, responsive: true, maintainAspectRatio: false, cutout: '45%', 
                 plugins: {
-                    legend: { position: 'bottom', title: { display: true, text: ' ', font: { size: 1 }, padding: { top: 30 } }, labels: { font: { family: 'Inter', size: 12, weight: '600' }, color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#fff' : '#111827', padding: 14, usePointStyle: true, pointStyle: 'rect' } },
+                    legend: { display: false },
                     tooltip: { backgroundColor: 'rgba(0,0,0,0.82)', titleFont: { family: 'Inter', size: 13 }, bodyFont: { family: 'Inter', size: 13 }, padding: 12, cornerRadius: 8, displayColors: false }
                 }
             },
             plugins: [outsideLabelsPlugin]
         });
+        const lg = document.getElementById('chartLegend');
+        if (lg) {
+            const names = ['Пройдено', 'В процесі', 'Залишилось'], cols = [colorPassed, colorProgress, colorRemaining];
+            lg.innerHTML = names.map((n, k) => `<div class="cl-item"><i style="background:${cols[k]}"></i><span>${n}</span></div>`).join('');
+        }
     }
 
     function renderCabinetStatsAndCourses(user) {

@@ -258,7 +258,7 @@
         #academyApp .stat-label-modern { color: var(--text-muted); font-size: 12px; font-weight: 600; margin-top: 4px; line-height: 1.25; }
         #academyApp .stat-val-modern { color: var(--text-main); font-size: 20px; font-weight: 800; }
         
-        #academyApp .chart-wrapper { position: relative; height: 260px; width: 100%; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        #academyApp .chart-wrapper { position: relative; display: flex; flex-direction: column; width: 100%; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
 
         #academyApp .list-card { background: var(--card-bg); border-radius: 20px; border: 1.5px solid var(--border); margin-bottom: 12px; padding: 16px 18px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
         #academyApp .list-card:active { transform: scale(0.97); background: var(--input-bg); }
@@ -478,14 +478,21 @@ body.academy-open { overflow: hidden; }
 #academyApp .mode-pane { display: none; }
 #academyApp .mode-pane.active { display: block; }
 
-/* Шкали цілей: контур із заокругленням і суцільні вертикальні смужки */
-#academyApp .goal-row { margin-bottom: 14px; }
-#academyApp .goal-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; font-size: 13px; font-weight: 800; color: var(--text-main); }
-#academyApp .goal-head small { font-size: 11px; font-weight: 700; color: var(--text-muted); }
-#academyApp .goal-track { display: flex; align-items: center; gap: 10px; }
-#academyApp .goal-bar { flex: 1; height: 22px; border: 2px solid var(--text-main); border-radius: 8px; padding: 3px; box-sizing: border-box; overflow: hidden; }
-#academyApp .goal-fill { height: 100%; width: 0; border-radius: 3px; background: repeating-linear-gradient(90deg, var(--text-main) 0 4px, transparent 4px 7px); transition: width .5s ease; }
-#academyApp .goal-pct { min-width: 52px; text-align: right; font-size: 13px; font-weight: 800; color: var(--text-main); font-variant-numeric: tabular-nums; }
+#academyApp .chart-canvas-box { position: relative; height: 270px; width: 100%; }
+#academyApp .chart-legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; padding-top: 10px; }
+#academyApp .cl-item { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-main); white-space: nowrap; }
+#academyApp .cl-item i { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; border: 1px solid rgba(128,128,128,.35); }
+
+/* Шкали цілей: тонка лінія з бульбашкою відсотка */
+#academyApp .goal-row { margin-bottom: 8px; }
+#academyApp .goal-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 800; color: var(--text-main); }
+#academyApp .goal-head small { font-size: 12px; font-weight: 700; color: var(--text-muted); }
+#academyApp .goal-head small.goal-ok { color: #16a34a; font-weight: 900; }
+#academyApp .goal-slider { position: relative; padding-top: 34px; margin: 0 14px; }
+#academyApp .goal-line { height: 4px; border-radius: 4px; background: var(--text-main); overflow: hidden; }
+#academyApp .goal-done { height: 100%; background: #9aa0b8; border-radius: 4px; transition: width .5s ease; }
+#academyApp .goal-bubble { position: absolute; top: 6px; transform: translateX(-50%); background: #9aa0b8; color: #fff; font-size: 12px; font-weight: 800; padding: 4px 9px; border-radius: 7px; line-height: 1.2; white-space: nowrap; }
+#academyApp .goal-bubble::after { content: ""; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%); border: 5px solid transparent; border-bottom: 0; border-top-color: #9aa0b8; }
 #academyApp .goal-empty { text-align: center; padding: 28px 16px; color: var(--text-muted); font-weight: 600; }
 #academyApp .goal-dl { font-size: 12px; font-weight: 700; color: var(--text-muted); margin: 2px 0 14px; }
 

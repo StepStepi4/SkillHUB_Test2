@@ -55,6 +55,7 @@
             .ua-name { font-size: calc(20px * ${scale}) !important; }
             .nav-item span { font-size: calc(11px * ${scale}) !important; }
             .nav-icon { width: calc(24px * ${scale}) !important; height: calc(24px * ${scale}) !important; }
+            .nav-item.nav-academy .nav-icon { width: calc(40px * ${scale}) !important; height: calc(40px * ${scale}) !important; flex: 0 0 calc(40px * ${scale}) !important; margin: calc(-8px * ${scale}) 0 !important; }
             .nav-icon.icon-bulb { width: calc(28px * ${scale}) !important; height: calc(28px * ${scale}) !important; }
         `;
     };

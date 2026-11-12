@@ -148,6 +148,26 @@
         </button>
 
         <div class="list-group" id="dynamicSkillHubButtons"></div>
+
+        <div class="list-group" style="margin-top:16px;">
+            <button class="list-item" data-func="Зворотній зв'язок" onclick="window.openFeedback()">
+                <img class="set-ico" src="assets/icons/settings/Feedback.svg" alt="">
+                <div class="list-item-content">
+                    <span class="list-item-title">Зворотній зв'язок</span>
+                    <span class="list-item-subtitle">Оцінити додаток, надіслати відгук або пропозицію</span>
+                </div>
+                <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+            </button>
+
+            <button class="list-item" id="voteRow" data-func="Голосування" style="display:none;" onclick="window.openVote()">
+                <img class="set-ico" src="assets/icons/settings/vote.svg" alt="">
+                <div class="list-item-content">
+                    <span class="list-item-title">Голосувалка</span>
+                    <span class="list-item-subtitle">Є відкрите голосування — візьміть участь</span>
+                </div>
+                <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+            </button>
+        </div>
     </div>
 
     <div id="tab-settings" class="app-tab">
@@ -189,31 +209,8 @@
                 <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
             </button>
 
-            <button class="list-item" data-func="Зворотній зв'язок" onclick="window.openFeedback()">
-                <img class="set-ico" src="assets/icons/settings/Feedback.svg" alt="">
-                <div class="list-item-content">
-                    <span class="list-item-title">Зворотній зв'язок</span>
-                    <span class="list-item-subtitle">Оцінити додаток, надіслати відгук або пропозицію</span>
-                </div>
-                <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-            </button>
 
-            <button class="list-item" id="voteRow" data-func="Голосування" style="display:none;" onclick="window.openVote()">
-                <img class="set-ico" src="assets/icons/settings/vote.svg" alt="">
-                <div class="list-item-content">
-                    <span class="list-item-title">Голосувалка</span>
-                    <span class="list-item-subtitle">Є відкрите голосування — візьміть участь</span>
-                </div>
-                <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-            </button>
 
-            <button class="list-item" data-func="Скинути налаштування" onclick="window.factoryReset()">
-                <img class="set-ico" src="assets/icons/settings/Factory reset.svg" alt="">
-                <div class="list-item-content">
-                    <span class="list-item-title" style="color: var(--danger);">Скинути налаштування</span>
-                    <span class="list-item-subtitle">Повернути додаток до заводського стану</span>
-                </div>
-            </button>
         </div>
 
         <div style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 6px;">
@@ -873,7 +870,8 @@
             </div>
             
             <div class="chart-wrapper" id="chartContainerBox">
-                <canvas id="progressChart"></canvas>
+                <div class="chart-canvas-box"><canvas id="progressChart"></canvas></div>
+                <div class="chart-legend" id="chartLegend"></div>
             </div>
 
             <!-- 8 показників -->
