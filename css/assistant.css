@@ -566,3 +566,12 @@ img[src*="assets/icons/"]:not([src*="Factory"]):not([src*="Discount"]):not([src*
 @keyframes nbBg { 0%, 15% { fill: #e50914; } 30%, 70% { fill: #3b0509; } 85%, 100% { fill: #e50914; } }
 @keyframes nbRun { 0%, 18% { opacity: 0; stroke-dashoffset: 0; } 28% { opacity: 1; } 72% { opacity: 1; } 82%, 100% { opacity: 0; stroke-dashoffset: -150; } }
 @media (prefers-reduced-motion: reduce) { .has-new .news-badge, .has-new .news-badge .nb-bg, .has-new .news-badge .nb-run { animation: none; } }
+
+/* Шапка: червона плашка «Свіжа новина», пульсує поки не прочитано */
+.news-pill { display: inline-block; background: #e50914; color: #fff; font: 800 13px/1 Inter, system-ui, sans-serif; letter-spacing: .2px; padding: 10px 16px; border-radius: 999px; white-space: nowrap; animation: pillPulse 1.4s ease-in-out infinite; }
+@keyframes pillPulse {
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(229, 9, 20, .65); }
+  50%  { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(229, 9, 20, 0); filter: brightness(1.15); }
+  100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(229, 9, 20, 0); }
+}
+@media (prefers-reduced-motion: reduce) { .news-pill { animation: none; } }
