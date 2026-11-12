@@ -478,7 +478,7 @@ body.academy-open { overflow: hidden; }
 #academyApp .mode-pane { display: none; }
 #academyApp .mode-pane.active { display: block; }
 
-#academyApp .chart-canvas-box { position: relative; height: 270px; width: 100%; }
+#academyApp .chart-canvas-box { position: relative; height: 200px; width: 100%; }
 #academyApp .chart-legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; padding-top: 10px; }
 #academyApp .cl-item { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-main); white-space: nowrap; }
 #academyApp .cl-item i { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; border: 1px solid rgba(128,128,128,.35); }
@@ -502,3 +502,5 @@ body.academy-open { overflow: hidden; }
 #academyApp .goal-field input { width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--input-bg); color: var(--text-main); font: 700 14px Inter, sans-serif; }
 #academyApp .goal-field .goal-fact { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-top: 3px; }
 #academyApp .goal-cancel-btn { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 12px; border: 1.5px solid var(--border); background: transparent; color: var(--text-main); font: 800 13px Inter, sans-serif; cursor: pointer; }
+
+#academyApp .goal-top { text-align: right; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }

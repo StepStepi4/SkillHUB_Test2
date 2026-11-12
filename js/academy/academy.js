@@ -1462,7 +1462,7 @@
         if (!box) return;
         const g = (user && user.goals) || null;
         if (!g) { box.innerHTML = '<div class="goal-empty">Цілі ще не призначені</div>'; return; }
-        let html = '';
+        let html = '<div class="goal-top">Ціль / Факт</div>';
         GOAL_DEFS.forEach(d => {
             const o = g[d.key] || {};
             const done = (o.done === null || o.done === undefined) ? null : o.done;

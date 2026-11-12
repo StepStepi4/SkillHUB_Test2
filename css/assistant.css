@@ -537,7 +537,7 @@ img[src*="assets/icons/"]:not([src*="Factory"]):not([src*="Discount"]):not([src*
 /* ===== HUD-завантаження (перший запуск і оновлення): чорно-біле, як у референсі ===== */
 .app-loader { background: #ffffff; color: #000000; }
 [data-theme="dark"] .app-loader { background: #000000; color: #ffffff; }
-.hud-wrap { width: min(86vw, 360px); display: flex; flex-direction: column; align-items: stretch; }
+.hud-wrap { width: min(64vw, 270px); display: flex; flex-direction: column; align-items: stretch; }
 .hud-title { text-align: center; font: 800 15px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: 0.5em; text-indent: 0.5em; margin-bottom: 14px; text-shadow: 0 0 10px currentColor; }
 .hud-bar { position: relative; height: 24px; border: 2px solid currentColor; padding: 3px; box-sizing: border-box; display: block !important; background: transparent; margin: 0; border-radius: 0; overflow: hidden; }
 .hud-fill { height: 100%; width: 0%; transition: width .35s ease; background: repeating-linear-gradient(120deg, currentColor 0 15px, transparent 15px 19px); clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
@@ -549,5 +549,3 @@ img[src*="assets/icons/"]:not([src*="Factory"]):not([src*="Discount"]):not([src*
 .hud-info .loader-text { margin: 0; padding: 0; font-size: 12px; font-weight: 600; text-align: left; color: inherit; opacity: .75; }
 .hud-info b { font-size: 13px; font-weight: 800; }
 
-/* Іконка Академії крупніша (~+23%), без зміни висоти меню і вирівнювання підписів */
-.nav-item.nav-academy .nav-icon { width: 40px; height: 40px; flex: 0 0 40px; margin: -7px 0; }
