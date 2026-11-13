@@ -117,7 +117,7 @@
             if (sv && (sv.code === 'forbidden' || sv.code === 'auth_required' || sv.code === 'no_auth')) return deny(sv.code === 'forbidden' ? 'Доступ заборонено: потрібна роль «Власник».' : 'Сесія недійсна. Увійдіть в Академію як Власник.');
             return deny('Сервер повернув помилку' + (sv && sv.error ? ': ' + sv.error : '') + '. Імовірно, скрипт ще не оновлено до версії ' + EXPECT_REV + '.');
         }
-        state.total = 33; state.done = 1; setProgress();
+        state.total = 34; state.done = 1; setProgress();
 
         rep.sec('Середовище');
         await step(rep, 'Версія застосунку', async () => {
@@ -186,6 +186,11 @@
             const v = window.verifyAppCache ? await window.verifyAppCache(25000) : null;
             if (!v) return { value: 'SW не відповів', status: 'warn' };
             return { value: 'файлів ' + v.total + ', відсутніх ' + v.missing + ', виправлено ' + v.fixed + ', залишилось ' + v.left, status: v.left > 0 ? 'err' : v.missing ? 'warn' : 'ok' };
+        });
+        await step(rep, 'Локальна копія Chart.js (офлайн-діаграми)', async () => {
+            const r = await fetchTimed('js/vendor/chart.umd.js?d=' + Date.now());
+            const real = r.ok && r.size > 50000;
+            return { value: real ? 'є, ' + kb(r.size) : 'файл відсутній', status: real ? 'ok' : 'warn', detail: real ? '' : 'Діаграма Академії працює лише з інтернетом (через CDN). Додайте js/vendor/chart.umd.js — див. js/vendor/README.md' };
         });
         for (const f of files) {
             await step(rep, 'Файл ' + f, async () => {
