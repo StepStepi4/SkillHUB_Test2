@@ -4,7 +4,7 @@
    лише лічильники, час і стани. 3) Весь текст проходить через __redact перед показом і копіюванням. */
 (function () {
     if (window.Diag) return;
-    const EXPECT_REV = 9;
+    const EXPECT_REV = 10;
     const files = ['index.html', 'sw.js', 'manifest.json', 'css/assistant.css', 'css/academy.css', 'js/core/config.js', 'js/assistant/assistant.js', 'js/academy/academy.js'];
     const red = s => (window.__redact ? window.__redact(s) : String(s));
     const $ = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
@@ -208,7 +208,7 @@
         await step(rep, 'Читання каталогу', async () => {
             const r = await fetchTimed(API_URL + '?action=catalog'); const t = performance.now(); catObj = JSON.parse(r.text); const pm = Math.round(performance.now() - t);
             const speed = r.total ? Math.round(r.size / 1024 / (r.total / 1000)) : 0;
-            return { value: kb(r.size) + ' за ' + r.total + ' мс (≈' + speed + ' КБ/с), розбір ' + pm + ' мс', status: !r.ok ? 'err' : r.total > 6000 ? 'warn' : 'ok' };
+            return { value: kb(r.size) + ' за ' + r.total + ' мс (≈' + speed + ' КБ/с), розбір ' + pm + ' мс', status: !r.ok ? 'err' : r.total > 9000 ? 'warn' : 'ok' };
         });
         await step(rep, 'Вміст каталогу', async () => {
             const c = catObj || {}; const svc = (c.categories || []).reduce((a, x) => a + ((x.services || []).length), 0);
@@ -229,7 +229,7 @@
             const t = performance.now(); const r = await window.Academy.diagPost('edu', {}); const ms = Math.round(performance.now() - t);
             if (!r || !r.success) return { value: 'помилка ' + (r && r.code), status: 'err' };
             const u = (r.educationData && r.educationData.users) || []; const g = u.filter(x => x.goals).length;
-            return { value: 'співробітників ' + u.length + ', із цілями ' + g + ', курсів ' + ((r.educationData && r.educationData.courses) || []).length + '; ' + ms + ' мс', status: ms > 6000 ? 'warn' : 'ok' };
+            return { value: 'співробітників ' + u.length + ', із цілями ' + g + ', курсів ' + ((r.educationData && r.educationData.courses) || []).length + '; ' + ms + ' мс', status: ms > 15000 ? 'warn' : 'ok', detail: ms > 4000 ? 'Повільно через порожній кеш сервера; наступні запити швидші (кеш прогрівається таймером)' : '' };
         });
         await step(rep, 'Черга відправки (outbox)', async () => {
             const n = window.Academy.outboxInfo().count;

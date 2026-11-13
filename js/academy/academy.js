@@ -1495,7 +1495,9 @@
         const g = (emp && (emp.goalsFact || emp.goals)) || {};
         originalGoals = {}; pendingGoals = {};
         let html = '';
-        GOAL_DEFS.concat([{ key: 'deadline', label: 'Дедлайн в днях', unit: '' }]).forEach(d => {
+        // «Дедлайн в днях» показуємо лише якщо в таблиці (CZ:DT) є така колонка цілей
+        const hasDl = Object.keys(g).indexOf('deadline') !== -1;
+        GOAL_DEFS.concat(hasDl ? [{ key: 'deadline', label: 'Дедлайн в днях', unit: '' }] : []).forEach(d => {
             const o = g[d.key] || {};
             const cur = (o.goal === null || o.goal === undefined) ? '' : String(o.goal);
             originalGoals[d.key] = cur; pendingGoals[d.key] = cur;
