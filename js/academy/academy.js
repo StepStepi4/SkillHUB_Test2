@@ -2245,6 +2245,13 @@
     /* ====================== Публічний інтерфейс розділу «Академія» ====================== */
     window.Academy = {
         isOpen: false,
+        // Запит від імені поточного користувача (токен не віддається назовні). Для діагностики: сервер сам перевіряє роль.
+        async diagPost(action, extra) {
+            if (!auth) auth = readAuth();
+            if (!auth) return { success: false, code: 'no_auth' };
+            return apiPost(authBody(Object.assign({ action: action }, extra || {})), 30000);
+        },
+        outboxInfo() { const q = outboxRead(); return { count: q.length }; },
         async open(opts) {
             const root = academyRoot();
             if (!root) return;

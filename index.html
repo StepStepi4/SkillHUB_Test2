@@ -221,6 +221,15 @@
                 </div>
                 <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
             </button>
+
+            <button class="list-item" id="diagRow" data-func="Діагностика" style="display:none;" onclick="window.openDiag()">
+                <img class="set-ico" src="assets/icons/settings/security.svg" alt="">
+                <div class="list-item-content">
+                    <span class="list-item-title">Діагностика додатку</span>
+                    <span class="list-item-subtitle">Повна перевірка функцій, синхронізації, швидкості та пам’яті</span>
+                </div>
+                <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+            </button>
             <button class="list-item" data-func="Скинути налаштування" onclick="window.factoryReset()">
                 <img class="set-ico" src="assets/icons/settings/Factory reset.svg" alt="">
                 <div class="list-item-content">
@@ -1019,6 +1028,7 @@
 <!-- СКРИПТИ -->
 </div>
 
+<script src="js/core/errlog.js"></script>
 <script src="js/core/config.js"></script>
 <script src="js/core/search.js"></script>
 <script src="js/core/storage.js"></script>

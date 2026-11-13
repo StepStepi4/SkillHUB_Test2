@@ -488,7 +488,19 @@
         }
         if (window.renderSkillHubTab) window.renderSkillHubTab();
     };
-    window.addEventListener('skillhub-user', () => { try { window.applyAccess(); } catch (e) {} });
+    // Діагностика: кнопка лише для Власника (клієнтська перевірка - зручність; справжній захист - на сервері, див. дію diag)
+    function isOwnerRole() { const u = currentUserInfo(); return !!(u && /власник|владелец|owner|admin|адмін/i.test(String(u.role || ''))); }
+    window.renderDiagRow = function() { const r = document.getElementById('diagRow'); if (r) r.style.display = isOwnerRole() ? '' : 'none'; };
+    window.openDiag = function() {
+        if (!isOwnerRole()) return;
+        const go = () => window.Diag && window.Diag.open();
+        if (window.Diag) return go();
+        const sc = document.createElement('script'); sc.src = 'js/assistant/diag.js'; sc.onload = go;
+        sc.onerror = () => alert('Не вдалося завантажити модуль діагностики (потрібен інтернет або оновлення додатку).');
+        document.head.appendChild(sc);
+    };
+    window.addEventListener('skillhub-user', () => { try { window.applyAccess(); } catch (e) {} try { window.renderDiagRow(); } catch (e) {} });
+    window.addEventListener('load', () => { try { window.renderDiagRow(); } catch (e) {} });
 
     window.openAcademyTab = function() {
         if (window.Academy && !window.Academy.isOpen) window.Academy.open();
