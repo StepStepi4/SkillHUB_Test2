@@ -4,7 +4,7 @@
    лише лічильники, час і стани. 3) Весь текст проходить через __redact перед показом і копіюванням. */
 (function () {
     if (window.Diag) return;
-    const EXPECT_REV = 10;
+    const EXPECT_REV = 11;
     const files = ['index.html', 'sw.js', 'manifest.json', 'css/assistant.css', 'css/academy.css', 'js/core/config.js', 'js/assistant/assistant.js', 'js/academy/academy.js'];
     const red = s => (window.__redact ? window.__redact(s) : String(s));
     const $ = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
@@ -16,17 +16,17 @@
 #diagOv{position:fixed;inset:0;z-index:100000;background:var(--bg-color,var(--bg,#f2f2f7));color:var(--text-main,#111);overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:Inter,system-ui,sans-serif;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px calc(env(safe-area-inset-bottom,0px) + 28px)}
 #diagOv .dg-wrap{max-width:720px;margin:0 auto}
 #diagOv .dg-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
-#diagOv h1{font-size:22px;font-weight:900;margin:0;line-height:1.15}
+#diagOv h1{font-size:22px;font-weight: 700;margin:0;line-height:1.15}
 #diagOv .dg-sub{font-size:12px;font-weight:600;color:var(--text-muted,#6b7280);margin-top:4px}
-#diagOv .dg-x{width:38px;height:38px;border-radius:50%;border:1px solid var(--border,#e5e5ea);background:var(--card-bg,#fff);font-size:18px;font-weight:800;cursor:pointer;color:inherit;flex-shrink:0}
+#diagOv .dg-x{width:38px;height:38px;border-radius:50%;border:1px solid var(--border,#e5e5ea);background:var(--card-bg,#fff);font-size:18px;font-weight: 700;cursor:pointer;color:inherit;flex-shrink:0}
 #diagOv .dg-sum{background:var(--card-bg,#fff);border:1px solid var(--border,#e5e5ea);border-radius:18px;padding:16px;margin-bottom:12px}
-#diagOv .dg-state{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:900}
+#diagOv .dg-state{display:flex;align-items:center;gap:10px;font-size:17px;font-weight: 700}
 #diagOv .dg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;background:#9ca3af}
 #diagOv .dg-dot.ok{background:#16a34a}#diagOv .dg-dot.warn{background:#f59e0b}#diagOv .dg-dot.err{background:#dc2626}#diagOv .dg-dot.run{background:#3b82f6;animation:dgP 1s infinite}
 @keyframes dgP{50%{opacity:.35}}
 #diagOv .dg-cnt{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
 #diagOv .dg-cnt div{background:var(--input-bg,#f3f4f6);border-radius:12px;padding:9px 6px;text-align:center}
-#diagOv .dg-cnt b{display:block;font-size:20px;font-weight:900}
+#diagOv .dg-cnt b{display:block;font-size:20px;font-weight: 700}
 #diagOv .dg-cnt span{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-muted,#6b7280);letter-spacing:.03em}
 #diagOv .dg-bar{height:4px;border-radius:4px;background:var(--border,#e5e5ea);margin-top:14px;overflow:hidden}
 #diagOv .dg-bar i{display:block;height:100%;width:0;background:var(--text-main,#111);transition:width .25s}
@@ -36,12 +36,12 @@
 #diagOv .dg-btn.sec{background:transparent;color:var(--text-main,#111)}
 #diagOv .dg-btn:disabled{opacity:.45}
 #diagOv .dg-sec{background:var(--card-bg,#fff);border:1px solid var(--border,#e5e5ea);border-radius:18px;margin-bottom:12px;overflow:hidden}
-#diagOv .dg-sec>h2{margin:0;padding:13px 16px;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted,#6b7280);border-bottom:1px solid var(--border,#e5e5ea);display:flex;justify-content:space-between}
+#diagOv .dg-sec>h2{margin:0;padding:13px 16px;font-size:12px;font-weight: 700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted,#6b7280);border-bottom:1px solid var(--border,#e5e5ea);display:flex;justify-content:space-between}
 #diagOv .dg-row{display:flex;gap:10px;align-items:flex-start;padding:11px 16px;border-bottom:1px solid var(--border,#e5e5ea)}
 #diagOv .dg-row:last-child{border-bottom:0}
 #diagOv .dg-row .dg-dot{margin-top:5px;width:10px;height:10px}
 #diagOv .dg-n{flex:1;min-width:0}
-#diagOv .dg-n b{font-size:13px;font-weight:800;display:block}
+#diagOv .dg-n b{font-size:13px;font-weight: 700;display:block}
 #diagOv .dg-n small{display:block;font-size:12px;font-weight:600;color:var(--text-muted,#6b7280);margin-top:2px;word-break:break-word}
 #diagOv .dg-v{text-align:right;font-size:12px;font-weight:700;max-width:52%;word-break:break-word;font-variant-numeric:tabular-nums}
 #diagOv .dg-v em{display:block;font-style:normal;font-size:10px;color:var(--text-muted,#6b7280);font-weight:600;margin-top:2px}
@@ -211,7 +211,7 @@
             return { value: kb(r.size) + ' за ' + r.total + ' мс (≈' + speed + ' КБ/с), розбір ' + pm + ' мс', status: !r.ok ? 'err' : r.total > 9000 ? 'warn' : 'ok' };
         });
         await step(rep, 'Вміст каталогу', async () => {
-            const c = catObj || {}; const svc = (c.categories || []).reduce((a, x) => a + ((x.services || []).length), 0);
+            const c = catObj || {}; const svc = (c.categories || []).filter(x => x && (x.ua || x.name)).length;
             const ok = (c.categories || []).length > 0;
             return { value: 'категорій ' + (c.categories || []).length + ', послуг ' + svc + ', тарифів ' + (c.tariffs || []).length + ', резервів ' + (c.rezervyData || []).length + ', новин ' + (c.news || []).length, status: ok ? 'ok' : 'err' };
         });

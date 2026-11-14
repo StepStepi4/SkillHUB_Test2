@@ -272,7 +272,7 @@
                     <div style="display: flex; flex-direction: column; justify-content: center; flex: 1;">
                         <div class="ach-card-title">${safeTitle}</div>
                         <div class="ach-card-desc">${safeDesc}</div>
-                        ${isEarned ? `<div style="margin-top:6px;"><span style="color:var(--success); font-size:11px; font-weight:800;">НАТИСНІТЬ ДЛЯ ОПИСУ</span></div>` : ''}
+                        ${isEarned ? `<div style="margin-top:6px;"><span style="color:var(--success); font-size:11px; font-weight: 700;">НАТИСНІТЬ ДЛЯ ОПИСУ</span></div>` : ''}
                     </div>
                 </div>
             `;
@@ -942,7 +942,7 @@
                 <div class="list-card" style="border-color: var(--primary); background: var(--primary-light); margin-bottom: 0; cursor: default;">
                     <img src="assets/icons/academy/meet.svg" class="ui-icon" style="width:28px; height:28px;" onerror="this.style.display='none'">
                     <div style="flex:1; margin-left: 14px; padding-right: 10px;">
-                        <div style="font-size: 15px; font-weight: 800; color: var(--primary);">Google Meet</div>
+                        <div style="font-size: 15px; font-weight: 700; color: var(--primary);">Google Meet</div>
                         ${dateTxt}
                     </div>
                     <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex-shrink: 0;">
@@ -1262,7 +1262,7 @@
             return `
                 <div class="list-card" style="border-color: ${borderCol}; padding: 14px 16px;" onclick="selectEmployeeFromModal('${escapeHTMLAttr(u.login)}')">
                     <div style="flex: 1; padding-right: 10px;">
-                        <div style="font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 4px;">${escapeHTMLAttr(u.name)}</div>
+                        <div style="font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 4px;">${escapeHTMLAttr(u.name)}</div>
                         <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; flex-direction: column; gap: 2px;">
                             ${storeTxt ? `<span>${storeTxt}</span>` : ''}
                             ${mgrTxt ? `<span>${mgrTxt}</span>` : ''}
@@ -1273,7 +1273,7 @@
                         </div>
                     </div>
                     <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex-shrink: 0;">
-                        <div style="font-size: 16px; font-weight: 900; color: ${(m.totalAssigned > 0 && m.completed === m.totalAssigned) ? 'var(--success)' : 'var(--text-main)'};">
+                        <div style="font-size: 16px; font-weight: 700; color: ${(m.totalAssigned > 0 && m.completed === m.totalAssigned) ? 'var(--success)' : 'var(--text-main)'};">
                             ${m.completed}<span style="font-size: 12px; color: var(--text-muted);">/${m.totalAssigned}</span>
                         </div>
                         <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Пройдено</div>
@@ -1407,7 +1407,7 @@
             return `
                 <div class="list-card" style="border-color: ${borderCol}; ${bgClass} padding: 14px 16px; cursor:default;">
                     <div style="flex: 1; padding-right: 10px;">
-                        <div style="font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 4px;">${escapeHTMLAttr(u.name)}</div>
+                        <div style="font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 4px;">${escapeHTMLAttr(u.name)}</div>
                         <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; flex-direction: column; gap: 2px;">
                             ${storeTxt ? `<span>${storeTxt}</span>` : ''}
                             <span>🗓 ${dateDisplay}</span>
@@ -1869,7 +1869,7 @@
                 <div class="${cardClass}" onclick="openCourse(this.getAttribute('data-name'))" data-name="${safeName}">
                     <div class="list-card-title" style="flex: 1;"><span style="font-size: 16px;">${parsed.title}</span></div>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="font-size: 15px; font-weight: 800; color: var(--text-main);">${cPassed} <span style="font-size: 13px; font-weight: 600; color: var(--text-muted);">/ ${cTotal}</span></div>
+                        <div style="font-size: 15px; font-weight: 700; color: var(--text-main);">${cPassed} <span style="font-size: 13px; font-weight: 600; color: var(--text-muted);">/ ${cTotal}</span></div>
                         <div class="list-card-arrow">❯</div>
                     </div>
                 </div>
@@ -1901,7 +1901,7 @@
                         <div class="ach-icon-wrapper"><img src="assets/achievements/${safeCode}.webp" onerror="this.src='assets/icons/ui/medal.svg'" class="ach-img"></div>
                         <div style="display: flex; flex-direction: column; justify-content: center; flex: 1;">
                             <div class="ach-card-title">${escapeHTMLAttr(title)}</div><div class="ach-card-desc">${escapeHTMLAttr(desc)}</div>
-                            <div style="margin-top:6px;"><span style="color:var(--success); font-size:11px; font-weight:800;">НАТИСНІТЬ ДЛЯ ОПИСУ</span></div>
+                            <div style="margin-top:6px;"><span style="color:var(--success); font-size:11px; font-weight: 700;">НАТИСНІТЬ ДЛЯ ОПИСУ</span></div>
                         </div>
                     </div>
                 `;
@@ -1922,11 +1922,11 @@
                 return `
                     <div class="list-card" style="cursor: default; margin-bottom: 10px; padding: 14px 16px;">
                         <div style="flex: 1; padding-right: 10px;">
-                            <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-bottom: 4px;">${idx + 1}. ${escapeHTMLAttr(cleanTitle)}</div>
+                            <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">${idx + 1}. ${escapeHTMLAttr(cleanTitle)}</div>
                             <div style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Спроб: <b>${parsed.attempts}</b> • Час: <b>${parsed.time} с</b> • Порушень: <b style="color:${parsed.violations > 0 ? 'var(--danger)' : 'inherit'};">${parsed.violations}</b></div>
                         </div>
                         <div style="text-align: right; flex-shrink: 0;">
-                            <div style="font-size: 16px; font-weight: 900; color: ${badgeColor};">${statusText}</div>
+                            <div style="font-size: 16px; font-weight: 700; color: ${badgeColor};">${statusText}</div>
                             ${rawRes ? `<div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">${escapeHTMLAttr(rawRes)}</div>` : ''}
                         </div>
                     </div>
@@ -1956,7 +1956,7 @@
         let progressHtml = `
             <div class="adaptive-progress-bar" style="height:36px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border); background:var(--input-bg); justify-content:center;">
                 <div class="apb-fill" style="width:${safePercent}%; background:var(--primary); border-radius:inherit;"></div>
-                <div class="apb-text" style="font-weight:800; font-size:14px; color:var(--text-main); text-shadow:0 0 4px rgba(255,255,255,0.9), 0 0 2px #fff;">Прогрес: ${percent}%</div>
+                <div class="apb-text" style="font-weight: 700; font-size:14px; color:var(--text-main); text-shadow:0 0 4px rgba(255,255,255,0.9), 0 0 2px #fff;">Прогрес: ${percent}%</div>
             </div>
         `;
 
@@ -1974,7 +1974,7 @@
                     <div style="display: flex; flex-direction: column; justify-content: center;"><span style="font-size: 15px; font-weight: 700; color: var(--text-main); line-height: 1.25;">${escapeHTMLAttr(parsed.title)}</span></div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px; flex-shrink:0;">
-                    <div style="font-size: 14px; font-weight: 800; color: ${scoreColor};">${scoreText}</div><div class="list-card-arrow">❯</div>
+                    <div style="font-size: 14px; font-weight: 700; color: ${scoreColor};">${scoreText}</div><div class="list-card-arrow">❯</div>
                 </div>
             </div>
             `;
@@ -2007,7 +2007,7 @@
                 sLink = "https://" + sLink.replace(/^https?:\/\//,'');
             }
             contentHtml += `
-            <a href="${sLink}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="margin-bottom: 24px; border-color: var(--primary); color: var(--primary); padding: 14px; font-size: 14px; font-weight: 800; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+            <a href="${sLink}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="margin-bottom: 24px; border-color: var(--primary); color: var(--primary); padding: 14px; font-size: 14px; font-weight: 700; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
                 <img src="assets/icons/academy/info.svg" class="ui-icon" onerror="this.style.display='none'">
                 Детальніше про цей курс
             </a>`;

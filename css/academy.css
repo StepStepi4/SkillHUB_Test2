@@ -111,9 +111,9 @@
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        #academyApp h1 { font-size: 26px; font-weight: 800; margin: 0 0 22px 0; text-align: center; letter-spacing: -0.5px; }
+        #academyApp h1 { font-size: 26px; font-weight: 700; margin: 0 0 22px 0; text-align: center; letter-spacing: -0.5px; }
         #academyApp p.subtitle { font-size: 14px; color: var(--text-muted); text-align: center; margin-bottom: 24px; font-weight: 500; }
-        #academyApp .section-title { font-size: 12px; font-weight: 800; margin: 24px 0 12px 0; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: flex-start; gap: 8px; }
+        #academyApp .section-title { font-size: 12px; font-weight: 700; margin: 24px 0 12px 0; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: flex-start; gap: 8px; }
         #academyApp .big-emoji { text-align: center; font-size: 64px; margin-bottom: 16px; line-height: 1; display: flex; justify-content: center; }
 
         #academyApp .login-wrapper { display: flex; flex-direction: column; justify-content: center; min-height: 80vh; }
@@ -172,7 +172,7 @@
         #academyApp .custom-checkmark::after { content: ''; width: 5px; height: 10px; border: solid white; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); display: none; margin-bottom: 2px; }
         #academyApp .custom-checkbox-wrapper input:checked + .custom-checkmark::after { display: block; }
 
-        #academyApp .btn { width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer; border: none; transition: 0.2s; text-align: center; display: flex; justify-content: center; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        #academyApp .btn { width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; text-align: center; display: flex; justify-content: center; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         #academyApp .btn-glow { background: #000000; color: #ffffff; box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
         [data-theme="dark"] #academyApp .btn-glow { background: #ffffff; color: #000000; box-shadow: 0 8px 20px rgba(255,255,255,0.12); }
         #academyApp .btn-glow:active { transform: scale(0.96); box-shadow: 0 4px 10px var(--primary-light); }
@@ -181,7 +181,7 @@
         #academyApp .btn-secondary:active { transform: scale(0.96); background: var(--border); }
 
         #academyApp .nav-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; gap: 10px; }
-        #academyApp .nav-header h2 { font-size: 22px !important; margin: 0; font-weight: 800; letter-spacing: -0.5px; line-height: 1.2; color: var(--text-main); }
+        #academyApp .nav-header h2 { font-size: 22px !important; margin: 0; font-weight: 700; letter-spacing: -0.5px; line-height: 1.2; color: var(--text-main); }
         #academyApp .nav-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
         #academyApp .back-btn-sleek { background: var(--card-bg); border: 1px solid var(--border); width: 42px; height: 42px; border-radius: 13px; display: flex; justify-content: center; align-items: center; color: var(--text-main); transition: all 0.2s; cursor: pointer; padding: 0; position: relative; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
         #academyApp .back-btn-sleek:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
@@ -197,7 +197,7 @@
             padding: 4px 6px; 
             height: 46px; /* Строго фіксована зменшена висота */
             font-size: 11px; /* Зменшений шрифт для вміщення довгого тексту */
-            font-weight: 800; 
+            font-weight: 700; 
             color: var(--text-main); 
             display: flex; 
             align-items: center; 
@@ -256,7 +256,7 @@
         #academyApp .stats-grid-8 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         #academyApp .stat-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 14px 12px; text-align: center; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         #academyApp .stat-label-modern { color: var(--text-muted); font-size: 12px; font-weight: 600; margin-top: 4px; line-height: 1.25; }
-        #academyApp .stat-val-modern { color: var(--text-main); font-size: 20px; font-weight: 800; }
+        #academyApp .stat-val-modern { color: var(--text-main); font-size: 20px; font-weight: 700; }
         
         #academyApp .chart-wrapper { position: relative; display: flex; flex-direction: column; width: 100%; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
 
@@ -267,7 +267,7 @@
         #academyApp .list-card-arrow { color: var(--text-muted); font-weight: bold; }
 
         #academyApp #deadlineContainer { background: var(--input-bg); border: 1px solid var(--border); border-radius: 16px; padding: 9px 16px; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto 18px auto; max-width: 100%; transition: 0.3s; }
-        #academyApp #deadlineText { font-size: 13.5px; font-weight: 800; color: var(--text-main); }
+        #academyApp #deadlineText { font-size: 13.5px; font-weight: 700; color: var(--text-main); }
         @keyframes urgentDeadlinePulse { 0%, 100% { color: var(--danger); opacity: 1; transform: scale(1); } 50% { color: #ff0000; opacity: 0.45; transform: scale(1.03); } }
         #academyApp .deadline-urgent #deadlineText { color: var(--danger) !important; animation: urgentDeadlinePulse 1.1s infinite ease-in-out; }
         #academyApp .deadline-urgent { background: rgba(239, 68, 68, 0.1) !important; border-color: rgba(239, 68, 68, 0.35) !important; }
@@ -279,7 +279,7 @@
         #academyApp .theory-line:last-child { border-bottom: none; }
         
         #academyApp .question-card { background: var(--card-bg); border-radius: 24px; padding: 24px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); }
-        #academyApp .question-title { font-size: 17px; font-weight: 800; margin-bottom: 20px; line-height: 1.4; color: var(--text-main); }
+        #academyApp .question-title { font-size: 17px; font-weight: 700; margin-bottom: 20px; line-height: 1.4; color: var(--text-main); }
         
         #academyApp .answer-label { display: flex; align-items: center; gap: 14px; padding: 16px; background: var(--card-bg); border: 2px solid var(--input-bg); border-radius: 16px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s ease; font-weight: 600; font-size: 14px; color: var(--text-main); }
         #academyApp .answer-label:hover { border-color: var(--border); background: var(--input-bg); }
@@ -294,14 +294,14 @@
         #academyApp .answer-label input:checked { background-color: var(--primary); border-color: var(--primary); }
         #academyApp .answer-label input:checked::before { transform: scale(1); }
 
-        #academyApp .timer-box { font-size: 16px; font-weight: 800; color: var(--danger); background: var(--danger-bg); padding: 8px 16px; border-radius: 12px; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+        #academyApp .timer-box { font-size: 16px; font-weight: 700; color: var(--danger); background: var(--danger-bg); padding: 8px 16px; border-radius: 12px; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
         #academyApp #errorMsg { color: var(--danger); font-size: 14px; font-weight: 700; text-align: center; margin-bottom: 20px; display: none; background: rgba(239, 68, 68, 0.1); padding: 14px; border-radius: 12px; }
 
         #academyApp .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 10000; display: none; opacity: 0; transition: 0.3s ease; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
         #academyApp .drawer-overlay.active { display: block; opacity: 1; }
         #academyApp .ach-drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 370px; height: 100%; background: var(--bg); z-index: 10001; transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: -8px 0 32px rgba(0,0,0,0.15); overflow-y: auto; padding: 24px; }
         #academyApp .ach-drawer.open { right: 0; }
-        #academyApp .ach-title { font-size: 22px; font-weight: 800; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+        #academyApp .ach-title { font-size: 22px; font-weight: 700; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
         
         #academyApp .ach-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 18px; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.03); transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); position: relative; z-index: 1; }
         #academyApp .ach-card:active:not(.zoomed) { transform: scale(0.96); background: var(--input-bg); } 
@@ -318,7 +318,7 @@
         #academyApp .ach-card.locked:active { transform: none; background: transparent; }
         #academyApp .ach-card.locked .ach-card-desc { display: none; }
         
-        #academyApp .ach-card-title { font-size: 16px; font-weight: 800; color: var(--text-main); line-height: 1.3; transition: 0.3s; }
+        #academyApp .ach-card-title { font-size: 16px; font-weight: 700; color: var(--text-main); line-height: 1.3; transition: 0.3s; }
         #academyApp .ach-card.locked .ach-card-title { font-size: 14px; } 
         #academyApp .ach-card.zoomed .ach-card-title { font-size: 20px; }
         
@@ -337,8 +337,8 @@
         }
         #academyApp .stats-modal.active { opacity: 1; transform: translate(-50%, -50%) scale(1); display: flex; }
         #academyApp .stats-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-shrink: 0; }
-        #academyApp .stats-modal-title { font-size: 20px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
-        #academyApp .modal-close-btn { background: var(--card-bg); border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 12px; font-size: 18px; font-weight: 800; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        #academyApp .stats-modal-title { font-size: 20px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        #academyApp .modal-close-btn { background: var(--card-bg); border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 12px; font-size: 18px; font-weight: 700; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
         #academyApp .search-box-wrap { position: relative; flex: 1; margin-bottom: 0; }
         #academyApp .search-input-modern {
@@ -364,7 +364,7 @@
         #academyApp .suggestion-item:last-child { border-bottom: none; }
         #academyApp .suggestion-item:hover,
 #academyApp .suggestion-item:active { background: var(--primary-light); }
-        #academyApp .suggestion-highlight { color: var(--primary); font-weight: 900; }
+        #academyApp .suggestion-highlight { color: var(--primary); font-weight: 700; }
 
         #academyApp .employees-scroll-list { flex: 1; overflow-y: auto; padding-right: 2px; }
 
@@ -386,7 +386,7 @@
             padding: 8px 4px;
             font-family: inherit;
             font-size: 11.5px;
-            font-weight: 800;
+            font-weight: 700;
             line-height: 1.1;
             text-align: center;
             color: var(--text-main);
@@ -410,7 +410,7 @@
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; color: #fff; z-index: 999999;
             display: none; flex-direction: column; justify-content: center; align-items: center;
-            font-size: 16px; font-weight: 800; text-align: center; padding: 24px; line-height: 1.5;
+            font-size: 16px; font-weight: 700; text-align: center; padding: 24px; line-height: 1.5;
         }
         body.cheating #academyApp .container { display: none !important; }
         body.cheating #academyApp #antiCheatScreen { display: flex !important; }
@@ -485,22 +485,52 @@ body.academy-open { overflow: hidden; }
 
 /* Шкали цілей: тонка лінія з бульбашкою відсотка */
 #academyApp .goal-row { margin-bottom: 8px; }
-#academyApp .goal-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 800; color: var(--text-main); }
+#academyApp .goal-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 700; color: var(--text-main); }
 #academyApp .goal-head small { font-size: 12px; font-weight: 700; color: var(--text-muted); }
-#academyApp .goal-head small.goal-ok { color: #16a34a; font-weight: 900; }
+#academyApp .goal-head small.goal-ok { color: #16a34a; font-weight: 700; }
 #academyApp .goal-slider { position: relative; padding-top: 34px; margin: 0 14px; }
 #academyApp .goal-line { height: 4px; border-radius: 4px; background: var(--text-main); overflow: hidden; }
 #academyApp .goal-done { height: 100%; background: #9aa0b8; border-radius: 4px; transition: width .5s ease; }
-#academyApp .goal-bubble { position: absolute; top: 6px; transform: translateX(-50%); background: #9aa0b8; color: #fff; font-size: 12px; font-weight: 800; padding: 4px 9px; border-radius: 7px; line-height: 1.2; white-space: nowrap; }
+#academyApp .goal-bubble { position: absolute; top: 6px; transform: translateX(-50%); background: #9aa0b8; color: #fff; font-size: 12px; font-weight: 700; padding: 4px 9px; border-radius: 7px; line-height: 1.2; white-space: nowrap; }
 #academyApp .goal-bubble::after { content: ""; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%); border: 5px solid transparent; border-bottom: 0; border-top-color: #9aa0b8; }
 #academyApp .goal-empty { text-align: center; padding: 28px 16px; color: var(--text-muted); font-weight: 600; }
 #academyApp .goal-dl { font-size: 12px; font-weight: 700; color: var(--text-muted); margin: 2px 0 14px; }
 
 /* Форма цілей у «Призначити» */
 #academyApp .goal-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-#academyApp .goal-field label { display: block; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+#academyApp .goal-field label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
 #academyApp .goal-field input { width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--input-bg); color: var(--text-main); font: 700 14px Inter, sans-serif; }
 #academyApp .goal-field .goal-fact { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-top: 3px; }
 #academyApp .goal-cancel-btn { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 12px; border: 1.5px solid var(--border); background: transparent; color: var(--text-main); font: 800 13px Inter, sans-serif; cursor: pointer; }
 
-#academyApp .goal-top { text-align: right; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+#academyApp .goal-top { text-align: right; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+
+/* ===== extras: залік, сьогодні, зведення, масові дії, журнал ===== */
+.ex-pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:6px;background:var(--input-bg);color:var(--text-main)}
+.ex-pill.ok,.ex-opt.ok{color:#16a34a}.ex-pill.warn,.ex-opt.warn{color:#d97706}.ex-pill.bad,.ex-opt.bad{color:#dc2626}
+.ex-sheet{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
+.ex-sheet-box{background:var(--card-bg,#fff);color:var(--text-main);width:100%;max-width:560px;max-height:85vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;padding:16px}
+.ex-sheet-head{display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:700;margin-bottom:12px}
+.ex-x{border:0;background:var(--input-bg);width:32px;height:32px;border-radius:50%;color:var(--text-main);cursor:pointer}
+.ex-sheet-body{overflow:auto;display:flex;flex-direction:column;gap:8px;font-weight:600}
+.ex-sheet-foot{margin-top:12px}
+.ex-opt{border:1.5px solid var(--border);background:var(--input-bg);border-radius:14px;padding:14px;font-size:15px;font-weight:700;text-align:left;cursor:pointer}
+.ex-opt.sel{border-color:currentColor}.ex-opt.clr{color:var(--text-muted)}
+.ex-main{width:100%;border:0;border-radius:14px;padding:14px;font-weight:700;font-size:15px;background:var(--text-main);color:var(--card-bg,#fff);cursor:pointer}
+.ex-input{border:1.5px solid var(--border);border-radius:12px;padding:12px;font-size:16px;background:var(--input-bg);color:var(--text-main)}
+.ex-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.ex-sub{color:var(--text-muted);font-weight:600;font-size:13px;margin-top:6px}.ex-list{font-size:13px;color:var(--text-muted);line-height:1.6}
+.ex-pre{white-space:pre-wrap;font:600 14px/1.5 inherit;background:var(--input-bg);padding:12px;border-radius:12px;margin:0}
+.ex-log{padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}.ex-log small{color:var(--text-muted);display:block}
+.ex-tools{display:flex;gap:8px;margin-bottom:10px;flex-shrink:0}
+.ex-tools button{flex:1;border:1.5px solid var(--border);background:var(--card-bg);color:var(--text-main);border-radius:12px;padding:9px 6px;font-size:12px;font-weight:700;cursor:pointer}
+.ex-tools button.on{background:var(--text-main);color:var(--card-bg)}
+.bulk-bar{position:sticky;bottom:0;display:flex;gap:6px;align-items:center;padding:10px;background:var(--card-bg);border-top:1px solid var(--border);flex-shrink:0}
+.bulk-bar span{flex:1;font-weight:700;font-size:13px}.bulk-bar button{border:0;border-radius:10px;padding:9px 12px;font-weight:700;background:var(--text-main);color:var(--card-bg);cursor:pointer}
+#academyApp .list-card.bulk-sel{outline:2.5px solid var(--text-main)}
+.today-line{display:flex;flex-direction:column;gap:2px;background:var(--input-bg);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:13px}
+.today-line b{font-size:11px;text-transform:uppercase;color:var(--text-muted);font-weight:700}
+.ex-toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);background:var(--text-main);color:var(--card-bg,#fff);padding:10px 16px;border-radius:999px;font-weight:700;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:100001}
+.ex-toast.show{opacity:1;transform:translate(-50%,0)}
+
+.goal-sort{border:1.5px solid var(--border);background:var(--input-bg);color:var(--text-main);border-radius:10px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer}

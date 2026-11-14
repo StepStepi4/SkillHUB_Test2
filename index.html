@@ -70,7 +70,7 @@
             <div class="header-row" id="mainHeader" style="margin-bottom: 4px; justify-content: space-between; align-items: center;">
                 <h2 id="headerTitle" style="line-height: 1; font-size: 24px; margin: 0;">Пошук</h2>
                 <button id="newsBtn" class="fav-btn-top news-btn" onclick="window.openNews()" style="margin-left:auto; margin-right:8px;" aria-label="Новини">
-                    <span class="news-pill">Свіжа новина</span>
+                    <img class="news-ico" src="assets/icons/ui/news.svg" alt="Новини">
                 </button>
                 <button id="topFavBtn" class="fav-btn-top" onclick="window.openFavoritesQuickMenu()" style="display:none;">
                     <img src="assets/icons/ui/favorite.svg" alt="Fav" style="width: 20px; height: 20px; object-fit: contain;">
@@ -102,7 +102,7 @@
         </div>
 
         <div id="result" style="display:none;">
-            <div class="ua-name" id="uaTitle" style="font-size:20px; font-weight:800; margin-bottom:5px; text-align: left;"></div>
+            <div class="ua-name" id="uaTitle" style="font-size:20px; font-weight: 700; margin-bottom:5px; text-align: left;"></div>
             <div class="item-category" id="itemCategory" style="margin-bottom:20px; opacity:0.7; font-size:13px; text-transform: uppercase; font-weight: 700; text-align: left;"></div>
 
             <div id="techInfo"></div>
@@ -151,11 +151,7 @@
 
         <div class="list-group" style="margin-top:16px;">
             <button class="list-item" id="newsRow" data-func="Новини" onclick="window.openNews()">
-                <span class="news-row-ico"><svg class="news-badge" viewBox="0 0 45 38" width="32" height="27" aria-hidden="true">
-                        <rect class="nb-bg" x="1.5" y="1.5" width="42" height="35" rx="10" fill="#e50914"/>
-                        <rect class="nb-run" x="1.5" y="1.5" width="42" height="35" rx="10" fill="none" stroke="#ffb400" stroke-width="3" stroke-linecap="round" pathLength="100"/>
-                        <text x="22.5" y="19" text-anchor="middle" dominant-baseline="central" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="15" fill="#fff" letter-spacing="-0.3">New</text>
-                    </svg></span>
+                <span class="news-row-ico"><img class="news-ico" src="assets/icons/ui/news.svg" alt=""></span>
                 <div class="list-item-content">
                     <span class="list-item-title">Новини</span>
                     <span class="list-item-subtitle">Останні новини та оновлення</span>
@@ -230,6 +226,16 @@
                 </div>
                 <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
             </button>
+            <div class="list-item" data-func="Показ обраного меню" style="flex-direction:column; align-items:flex-start;">
+                <div class="list-item-content" style="width:100%; margin-bottom:10px;">
+                    <span class="list-item-title">Показ обраного меню</span>
+                    <span class="list-item-subtitle">Де показувати кнопку «Обране»</span>
+                </div>
+                <div class="seg-row" id="favModeSeg">
+                    <button data-m="top">Вверху</button><button data-m="float">Плаваюча кнопка</button><button data-m="off">Вимкнути</button>
+                </div>
+            </div>
+
             <button class="list-item" data-func="Скинути налаштування" onclick="window.factoryReset()">
                 <img class="set-ico" src="assets/icons/settings/Factory reset.svg" alt="">
                 <div class="list-item-content">
@@ -335,6 +341,7 @@
 </div>
 
 <!-- МОДАЛКА: ШВИДКЕ МЕНЮ (ОБРАНЕ) -->
+<button id="favFloat" class="fav-float" style="display:none;" aria-label="Обране"><img src="assets/icons/ui/favorite.svg" alt=""></button>
 <div id="favQuickMenuModal" class="modal">
     <div class="modal-content" style="max-height: 85vh;">
         <div class="modal-header">
@@ -392,7 +399,7 @@
 
             <div style="background: var(--primary-light); border-radius: 16px; padding: 16px; text-align: center; border: 1px dashed var(--primary); transition: 0.3s;" id="klochResultBox">
                 <div style="font-size: 13px; color: var(--rozetka-green-dark); font-weight: 600; margin-bottom: 4px;">Розрахунковий бонус</div>
-                <div id="klochResultValue" style="font-size: 28px; font-weight: 900; color: var(--text-main);">0.00 ₴</div>
+                <div id="klochResultValue" style="font-size: 28px; font-weight: 700; color: var(--text-main);">0.00 ₴</div>
                 <div id="klochResultFormula" style="font-size: 11px; color: var(--text-muted); margin-top: 4px; font-style: italic;">Формула: (0 * 0%) * 1</div>
             </div>
 
@@ -412,7 +419,7 @@
             <div style="display: flex; gap: 8px; margin-top: 8px;">
                 <div style="flex: 1; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                     <span style="font-size: 14px; font-weight: 700; color: var(--text-muted);">Загальна сума:</span>
-                    <span id="klochTotalSum" style="font-size: 18px; font-weight: 900; color: var(--primary);">0.00 ₴</span>
+                    <span id="klochTotalSum" style="font-size: 18px; font-weight: 700; color: var(--primary);">0.00 ₴</span>
                 </div>
                 <button id="exportKlochBtn" class="btn" style="background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border); width: 50px; padding: 0; flex-shrink: 0;" onclick="window.exportKlochList()">
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
@@ -543,7 +550,7 @@
             </form>
             <div id="sellerStatusOverlay">
                 <div style="font-size: 3rem; margin-bottom: 10px;">✅</div>
-                <h5 style="color: var(--rozetka-green-dark); font-weight: 800; margin: 0; font-size: 1.2rem;">УСПІШНО ВІДПРАВЛЕНО!</h5>
+                <h5 style="color: var(--rozetka-green-dark); font-weight: 700; margin: 0; font-size: 1.2rem;">УСПІШНО ВІДПРАВЛЕНО!</h5>
                 <p style="font-size: 1rem; color: var(--text-muted); margin-top: 10px; margin-bottom: 0; line-height: 1.4;">Заявка обробляється протягом певного часу</p>
             </div>
         </div>
@@ -569,7 +576,7 @@
 <div id="academyApp" hidden>
 <div id="antiCheatScreen">
     <div style="font-size: 70px; margin-bottom: 24px;">🚨</div>
-    <div style="font-size: 24px; font-weight: 800;">ТЕСТ ЗАБЛОКОВАНО</div>
+    <div style="font-size: 24px; font-weight: 700;">ТЕСТ ЗАБЛОКОВАНО</div>
     <div style="font-size: 14px; font-weight: 500; color: #98989d; margin-top: 12px;">
         Виконано спробу згорнути вікно або згорнути браузер.<br>Захист від списування активовано.
     </div>
@@ -628,7 +635,7 @@
 
     <!-- Панель фільтрів -->
     <div id="filterPanel" style="display: none; background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; flex-shrink: 0; flex-direction: column; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-        <div onclick="toggleFilterMenu()" style="font-size: 12px; font-weight: 800; color: var(--primary); text-transform: uppercase; display:flex; justify-content:space-between; align-items:center; cursor:pointer;"><span>Фільтрація співробітників</span><span style="font-size:14px;">▲ Згорнути</span></div>
+        <div onclick="toggleFilterMenu()" style="font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; display:flex; justify-content:space-between; align-items:center; cursor:pointer;"><span>Фільтрація співробітників</span><span style="font-size:14px;">▲ Згорнути</span></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 8px;">
         <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
             <input type="checkbox" id="f_assigned" onchange="applyFilters()">
@@ -724,7 +731,7 @@
 
     <!-- Блок Google Meet (тільки для власника) -->
     <div id="ownerMeetInputs" style="display:none; flex-direction:column; gap:14px; margin-bottom: 14px; flex-shrink: 0; background: var(--card-bg); padding: 16px; border-radius: 16px; border: 1px solid var(--border);">
-        <div style="font-size: 12px; font-weight: 800; color: var(--primary); text-transform: uppercase;">Зустріч Google Meet</div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase;">Зустріч Google Meet</div>
         <div>
             <label class="input-label" style="margin-bottom: 6px;">Посилання на зустріч</label>
             <input type="text" id="assignMeetLink" class="search-input-modern" placeholder="https://meet.google.com/..." oninput="checkAssignChanges()">
@@ -747,7 +754,7 @@
 <div class="drawer-overlay" id="skillhubModalOverlay" onclick="closeSkillhubFrame()"></div>
 <div class="skillhub-modal" id="skillhubModal">
     <div class="skillhub-header">
-        <div style="font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+        <div style="font-weight: 700; color:var(--text-main); display:flex; align-items:center; gap:8px;">
             <img src="assets/icons/academy/info.svg" class="ui-icon" onerror="this.style.display='none'"> 
             Детально про послугу
         </div>
@@ -834,7 +841,7 @@
         <!-- Банер перегляду співробітника -->
         <div id="viewingEmployeeBanner" class="viewing-banner">
             <div class="viewing-banner-info">
-                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary);">Перегляд співробітника</span>
+                <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--primary);">Перегляд співробітника</span>
                 <span id="viewingEmployeeMeta" style="font-size: 12px; font-weight: 600; color: var(--text-muted);"></span>
             </div>
             <div class="banner-actions">
@@ -966,7 +973,7 @@
         <div id="theoryContentContainer"></div> 
 
         <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 16px; padding: 16px; margin-bottom: 24px; text-align: left;" id="testWarningBox">
-            <div style="font-size: 14px; font-weight: 800; color: var(--danger); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <div style="font-size: 14px; font-weight: 700; color: var(--danger); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 18px;">⚠️</span> Важливе правило
             </div>
             <div style="font-size: 13px; color: var(--text-main); line-height: 1.4; font-weight: 500;">
@@ -1034,6 +1041,8 @@
 <script src="js/core/storage.js"></script>
 <script src="js/core/richtext.js"></script>
 <script src="js/assistant/assistant.js"></script>
+<script src="js/assistant/ux.js"></script>
 <script src="js/academy/academy.js"></script>
+<script src="js/academy/extras.js"></script>
 </body>
 </html>

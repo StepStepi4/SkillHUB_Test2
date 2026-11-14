@@ -255,7 +255,7 @@
 
                 let priceLabelHtml = "";
                 if (priceLabel && priceLabel !== "Дізнатись" && priceLabel !== "Обрати пакет") {
-                    priceLabelHtml = `<div style="font-size: 16px; font-weight: 800; color: var(--primary); white-space: nowrap; background: var(--input-bg); padding: 4px 10px; border-radius: 8px;">${priceLabel}</div>`;
+                    priceLabelHtml = `<div style="font-size: 16px; font-weight: 700; color: var(--primary); white-space: nowrap; background: var(--input-bg); padding: 4px 10px; border-radius: 8px;">${priceLabel}</div>`;
                 }
 
                 let discountBadgeHtml = "";
@@ -360,11 +360,11 @@
                                 <div style="margin-bottom: 8px; background: var(--card-bg); border-radius: 8px; padding: 12px; border: 1px solid var(--border);">
                                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 10px;">
                                         <div style="font-size: 13px; font-weight: 700; color: var(--text-main); line-height: 1.3;">${displayName}</div>
-                                        <div style="font-size: 14px; font-weight: 800; color: var(--primary); white-space: nowrap;">${tPriceStr}</div>
+                                        <div style="font-size: 14px; font-weight: 700; color: var(--primary); white-space: nowrap;">${tPriceStr}</div>
                                     </div>
                                     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px;">
                                         <span style="font-size: 12px; color: var(--text-muted);">Код товару:</span>
-                                        <span style="font-size: 15px; font-weight: 800; color: var(--text-main); cursor: pointer;" onclick="window.copyCode(event, this, '${t.code}')">${t.code} 📋</span>
+                                        <span style="font-size: 15px; font-weight: 700; color: var(--text-main); cursor: pointer;" onclick="window.copyCode(event, this, '${t.code}')">${t.code} 📋</span>
                                     </div>
                                 </div>
                                 `;
@@ -377,7 +377,7 @@
 
                             return `
                             <div style="margin-bottom: 20px;">
-                                <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; text-align: center;">${variantTitle}</div>${comboItemsHtml}
+                                <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; text-align: center;">${variantTitle}</div>${comboItemsHtml}
                                 <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px; background: var(--card-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--primary-light);">
                                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted);">
                                         <span>Сума діапазонів:</span>
@@ -393,7 +393,7 @@
 
                         comboHtml = `
                             <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed var(--border);">
-                                <button class="btn" style="background: var(--primary-light); color: var(--rozetka-green-dark); font-weight: 800; width: 100%; border: 1px dashed var(--primary);" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">
+                                <button class="btn" style="background: var(--primary-light); color: var(--rozetka-green-dark); font-weight: 700; width: 100%; border: 1px dashed var(--primary);" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">
                                     🧩 Об'єднати сертифікати
                                 </button>
                                 <div style="display: none; background: var(--input-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border); animation: fade 0.2s ease;">
@@ -1113,7 +1113,7 @@
                     <span style="font-size: 11px; color: var(--primary);">Коеф: ${item.percent}%</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-weight: 800; font-size: 14px; color: var(--text-main);">${item.result.toFixed(2)} ₴</span>
+                    <span style="font-weight: 700; font-size: 14px; color: var(--text-main);">${item.result.toFixed(2)} ₴</span>
                     <button style="background: transparent; border: none; color: var(--danger); cursor: pointer; padding: 4px;" onclick="window.removeKlochItem(${item.id})">✖</button>
                 </div>
             </div>`;
@@ -1629,7 +1629,7 @@ window.saveStore = function() {
                     sColor = "var(--clr-seller-market-text)";
                     isMarketplaceSeller = true;
                 }
-                sellerHtml = `<div style="background: ${sBg}; color: ${sColor}; font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; display: inline-block; width: max-content; margin-top: 6px;">${s}</div>`;
+                sellerHtml = `<div style="background: ${sBg}; color: ${sColor}; font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; display: inline-block; width: max-content; margin-top: 6px;">${s}</div>`;
             }
 
             let articleHtml = "";
@@ -1640,9 +1640,9 @@ window.saveStore = function() {
                 if (isMarketplaceSeller || artUpper.startsWith("PRM") || artUpper.startsWith("RMP") || artUpper.startsWith("RPM")) {
                     if (art.length > 4) {
                         let p2 = art.slice(-4);
-                        articleHtml = `<div style="font-size: 12px; color: var(--text-muted); margin-top: 6px; font-family: monospace;">.......<span style="font-weight: 900; font-size: 15px; color: var(--text-main);">${window.escapeHTML(p2)}</span></div>`;
+                        articleHtml = `<div style="font-size: 12px; color: var(--text-muted); margin-top: 6px; font-family: monospace;">.......<span style="font-weight: 700; font-size: 15px; color: var(--text-main);">${window.escapeHTML(p2)}</span></div>`;
                     } else {
-                        articleHtml = `<div style="font-size: 14px; font-weight: 900; color: var(--text-main); margin-top: 6px; font-family: monospace;">${window.escapeHTML(art)}</div>`;
+                        articleHtml = `<div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-top: 6px; font-family: monospace;">${window.escapeHTML(art)}</div>`;
                     }
                 } else {
                     articleHtml = `<div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Код на сайті Rozetka <span style="font-family: monospace; font-weight: 600; color: var(--text-main);">${window.escapeHTML(art)}</span></div>`;
@@ -1651,7 +1651,7 @@ window.saveStore = function() {
 
             let qtyHtml = "";
             if (r.qty) {
-                qtyHtml = `<div style="background: var(--input-bg); color: var(--text-main); font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border); margin-top: 6px;">📦 ${window.escapeHTML(r.qty)} шт</div>`;
+                qtyHtml = `<div style="background: var(--input-bg); color: var(--text-main); font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border); margin-top: 6px;">📦 ${window.escapeHTML(r.qty)} шт</div>`;
             }
 
             return `
@@ -1876,7 +1876,7 @@ window.saveStore = function() {
                 snHtml = `
                 <div style="display:flex; justify-content:space-between; align-items:center; background:var(--input-bg); padding:12px 16px; border-radius:12px; margin-bottom:16px; border:1px solid var(--border);">
                     <div style="font-size:12px; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Серійний номер:</div>
-                    <div style="font-size:15px; font-weight:800; color:var(--primary); cursor:pointer; display:flex; align-items:center; gap:6px;" onclick="window.copyCode(event, this, '${window.escapeForJS(sn)}')">${sn} 📋</div>
+                    <div style="font-size:15px; font-weight: 700; color:var(--primary); cursor:pointer; display:flex; align-items:center; gap:6px;" onclick="window.copyCode(event, this, '${window.escapeForJS(sn)}')">${sn} 📋</div>
                 </div>`;
             }
 
@@ -2116,7 +2116,7 @@ window.saveStore = function() {
                 let sName = serviceMatch[1];
                 let costText = window.findPriceForServiceText(sName, window.currentDevicePrice);
                 if (costText) {
-                    priceBadge = `<div class="sc-price" style="font-size: 13px; font-weight: 800; color: var(--primary); background: var(--input-bg); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--border); white-space: nowrap; margin-left: 8px;">${costText}</div>`;
+                    priceBadge = `<div class="sc-price" style="font-size: 13px; font-weight: 700; color: var(--primary); background: var(--input-bg); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--border); white-space: nowrap; margin-left: 8px;">${costText}</div>`;
                 }
             }
 
@@ -2481,7 +2481,7 @@ window.saveStore = function() {
             if (idxB !== -1) { common.push({a: featA, b: diffB[idxB]}); diffB.splice(idxB, 1); } else diffA.push(featA);
         });
 
-        let html = `<div style="font-size: 11px; color: var(--text-muted); font-weight: 800; margin-bottom: 12px; text-align: center; text-transform: uppercase;">Властивості (унікальні позначені ⭐️)</div>`;
+        let html = `<div style="font-size: 11px; color: var(--text-muted); font-weight: 700; margin-bottom: 12px; text-align: center; text-transform: uppercase;">Властивості (унікальні позначені ⭐️)</div>`;
         html += `<div class="compare-wrapper"><table class="compare-table"><thead><tr>`;
         [sA, sB].forEach(s => {
             let brandLabel = s.brand || (s.cls === 'brand-ekta' ? 'ЕКТА' : (s.cls === 'brand-support' ? 'SUPPORT' : (s.cls === 'brand-epz' ? 'ЕПЗ' : 'СЕРВІС')));
@@ -2561,7 +2561,7 @@ window.saveStore = function() {
     window.renderMontazhModal = function() {
         try {
             if (!db.montazhData || !db.montazhData.cities || db.montazhData.cities.length === 0) {
-                safeUpdateHTML('modalBody', `<div style="text-align:center; padding: 20px; color:var(--text-muted); font-weight: 800;">Помилка: Міста для монтажу не завантажено.</div>`); return;
+                safeUpdateHTML('modalBody', `<div style="text-align:center; padding: 20px; color:var(--text-muted); font-weight: 700;">Помилка: Міста для монтажу не завантажено.</div>`); return;
             }
 
             window.currentDevicePrice = parseFloat(document.getElementById('devicePrice').value) || 0;
@@ -2842,20 +2842,20 @@ window.saveStore = function() {
 
                 if (l.startsWith('(AA+)')) {
                     l = l.substring(5).trim().toUpperCase();
-                    lineStyle += " font-weight:800;";
+                    lineStyle += " font-weight: 700;";
                 } else if (l.startsWith('(Аа+)')) {
                     l = l.substring(5).trim();
                     l = l.charAt(0).toUpperCase() + l.slice(1);
-                    lineStyle += " font-weight:800;";
+                    lineStyle += " font-weight: 700;";
                 } else if (l.startsWith('(аа*)')) {
                     l = l.substring(5).trim();
                     lineStyle += " font-style:italic;";
                 } else if (l.startsWith('(КР+)')) {
                     l = l.substring(5).trim().toUpperCase();
-                    lineStyle += " font-weight:800; color:var(--danger);";
+                    lineStyle += " font-weight: 700; color:var(--danger);";
                 } else if (l.startsWith('(Кр+)')) {
                     l = l.substring(5).trim();
-                    lineStyle += " font-weight:800; color:var(--danger);";
+                    lineStyle += " font-weight: 700; color:var(--danger);";
                 } else if (l.startsWith('(кр*)')) {
                     l = l.substring(5).trim();
                     lineStyle += " font-style:italic; color:var(--danger);";
