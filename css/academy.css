@@ -534,3 +534,40 @@ body.academy-open { overflow: hidden; }
 .ex-toast.show{opacity:1;transform:translate(-50%,0)}
 
 .goal-sort{border:1.5px solid var(--border);background:var(--input-bg);color:var(--text-main);border-radius:10px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer}
+
+/* ===== бокове меню, масові дії, чекбокси ===== */
+#academyApp .stats-head-btns{display:flex;gap:8px;align-items:center}
+#academyApp .ex-burger{position:relative;width:38px;height:38px;border-radius:12px;border:1.5px solid var(--border);background:var(--card-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+#academyApp .ex-burger i{display:block;width:16px;height:2px;border-radius:2px;background:var(--text-main)}
+#academyApp .ex-burger .notification-dot{display:none;top:-3px;right:-3px}
+.ex-drawer{position:absolute;inset:0;z-index:20;border-radius:26px;overflow:hidden;background:rgba(0,0,0,0);pointer-events:none;transition:background .18s}
+.ex-drawer.open{background:rgba(0,0,0,.4);pointer-events:auto}
+.ex-drawer-panel{position:absolute;left:0;top:0;bottom:0;width:86%;max-width:340px;background:var(--bg);border-right:1px solid var(--border);transform:translateX(-102%);transition:transform .2s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;padding:16px 14px}
+.ex-drawer.open .ex-drawer-panel{transform:none}
+.ex-drawer-head{display:flex;justify-content:space-between;align-items:center;font-size:18px;margin-bottom:10px;color:var(--text-main)}
+.ex-drawer-body{overflow:auto;display:flex;flex-direction:column;gap:8px;padding-bottom:12px}
+.ex-dsec{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin:10px 2px 2px}
+.ex-dbtn{height:46px;border:1.5px solid var(--border);background:var(--card-bg);color:var(--text-main);border-radius:12px;font:700 14px inherit;font-family:inherit;text-align:left;padding:0 14px;cursor:pointer}
+.ex-dbtn:active{background:var(--input-bg)}
+.bulk-bar{flex-shrink:0;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;padding:10px;background:var(--card-bg);border:1.5px solid var(--border);border-radius:16px;}
+.bulk-count{font-size:13px;font-weight:600;text-align:center;color:var(--text-main)}
+.bulk-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.bulk-btns button{height:40px;border:0;border-radius:10px;font:700 13px inherit;font-family:inherit;background:var(--text-main);color:var(--card-bg);cursor:pointer;padding:0}
+.bulk-btns button.ghost{background:var(--input-bg);color:var(--text-main);border:1.5px solid var(--border)}
+.bulk-chk{width:24px;height:24px;flex:0 0 24px;border-radius:8px;border:2px solid var(--border);margin-right:12px;display:flex;align-items:center;justify-content:center;color:var(--card-bg)}
+.bulk-chk.on{background:var(--text-main);border-color:var(--text-main)}
+.ex-chkrow{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px}
+.ex-chkrow input{position:absolute;opacity:0;pointer-events:none}
+.ex-box{width:24px;height:24px;flex:0 0 24px;border-radius:8px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;color:transparent}
+.ex-chkrow input:checked + .ex-box{background:var(--text-main);border-color:var(--text-main);color:var(--card-bg)}
+.ex-lbl{font-size:12px;font-weight:700;color:var(--text-muted);margin-top:10px}
+.ex-input.err{border-color:#dc2626}
+.ex-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ex-chip{border:1.5px solid var(--border);background:var(--input-bg);color:var(--text-main);border-radius:999px;padding:6px 12px;font:600 12px inherit;font-family:inherit;cursor:pointer}
+.ex-chip.on{background:var(--text-main);color:var(--card-bg);border-color:var(--text-main)}
+.ex-oral-dot{width:8px;height:8px;border-radius:50%;background:var(--border);display:inline-block}
+.ex-oral-dot.ok{background:#16a34a}.ex-oral-dot.warn{background:#d97706}.ex-oral-dot.bad{background:#dc2626}
+#oralStatus{align-self:center;margin:2px 0 0}
+#academyApp .banner-actions{grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,1fr))}
+#academyApp .banner-action-btn{flex-direction:column}
+#academyApp .goal-sort{font-size:11px !important;font-weight:600 !important;line-height:1.2 !important;padding:5px 10px !important;width:auto !important;height:auto !important}

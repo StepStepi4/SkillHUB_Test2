@@ -219,7 +219,7 @@
             </button>
 
             <button class="list-item" id="diagRow" data-func="Діагностика" style="display:none;" onclick="window.openDiag()">
-                <img class="set-ico" src="assets/icons/settings/security.svg" alt="">
+                <img class="set-ico" src="assets/icons/settings/diagnostics.svg" alt="">
                 <div class="list-item-content">
                     <span class="list-item-title">Діагностика додатку</span>
                     <span class="list-item-subtitle">Повна перевірка функцій, синхронізації, швидкості та пам’яті</span>
@@ -231,9 +231,7 @@
                     <span class="list-item-title">Показ обраного меню</span>
                     <span class="list-item-subtitle">Де показувати кнопку «Обране»</span>
                 </div>
-                <div class="seg-row" id="favModeSeg">
-                    <button data-m="top">Вверху</button><button data-m="float">Плаваюча кнопка</button><button data-m="off">Вимкнути</button>
-                </div>
+                <select id="favModeSel" class="ex-select"><option value="top">Вверху</option><option value="float">Плаваюча кнопка</option><option value="off">Вимкнути</option></select>
             </div>
 
             <button class="list-item" data-func="Скинути налаштування" onclick="window.factoryReset()">
@@ -616,7 +614,10 @@
             <img src="assets/icons/academy/statistic.svg" class="ui-icon"> 
             Статистика
         </div>
-        <button class="modal-close-btn" onclick="closeStatsModal()">✕</button>
+        <div class="stats-head-btns">
+            <button class="ex-burger" id="drawerBtn" onclick="toggleFilterMenu()" aria-label="Меню"><i></i><i></i><i></i><span class="notification-dot" id="filterActiveDot"></span></button>
+            <button class="modal-close-btn" onclick="closeStatsModal()">✕</button>
+        </div>
     </div>
 
     <!-- Рядок пошуку та фільтрів -->
@@ -627,10 +628,6 @@
             <button class="search-clear-btn" id="empSearchClearBtn" onclick="clearEmployeeSearch()">✕</button>
             <div class="search-suggestions" id="empSearchSuggestions"></div>
         </div>
-        <button class="back-btn-sleek" onclick="toggleFilterMenu()" style="width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0; background: var(--card-bg);">
-            <img src="assets/icons/academy/filters.svg" class="ui-icon" onerror="this.src='assets/icons/academy/info.svg'">
-            <div class="notification-dot" id="filterActiveDot" style="top: -2px; right: -2px;"></div>
-        </button>
     </div>
 
     <!-- Панель фільтрів -->

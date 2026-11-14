@@ -921,7 +921,7 @@
         let favs = window.getFavorites();
 
         if (favs.length === 0) {
-            safeUpdateHTML('favQuickMenuBody', `<div style="padding: 30px 20px; text-align: center; color: var(--text-muted); font-size: 14px; font-weight: 600;">Ви ще не додали жодної функції в обране.<br><br>Зробити це можна у вкладці "SkillHUB" 💡</div>`);
+            safeUpdateHTML('favQuickMenuBody', `<div style="padding: 30px 20px; text-align: center; color: var(--text-muted); font-size: 14px; font-weight: 600;">В обраному поки порожньо.<br><br>Додайте функції в меню <b style="color:var(--text-main)">SkillHUB</b> — вони зʼявляться тут.</div>`);
             window.openModalBase('favQuickMenuModal');
             return;
         }
