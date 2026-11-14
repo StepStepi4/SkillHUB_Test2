@@ -1,6 +1,6 @@
 // SkillHUB Assistant - Service Worker (offline-first)
 // ВАЖЛИВО: при кожному релізі міняйте VERSION - тоді всі пристрої підтягнуть нові файли.
-const VERSION = 'v-0fe553c77a';
+const VERSION = 'v-48b5691c39';
 const SHELL_CACHE = 'skillhub-shell-' + VERSION;   // "оболонка": сторінки, іконки, бібліотеки
 const RUNTIME_CACHE = 'skillhub-runtime-v1';       // шрифти, картинки досягнень та інше, що завантажується під час роботи
 
@@ -97,6 +97,7 @@ const SHELL = [
   "./assets/icons/ui/discount.svg",
   "./assets/icons/ui/favorite.svg",
   "./assets/icons/ui/medal.svg",
+  "./assets/icons/ui/news-megaphone.svg",
   "./assets/icons/ui/news.svg",
   "./assets/icons/ui/password-protection.svg",
   "./assets/icons/ui/refresh-time.svg",
@@ -197,20 +198,17 @@ function isCacheable(res) {
   return res && (res.status === 200 || res.type === 'opaque');
 }
 
-// сторінки: спершу мережа (щоб бачити оновлення), але не довше 3 с - далі кеш
-async function networkFirstWithTimeout(request, timeoutMs) {
+// сторінки: миттєво з кешу поточної версії (усі файли однієї версії, без "суміші" старого й нового).
+// Нова версія приходить через оновлення самого sw.js (перевіряється при кожному запуску).
+async function pageFromShell(request) {
   const cache = await caches.open(SHELL_CACHE);
-  const fromCache = () => cache.match(request, { ignoreSearch: true });
+  const hit = (await cache.match(request, { ignoreSearch: true })) ||
+              (await cache.match(new URL('./index.html', self.registration.scope).href));
+  if (hit) return hit;
   try {
-    const res = await Promise.race([
-      fetch(request),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs))
-    ]);
-    if (isCacheable(res)) cache.put(request, res.clone());
+    const res = await fetch(request);
     return res;
-  } catch (e) {
-    return (await fromCache()) || (await cache.match(new URL('./index.html', self.registration.scope).href)) || Response.error();
-  }
+  } catch (e) { return Response.error(); }
 }
 
 // решта: миттєво з кешу, а в фоні оновлюємо
@@ -234,7 +232,7 @@ self.addEventListener('fetch', (event) => {
   if (url.hostname === 'script.google.com' || url.hostname === 'script.googleusercontent.com') return; // API: кешує сам застосунок (IndexedDB)
 
   if (req.mode === 'navigate') {
-    event.respondWith(networkFirstWithTimeout(req, 3000));
+    event.respondWith(pageFromShell(req));
     return;
   }
   event.respondWith(staleWhileRevalidate(req));

@@ -151,7 +151,7 @@
 
         <div class="list-group" style="margin-top:16px;">
             <button class="list-item" id="newsRow" data-func="Новини" onclick="window.openNews()">
-                <span class="news-row-ico"><img class="news-ico" src="assets/icons/ui/news.svg" alt=""></span>
+                <img class="set-ico news-mega" src="assets/icons/ui/news-megaphone.svg" alt="">
                 <div class="list-item-content">
                     <span class="list-item-title">Новини</span>
                     <span class="list-item-subtitle">Останні новини та оновлення</span>
@@ -226,6 +226,14 @@
                 </div>
                 <div class="list-item-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
             </button>
+            <div class="list-item" id="badgeRow" data-func="Відмітка на іконці" style="display:none;">
+                <div class="list-item-content">
+                    <span class="list-item-title">Відмітка на іконці</span>
+                    <span class="list-item-subtitle">Показувати червону мітку, коли є нова новина чи оновлення</span>
+                </div>
+                <button class="ex-main" id="badgeBtn" style="width:auto;padding:10px 14px;">Увімкнути</button>
+            </div>
+
             <div class="list-item" data-func="Показ обраного меню" style="flex-direction:column; align-items:flex-start;">
                 <div class="list-item-content" style="width:100%; margin-bottom:10px;">
                     <span class="list-item-title">Показ обраного меню</span>
@@ -631,28 +639,13 @@
     </div>
 
     <!-- Панель фільтрів -->
-    <div id="filterPanel" style="display: none; background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; flex-shrink: 0; flex-direction: column; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-        <div onclick="toggleFilterMenu()" style="font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; display:flex; justify-content:space-between; align-items:center; cursor:pointer;"><span>Фільтрація співробітників</span><span style="font-size:14px;">▲ Згорнути</span></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 8px;">
+    <div id="filterPanel" class="filter-panel">
+        <div class="fp-title">Курси та цілі</div>
+        <div class="fp-grid">
         <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
             <input type="checkbox" id="f_assigned" onchange="applyFilters()">
             <div class="custom-checkmark"></div>
             <span>Призначені курси</span>
-        </label>
-        <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
-            <input type="checkbox" id="f_goals" onchange="applyFilters()">
-            <div class="custom-checkmark"></div>
-            <span>Призначені цілі</span>
-        </label>
-        <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
-            <input type="checkbox" id="f_meet" onchange="applyFilters()">
-            <div class="custom-checkmark"></div>
-            <span>Зустрічі в Meet</span>
-        </label>
-        <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
-            <input type="checkbox" id="f_deadline" onchange="applyFilters()">
-            <div class="custom-checkmark"></div>
-            <span>Закритий дедлайн</span>
         </label>
         <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
             <input type="checkbox" id="f_done" onchange="applyFilters()">
@@ -660,18 +653,45 @@
             <span>Завершені курси</span>
         </label>
         <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
+            <input type="checkbox" id="f_deadline" onchange="applyFilters()">
+            <div class="custom-checkmark"></div>
+            <span>Прострочений дедлайн</span>
+        </label>
+        <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
+            <input type="checkbox" id="f_goals" onchange="applyFilters()">
+            <div class="custom-checkmark"></div>
+            <span>Призначені цілі</span>
+        </label>
+        <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
             <input type="checkbox" id="f_goalsdone" onchange="applyFilters()">
             <div class="custom-checkmark"></div>
             <span>Завершені цілі</span>
         </label>
+        <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
+            <input type="checkbox" id="f_goalslag" onchange="applyFilters()">
+            <div class="custom-checkmark"></div>
+            <span>Відстають по цілях</span>
+        </label>
+        <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
+            <input type="checkbox" id="f_noassign" onchange="applyFilters()">
+            <div class="custom-checkmark"></div>
+            <span>Без призначень</span>
+        </label>
+        <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
+            <input type="checkbox" id="f_meet" onchange="applyFilters()">
+            <div class="custom-checkmark"></div>
+            <span>Зустрічі в Meet</span>
+        </label>
         </div>
-        
-        <div style="margin-top: 8px;">
-            <label class="input-label" style="margin-bottom: 6px;">По керівникам</label>
-            <select id="f_manager" class="search-input-modern" style="padding: 12px 16px !important; border-radius: 12px;" onchange="applyFilters()">
-                <option value="">Всі керівники</option>
-            </select>
-        </div>
+        <div class="fp-title">Усний залік</div>
+        <select id="f_oral" class="search-input-modern fp-select" onchange="applyFilters()">
+            <option value="">Усі</option><option value="Успішно здав">Успішно здав</option><option value="Потрібно вивчити">Потрібно вивчити</option><option value="Не здав">Не здав</option><option value="__none">Не виставлено</option>
+        </select>
+        <div class="fp-title">Локація</div>
+        <select id="f_store" class="search-input-modern fp-select" onchange="applyFilters()"><option value="">Усі локації</option></select>
+        <div class="fp-title">Керівник</div>
+        <select id="f_manager" class="search-input-modern fp-select" onchange="applyFilters()"><option value="">Всі керівники</option></select>
+        <button type="button" class="fp-reset" onclick="resetFilters()">Скинути фільтри</button>
     </div>
 
     <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between;">

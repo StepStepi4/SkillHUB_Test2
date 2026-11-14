@@ -192,70 +192,6 @@
         m.querySelector('#weeklyCopy').onclick = () => copyText(weeklyText());
     }
 
-    /* ---------- Масові дії ---------- */
-    let bulk = false; const picked = new Set();
-    const CHK = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg>';
-    function updBulkBar() {
-        let bar = document.getElementById('bulkBar');
-        if (!bulk) { if (bar) bar.remove(); return; }
-        if (!bar) { bar = document.createElement('div'); bar.id = 'bulkBar'; bar.className = 'bulk-bar'; const l = document.getElementById('statsModalUsersList'); l.parentNode.insertBefore(bar, l); }
-        bar.innerHTML = `<div class="bulk-count">Обрано: <b>${picked.size}</b></div>
-            <div class="bulk-btns"><button data-a="all">Усі</button><button data-a="oral">Залік</button><button data-a="course">Курси</button><button data-a="off" class="ghost">Скасувати</button></div>`;
-        bar.querySelectorAll('button').forEach(b => b.onclick = () => bulkAct(b.getAttribute('data-a')));
-    }
-    const pickedUsers = () => eduDb.users.filter(u => picked.has(String(u.login).toLowerCase()));
-    function markCards() {
-        document.querySelectorAll('#statsModalUsersList .list-card').forEach(c => {
-            let lg = c.getAttribute('data-login');
-            if (!lg) { const m = /selectEmployeeFromModal\('([^']*)'\)/.exec(c.getAttribute('onclick') || ''); lg = m ? m[1].toLowerCase() : ''; c.setAttribute('data-login', lg); }
-            const on = bulk && picked.has(lg);
-            c.classList.toggle('bulk-sel', on);
-            let b = c.querySelector(':scope > .bulk-chk');
-            if (bulk && !b) { b = document.createElement('span'); b.className = 'bulk-chk'; c.insertBefore(b, c.firstChild); }
-            if (!bulk && b) b.remove();
-            if (b) { b.classList.toggle('on', on); b.innerHTML = on ? CHK : ''; }
-        });
-    }
-    function setBulk(on) {
-        bulk = on; picked.clear();
-        document.getElementById('statsModal').classList.toggle('bulk-mode', on);
-        updBulkBar(); markCards();
-    }
-    function bulkAct(a) {
-        if (a === 'off') { setBulk(false); return; }
-        if (a === 'all') {
-            const cards = Array.from(document.querySelectorAll('#statsModalUsersList .list-card'));
-            const every = cards.length && cards.every(c => picked.has(c.getAttribute('data-login')));
-            cards.forEach(c => every ? picked.delete(c.getAttribute('data-login')) : picked.add(c.getAttribute('data-login')));
-            updBulkBar(); markCards(); return;
-        }
-        const users = pickedUsers(); if (!users.length) { toast('Спочатку оберіть співробітників'); return; }
-        if (a === 'oral') {
-            const m = sheet('bulkSheet', `Усний залік (${users.length})`, ORAL.map(o => `<button class="ex-opt ${o.cls}" data-v="${esc(o.v)}">${esc(o.v)}</button>`).join(''));
-            m.querySelectorAll('.ex-opt').forEach(b => b.onclick = () => { setOral(users, b.getAttribute('data-v')); m.remove(); toast('Збережено'); renderStatsModalEmployees(''); markCards(); });
-        } else if (a === 'course') {
-            const cat = (eduDb.courseCatalog || []);
-            const m = sheet('bulkSheet', `Призначити курси (${users.length})`,
-                (cat.length ? cat.map((c, i) => `<label class="ex-chkrow"><input type="checkbox" data-i="${i}"><span class="ex-box">${CHK}</span><span>${esc(c.name)}</span></label>`).join('') : '<div class="ex-sub">Немає курсів</div>') +
-                `<label class="ex-lbl">Дедлайн, днів (обовʼязково)</label><input type="number" min="1" inputmode="numeric" id="bulkDl" class="ex-input" placeholder="Наприклад, 14">`,
-                `<button class="ex-main" id="bulkOk">Призначити</button>`);
-            m.querySelector('#bulkOk').onclick = () => {
-                const idx = Array.from(m.querySelectorAll('input[data-i]:checked')).map(i => +i.getAttribute('data-i'));
-                const dlEl = m.querySelector('#bulkDl'), dl = String(dlEl.value || '').trim();
-                if (!idx.length) { toast('Оберіть хоча б один курс'); return; }
-                if (!dl || !(+dl > 0)) { toast('Вкажіть дедлайн у днях'); dlEl.classList.add('err'); dlEl.focus(); return; }
-                users.forEach(u => {
-                    const assignments = {}; let added = [];
-                    idx.forEach(i => { const c = cat[i], key = getCleanName(c.name); assignments[key] = true; if (!(u.assigned || []).some(x => getCleanName(x) === key)) added.push(c.name); });
-                    enqueue({ action: 'assign_courses', targetLogin: u.login, assignments: assignments, deadlineDays: dl });
-                    u.assigned = (u.assigned || []).concat(added); u.deadlineDays = dl;
-                    const d = eduDb.users.find(x => x.login === u.login); if (d && d !== u) { d.assigned = u.assigned; d.deadlineDays = dl; }
-                });
-                m.remove(); toast(`Призначено: ${idx.length} курс. × ${users.length} спів.`); renderStatsModalEmployees(''); markCards();
-            };
-        }
-    }
-
     /* ---------- Журнал дій (Власник) ---------- */
     async function openLog() {
         const m = sheet('logSheet', 'Журнал дій', '<div class="ex-sub">Завантаження…</div>');
@@ -280,15 +216,11 @@
                 <div class="ex-dsec">Звіти</div>
                 <button class="ex-dbtn" data-a="team">Зведення команди</button>
                 <button class="ex-dbtn" data-a="week">Підсумок тижня</button>
-                <div class="ex-dsec">Масові дії</div>
-                <button class="ex-dbtn" data-a="bulk">Вибрати співробітників</button>
             </div></div>`;
         modal.appendChild(d);
         const fp = document.getElementById('filterPanel');
         if (fp) {
             d.querySelector('#exFilterSlot').appendChild(fp);
-            fp.style.cssText = 'display:flex;flex-direction:column;gap:10px;border:0;padding:0;margin:0;background:transparent;box-shadow:none';
-            const h = fp.firstElementChild; if (h && h.getAttribute('onclick')) h.style.display = 'none';
         }
         d.addEventListener('click', e => {
             if (e.target === d) { closeDrawer(); return; }
@@ -297,7 +229,6 @@
             if (act === 'close') closeDrawer();
             else if (act === 'team') { closeDrawer(); openTeamSummary(); }
             else if (act === 'week') { closeDrawer(); openWeekly(); }
-            else if (act === 'bulk') { closeDrawer(); setBulk(true); toast('Торкніться співробітників для вибору'); }
         });
         return d;
     }
@@ -306,20 +237,6 @@
     window.toggleFilterMenu = toggleFilterMenu = function () {
         const d = ensureDrawer(); if (d) d.classList.contains('open') ? closeDrawer() : openDrawer();
     };
-    function setupStatsModal() {
-        const modal = document.getElementById('statsModal'); if (!modal || modal._exInit) return; modal._exInit = true;
-        const list = document.getElementById('statsModalUsersList');
-        list.addEventListener('click', e => {
-            if (!bulk) return;
-            const c = e.target.closest('.list-card'); if (!c) return;
-            e.stopPropagation(); e.preventDefault();
-            const lg = c.getAttribute('data-login'); if (!lg) return;
-            picked.has(lg) ? picked.delete(lg) : picked.add(lg);
-            updBulkBar(); markCards();
-        }, true);
-        new MutationObserver(markCards).observe(list, { childList: true });
-    }
-
     /* ---------- Рядок «Журнал дій» в Опціях ---------- */
     function injectLogRow() {
         const diag = document.getElementById('diagRow'); if (!diag) return;
@@ -361,10 +278,10 @@
     const _os = window.openStatsModal || openStatsModal;
     window.openStatsModal = openStatsModal = function () {
         _os.apply(this, arguments);
-        if (canManage()) { ensureDrawer(); setupStatsModal(); closeDrawer(); if (bulk) setBulk(false); }
+        if (canManage()) { ensureDrawer(); closeDrawer(); }
     };
     const _cs = closeStatsModal;
-    window.closeStatsModal = closeStatsModal = function () { closeDrawer(); if (bulk) setBulk(false); _cs.apply(this, arguments); };
+    window.closeStatsModal = closeStatsModal = function () { closeDrawer(); _cs.apply(this, arguments); };
     window.openOralPicker = openOralPicker;
     setTimeout(injectLogRow, 0);
 })();

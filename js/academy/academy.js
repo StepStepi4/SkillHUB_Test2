@@ -158,21 +158,23 @@
     let sessionCheckInterval = null;
 
     function toggleFilterMenu() {
-        let panel = document.getElementById('filterPanel');
-        if (panel.style.display === 'none' || panel.style.display === '') {
-            panel.style.display = 'flex';
-        } else {
-            panel.style.display = 'none';
-        }
+        /* керується бічним меню (extras.js) */
     }
 
-    document.addEventListener('scroll', function (e) {
-        if (e.target && e.target.id === 'statsModalUsersList' && e.target.scrollTop > 30) {
-            var fp = document.getElementById('filterPanel');
-            if (fp && fp.style.display === 'flex') fp.style.display = 'none';
-        }
-    }, true);
-
+    const FILTER_CHECKS = ['f_assigned','f_goals','f_meet','f_deadline','f_done','f_goalsdone','f_goalslag','f_noassign'];
+    function resetFilters(silent) {
+        FILTER_CHECKS.forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
+        ['f_manager','f_oral','f_store'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        if (!silent) applyFilters();
+    }
+    window.resetFilters = resetFilters;
+    function populateStoreFilter() {
+        const sel = document.getElementById('f_store'); if (!sel) return;
+        const cur = sel.value, st = new Set();
+        getAccessibleEmployeesList().forEach(u => { if (u.store && u.store !== '-') st.add(String(u.store).trim()); });
+        sel.innerHTML = '<option value="">Усі локації</option>' + Array.from(st).sort((a, b) => a.localeCompare(b, 'uk')).map(m => `<option value="${escapeHTMLAttr(m)}">${escapeHTMLAttr(m)}</option>`).join('');
+        sel.value = st.has(cur) ? cur : '';
+    }
     function applyFilters() {
         let q = document.getElementById('empSearchInput').value.toLowerCase();
         renderStatsModalEmployees(q);
@@ -634,10 +636,16 @@
     }
 
     let _eduFetching = false;
+    let _eduPromise = null;
     async function fetchFreshDataSilent(isManual = false) {
-        if (!navigator.onLine || _eduFetching) return;
+        if (!navigator.onLine) return 'offline';
+        if (_eduFetching) {
+            if (!isManual) return 'busy';
+            try { await _eduPromise; } catch (e) {}   // ручне оновлення чекає поточне й робить своє
+        }
         _eduFetching = true;
-        try { await _fetchFreshDataSilentInner(isManual); } finally { _eduFetching = false; }
+        _eduPromise = _fetchFreshDataSilentInner(isManual);
+        try { return await _eduPromise; } finally { _eduFetching = false; }
     }
     // Застосувати відповідь сервера (login / edu) до стану застосунку й кешу
     function applyEduData(data) {
@@ -648,16 +656,16 @@
     }
 
     async function _fetchFreshDataSilentInner(isManual = false) {
-        if (!auth) return;
+        if (!auth) return 'noauth';
         await flushOutbox();
-        if (!auth) return;
+        if (!auth) return 'noauth';
         try {
             const data = await apiPost(authBody({ action: 'edu' }), 15000);
-            if (data && isAuthCode(data.code)) { handleAuthLost(data.code); return; }
-            if (!(data && data.success && data.educationData && data.educationData.users)) return;
+            if (data && isAuthCode(data.code)) { handleAuthLost(data.code); return 'noauth'; }
+            if (!(data && data.success && data.educationData && data.educationData.users)) return 'fail';
 
             // Є ще не відправлені зміни - не затираємо їх застарілими даними з сервера
-            if (outboxPending()) return;
+            if (outboxPending()) return 'pending';
             applyEduData(data);
 
             if (currentUser) {
@@ -683,16 +691,28 @@
                     }
                 }
             }
-        } catch(e) {}
+            return 'ok';
+        } catch(e) { return 'fail'; }
     }
 
+    function refreshToast(msg) {
+        let t = document.getElementById('refreshToast');
+        if (!t) { t = document.createElement('div'); t.id = 'refreshToast'; t.className = 'ex-toast'; document.body.appendChild(t); }
+        t.textContent = msg; t.classList.add('show');
+        clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2400);
+    }
+    let _eduManualBusy = false;
     async function forceRefresh() {
-        if (!navigator.onLine) { alert("Немає підключення до інтернету!"); return; }
-        document.getElementById('loaderText').innerText = "Оновлення даних...";
-        document.getElementById('loader').style.display = 'flex';
-        await fetchFreshDataSilent(true);
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('loaderText').innerText = "Синхронізація з базою...";
+        if (_eduManualBusy) return;
+        if (!navigator.onLine) { refreshToast('Немає підключення до інтернету'); return; }
+        _eduManualBusy = true;
+        const btn = document.querySelector('#cabinetNavActions [onclick="forceRefresh()"]');
+        if (btn) btn.classList.add('spin');
+        let r = 'fail';
+        try { r = await fetchFreshDataSilent(true); } catch (e) {}
+        if (btn) btn.classList.remove('spin');
+        _eduManualBusy = false;
+        refreshToast(r === 'ok' ? 'Дані оновлено' : r === 'pending' ? 'Є невідправлені зміни — спробуйте за мить' : r === 'offline' ? 'Немає підключення до інтернету' : r === 'noauth' ? 'Потрібен повторний вхід' : 'Не вдалося оновити. Спробуйте ще раз');
     }
 
     function computeRemainingDeadlineMs(userObj) {
@@ -1126,10 +1146,10 @@
         document.getElementById('f_deadline').checked = false;
         ['f_goals','f_done','f_goalsdone'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
         document.getElementById('f_meet').checked = false;
-        document.getElementById('filterPanel').style.display = 'none';
+        resetFilters(true);
         document.getElementById('filterActiveDot').style.display = 'none';
         
-        populateManagerFilter();
+        populateManagerFilter(); populateStoreFilter();
         
         renderStatsModalEmployees('');
         document.getElementById('statsModalOverlay').classList.add('active');
@@ -1196,7 +1216,9 @@
     function filterEmployeesLogic(employees) {
         const chk = id => { const el = document.getElementById(id); return el ? el.checked : false; };
         const f_assigned = chk('f_assigned'), f_goals = chk('f_goals'), f_meet = chk('f_meet');
-        const f_deadline = chk('f_deadline'), f_done = chk('f_done'), f_goalsdone = chk('f_goalsdone');
+        const f_deadline = chk('f_deadline'), f_done = chk('f_done'), f_goalsdone = chk('f_goalsdone'), f_lag = chk('f_goalslag'), f_none = chk('f_noassign');
+        const val = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+        const f_oral = val('f_oral'), f_store = val('f_store');
         const f_manager = document.getElementById('f_manager') ? document.getElementById('f_manager').value : "";
 
         return employees.filter(u => {
@@ -1220,6 +1242,14 @@
                 if (!(m.totalAssigned > 0 && m.completed >= m.totalAssigned)) return false;
             }
             if (f_goalsdone && !goalsAllDone(u)) return false;
+            if (f_lag) {
+                const g = u.goals || {}, ks = Object.keys(g).filter(k => k !== 'deadline' && g[k] && g[k].goal);
+                if (!ks.length || goalsAllDone(u)) return false;
+                if (ks.reduce((a, k) => a + Math.min(100, g[k].done || 0), 0) / ks.length >= 50) return false;
+            }
+            if (f_none && ((u.assigned && u.assigned.length) || hasGoals(u))) return false;
+            if (f_oral) { const o = String(u.oralExam || '').trim(); if (f_oral === '__none' ? o !== '' : o !== f_oral) return false; }
+            if (f_store && String(u.store || '').trim() !== f_store) return false;
 
             if (f_manager && f_manager !== "") {
                 if (formatManagerName(u.manager) !== f_manager) return false;
@@ -1238,8 +1268,8 @@
         }
 
         // Встановлення індикатора фільтру
-        let hasActiveFilters = ['f_assigned','f_goals','f_meet','f_deadline','f_done','f_goalsdone'].some(id => { const el = document.getElementById(id); return el && el.checked; })
-            || (document.getElementById('f_manager').value !== "");
+        let hasActiveFilters = FILTER_CHECKS.some(id => { const el = document.getElementById(id); return el && el.checked; })
+            || ['f_manager','f_oral','f_store'].some(id => { const el = document.getElementById(id); return el && el.value !== ''; });
         document.getElementById('filterActiveDot').style.display = hasActiveFilters ? 'block' : 'none';
 
         document.getElementById('modalEmpCount').innerText = `Знайдено: ${employees.length}`;

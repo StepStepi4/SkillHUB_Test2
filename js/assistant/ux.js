@@ -47,13 +47,27 @@
         window.addEventListener('resize', () => { const r = f.getBoundingClientRect(); if (f.style.left) place(r.left, r.top); });
     }
 
+    /* Відмітка на іконці додатку: непрочитана новина або готове оновлення.
+       Працює в встановленому PWA (Android/Chrome, iOS 16.4+ після дозволу сповіщень). */
+    const badgeOk = () => ('setAppBadge' in navigator);
+    function setBadge() {
+        if (!badgeOk()) return;
+        const nb = document.getElementById('newsBtn');
+        const n = (nb && nb.classList.contains('has-new') ? 1 : 0) + (window._updPending ? 1 : 0);
+        try { (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => {}); } catch (e) {}
+    }
     function badge() {
         const nb = document.getElementById('newsBtn'); if (!nb) return;
-        const upd = () => {
-            const unread = nb.classList.contains('has-new');
-            try { if (unread && navigator.setAppBadge) navigator.setAppBadge(1).catch(() => {}); else if (!unread && navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {}); } catch (e) {}
-        };
-        new MutationObserver(upd).observe(nb, { attributes: true, attributeFilter: ['class'] }); upd();
+        new MutationObserver(setBadge).observe(nb, { attributes: true, attributeFilter: ['class'] });
+        document.addEventListener('skillhub-badge', setBadge);
+        document.addEventListener('visibilitychange', setBadge);
+        setBadge();
+        // рядок у налаштуваннях: потрібен лише там, де відмітка підтримується, але ще не дозволена (iOS)
+        const row = document.getElementById('badgeRow'), btn = document.getElementById('badgeBtn');
+        if (row && badgeOk() && 'Notification' in window && Notification.permission === 'default') {
+            row.style.display = '';
+            btn.onclick = () => Notification.requestPermission().then(r => { if (r !== 'default') row.style.display = 'none'; setBadge(); });
+        }
     }
 
     function init() {

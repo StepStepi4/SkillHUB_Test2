@@ -571,3 +571,11 @@ body.academy-open { overflow: hidden; }
 #academyApp .banner-actions{grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,1fr))}
 #academyApp .banner-action-btn{flex-direction:column}
 #academyApp .goal-sort{font-size:11px !important;font-weight:600 !important;line-height:1.2 !important;padding:5px 10px !important;width:auto !important;height:auto !important}
+.filter-panel{display:flex;flex-direction:column;gap:8px}
+.fp-title{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-top:6px}
+.fp-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.fp-select{padding:11px 14px !important;border-radius:12px !important;font-size:14px !important}
+.fp-reset{height:42px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text-main);border-radius:12px;font:700 13px inherit;font-family:inherit;cursor:pointer;margin-top:6px}
+
+.back-btn-sleek.spin img{animation:exSpin .8s linear infinite}
+@keyframes exSpin{to{transform:rotate(360deg)}}

@@ -2957,7 +2957,7 @@ window.saveStore = function() {
         // щойно користувач повертається в застосунок (щоб одразу діяли нові файли).
         const hadController = !!navigator.serviceWorker.controller;
         let updatePending = false;
-        navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) { updatePending = true; try { sessionStorage.setItem('skillhub_skip_start', '1'); } catch (e) {} } });
+        navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) { updatePending = true; window._updPending = true; document.dispatchEvent(new Event('skillhub-badge')); try { sessionStorage.setItem('skillhub_skip_start', '1'); } catch (e) {} } });
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && updatePending) { updatePending = false; location.reload(); }
         });
