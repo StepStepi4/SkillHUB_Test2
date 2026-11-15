@@ -109,8 +109,12 @@
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                 <span style="font-weight:700; font-size:13px; text-transform:uppercase; color:var(--text-muted); letter-spacing: 0.5px;">Сервіси</span>
-                <button id="toggleCompareBtn" class="compare-toggle-btn" style="display:none;" onclick="window.toggleCompareMode()">Порівняти</button>
+                <div class="svc-actions">
+                    <button id="svcFilterBtn" class="svc-filter-btn" style="display:none;" onclick="window.toggleSvcFilter()" aria-label="Фільтр категорій"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6 7.5V19l-4-2v-4.5z"/></svg><span id="svcFilterLbl">Фільтр</span></button>
+                    <button id="toggleCompareBtn" class="compare-toggle-btn" style="display:none;" onclick="window.toggleCompareMode()">Порівняти</button>
+                </div>
             </div>
+            <div id="svcFilterPop" class="svc-filter-pop"></div>
 
             <div id="serviceList" style="display:flex; flex-direction:column; gap:12px;"></div>
         </div>
@@ -1053,6 +1057,7 @@
 <script src="js/core/config.js"></script>
 <script src="js/core/search.js"></script>
 <script src="js/core/storage.js"></script>
+<script src="js/core/emoji-icons.js"></script>
 <script src="js/core/richtext.js"></script>
 <script src="js/assistant/assistant.js"></script>
 <script src="js/assistant/ux.js"></script>

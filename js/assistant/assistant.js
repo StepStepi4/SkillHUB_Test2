@@ -40,7 +40,7 @@
             .list-item-value { font-size: calc(16px * ${scale}) !important; }
             .sc-title { font-size: calc(15px * ${scale}) !important; }
             .sc-price { font-size: calc(15px * ${scale}) !important; }
-            .tech-val { font-size: calc(14px * ${scale}) !important; }
+            .tech-val, .tech-value { font-size: calc(14px * ${scale}) !important; }
             .tech-label { font-size: calc(11px * ${scale}) !important; }
             .desc-line div { font-size: calc(13px * ${scale}) !important; }
             .modal-title { font-size: calc(18px * ${scale}) !important; }
@@ -75,7 +75,8 @@
         if (clean.toLowerCase().endsWith('.svg') || clean.toLowerCase().endsWith('.png')) {
             return `<img src="${SKILLHUB_ICONS_DIR}${clean}" alt="icon" style="width: 100%; height: 100%; object-fit: contain; display: block;">`;
         }
-        return clean;
+        const ei = window.EmojiIcons && window.EmojiIcons.svg(clean);
+        return ei || clean;
     };
 
     window.addEventListener('error', function(e) {
@@ -364,7 +365,7 @@
                                     </div>
                                     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px;">
                                         <span style="font-size: 12px; color: var(--text-muted);">Код товару:</span>
-                                        <span style="font-size: 15px; font-weight: 700; color: var(--text-main); cursor: pointer;" onclick="window.copyCode(event, this, '${t.code}')">${t.code} 📋</span>
+                                        <span style="font-size: 15px; font-weight: 700; color: var(--text-main); cursor: pointer;" onclick="window.copyCode(event, this, '${t.code}')">${t.code} <span class="copy-ico">${window.renderIcon('📋')}</span></span>
                                     </div>
                                 </div>
                                 `;
@@ -1876,7 +1877,7 @@ window.saveStore = function() {
                 snHtml = `
                 <div style="display:flex; justify-content:space-between; align-items:center; background:var(--input-bg); padding:12px 16px; border-radius:12px; margin-bottom:16px; border:1px solid var(--border);">
                     <div style="font-size:12px; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Серійний номер:</div>
-                    <div style="font-size:15px; font-weight: 700; color:var(--primary); cursor:pointer; display:flex; align-items:center; gap:6px;" onclick="window.copyCode(event, this, '${window.escapeForJS(sn)}')">${sn} 📋</div>
+                    <div style="font-size:15px; font-weight: 700; color:var(--primary); cursor:pointer; display:flex; align-items:center; gap:6px;" onclick="window.copyCode(event, this, '${window.escapeForJS(sn)}')">${sn} <span class="copy-ico">${window.renderIcon('📋')}</span></div>
                 </div>`;
             }
 
@@ -1996,7 +1997,7 @@ window.saveStore = function() {
             elCatInput.value = item.name;
             safeUpdateHTML('uaTitle', `<div style="display:flex; align-items:center; gap:8px;">
                 <div style="width:24px; height:24px; display:flex; justify-content:center; align-items:center;">${window.renderIcon(item.icon)}</div>
-                <span>${item.name}</span>
+                <span>${String(item.name).replace('🔥', '').trim()}</span>${String(item.name).includes('🔥') ? FIRE_HTML : ''}
             </div>`);
             safeUpdateHTML('itemCategory', item.brandText ? "Послуга від " + item.brandText : "Окрема послуга");
         } else {
@@ -2017,61 +2018,56 @@ window.saveStore = function() {
         renderServices();
     }
 
+    const SVC_ICON = n => `<img src="assets/icons/service/${n}.svg" alt="" draggable="false">`;
     function buildTechInfoHTML(item, p) {
         if(!item) return "";
-        let html = `<div class="tech-info-block">`; let hasInfo = false;
+        const row = (icon, label, valueHtml, cls) => `<div class="tech-row${cls ? ' ' + cls : ''}"><div class="tech-icon">${icon}</div><div class="tech-text-wrap"><div class="tech-label">${label}</div><div class="tech-value">${valueHtml}</div></div></div>`;
+        let rows = '';
         if (item.complexity) {
-            hasInfo = true; let s = "color: var(--text-muted); font-weight: 500;"; const t = String(item.complexity).toLowerCase();
-            if (t.includes('критич')) s = "color: var(--danger); font-weight: 700;";
-            else if (t.includes('висок')) s = "color: #f97316; font-weight: 600;";
-            else if (t.includes('середн')) s = "color: #eab308; font-weight: 600;";
-            else if (t.includes('низьк')) s = "color: #10b981; font-weight: 600;";
-            html += `<div class="tech-row"><div class="tech-icon" style="display:flex; align-items:center; justify-content:center; width:26px; height:26px;">${window.renderIcon('⚙️')}</div><div class="tech-text-wrap"><div class="tech-label">Складність</div><div class="tech-val" style="${s}">${item.complexity}</div></div></div>`;
+            let tone = ''; const t = String(item.complexity).toLowerCase();
+            if (t.includes('критич')) tone = 'crit'; else if (t.includes('висок')) tone = 'high'; else if (t.includes('середн')) tone = 'mid'; else if (t.includes('низьк')) tone = 'low';
+            rows += row(window.renderIcon('⚙️'), 'Складність', `<span class="cx-pill ${tone}"><i></i>${window.escapeHTML ? window.escapeHTML(item.complexity) : item.complexity}</span>`);
         }
 
+        // вартість платного ремонту: "15%" або діапазон "15-25%" -> гривні
         let calcPrice = item.price ? item.price.toString() : "";
         if (calcPrice.includes('%') && p > 0) {
-            let uah = calcPrice.replace(/(\d+(?:\.\d+)?)%/g, (match, p1) => { return Math.round(p * parseFloat(p1) / 100).toLocaleString('uk-UA') + " ₴"; });
-            calcPrice = `${calcPrice} <span style="color:var(--primary); font-weight:bold;">(${uah})</span>`;
+            const fmt = n => Math.round(n).toLocaleString('uk-UA');
+            let uah = '';
+            const rg = calcPrice.match(/(\d+(?:[.,]\d+)?)\s*[-–—]\s*(\d+(?:[.,]\d+)?)\s*%/);
+            const one = calcPrice.match(/(\d+(?:[.,]\d+)?)\s*%/);
+            if (rg) uah = `${fmt(p * parseFloat(rg[1].replace(',', '.')) / 100)}–${fmt(p * parseFloat(rg[2].replace(',', '.')) / 100)} ₴`;
+            else if (one) uah = `${fmt(p * parseFloat(one[1].replace(',', '.')) / 100)} ₴`;
+            if (uah) calcPrice = `${calcPrice} <span class="tech-calc">≈ ${uah}</span>`;
         }
 
         const fields = [
-            ['💵', 'Платний ремонт', calcPrice],
-            ['🔧', 'Найдорожчі деталі', item.expensiveParts],
-            ['✅', 'Гарантійні випадки', item.garant],
-            ['🛡️', 'Гарантія', item.garantiya],
-            ['❌', 'Негарантійні випадки', item.negarant]
+            [SVC_ICON('Cash'), 'Платний ремонт', calcPrice, ''],
+            [SVC_ICON('Zapchasti'), 'Найдорожчі деталі', item.expensiveParts, ''],
+            [SVC_ICON('Waranty'), 'Гарантійні поломки', item.garant, ''],
+            [window.renderIcon('🛡️'), 'Гарантія', item.garantiya, ''],
+            [SVC_ICON('Damage'), 'Не гарантійні поломки', item.negarant, 'negarant']
         ];
-
-        fields.forEach(f => {
-            if (f[2] && f[2].toString().trim() !== "") {
-                hasInfo = true;
-                let isNegarant = f[1].includes('Негарантійні');
-                let rowClasses = isNegarant ? 'tech-row negarant' : 'tech-row';
-                html += `<div class="${rowClasses}"><div class="tech-icon" style="display:flex; align-items:center; justify-content:center; width:26px; height:26px;">${window.renderIcon(f[0])}</div><div class="tech-text-wrap"><div class="tech-label">${f[1]}</div><div class="tech-val">${f[2]}</div></div></div>`;
-            }
-        });
+        fields.forEach(f => { if (f[2] && f[2].toString().trim() !== "") rows += row(f[0], f[1], f[2], f[3]); });
 
         let photosArray = [];
         if (item.photo1) photosArray.push(item.photo1);
         if (item.photo2) photosArray.push(item.photo2);
         if (item.photo3) photosArray.push(item.photo3);
-
+        let photoHtml = '';
         if (photosArray.length > 0) {
-            hasInfo = true;
-            let photosStr = photosArray.join(',');
-            html += `
-            <div class="tech-photo-wrapper" onclick="window.openGallery('${photosStr}')">
-                <div class="photo-icon" style="display:flex; align-items:center; justify-content:center; width:26px; height:26px;">${window.renderIcon('📸')}</div>
+            photoHtml = `
+            <div class="tech-photo-wrapper" onclick="window.openGallery('${photosArray.join(',')}')">
+                <div class="tech-icon">${SVC_ICON('Photo')}</div>
                 <div class="photo-text">
-                    <span class="photo-title">Приклади пошкоджень</span>
-                    <span class="photo-subtitle">Переглянути фото (${photosArray.length})</span>
+                    <span class="photo-title">Приклади битої техніки</span>
+                    <span class="photo-subtitle">${photosArray.length} фото</span>
                 </div>
-                <div class="photo-arrow">❯</div>
+                <svg class="photo-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
             </div>`;
         }
-
-        html += `</div>`; return hasInfo ? html : "";
+        if (!rows && !photoHtml) return "";
+        return `<div class="tech-info-block">${rows}${photoHtml}</div>`;
     }
 
     function renderTechInfo() {
@@ -2097,7 +2093,7 @@ window.saveStore = function() {
 
             let match = l.match(/^(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/);
             let e = match ? match[0] : "🔹";
-            let t = match ? l.replace(e, '').trim() : l;
+            let t = match ? l.replace(e, '').replace(/^[\uFE0F\u200D\s]+/, '').trim() : l;
 
             if (!match) {
                 let lower = t.toLowerCase();
@@ -2135,7 +2131,7 @@ window.saveStore = function() {
         let codeHtml = codeF ? `
             <div class="desc-code" onclick="window.copyCode(event, this, '${window.escapeForJS(codeF)}')">
                 <span style="color:var(--text-muted); font-weight:500;">Код:</span>
-                <span style="font-size:15px; font-weight:700; color:var(--primary);">${codeF} 📋</span>
+                <span style="font-size:15px; font-weight:700; color:var(--primary);">${codeF} <span class="copy-ico">${window.renderIcon('📋')}</span></span>
             </div>` : '';
 
         if (!descText && !codeHtml) return '';
@@ -2227,6 +2223,12 @@ window.saveStore = function() {
         return dataForSort;
     }
 
+    const FIRE_HTML = `<span class="fire-ico" aria-label="Фокус"><svg viewBox="0 0 24 28" aria-hidden="true">
+        <path class="f-out" d="M12 1.5c.8 4.6 7.6 7.6 7.6 14.2A7.6 7.6 0 0 1 4.4 15.7c0-2.4 1.2-4 2.6-5.5.3 1.7 1.3 2.7 2.4 2.9C8.6 8.8 10 4.9 12 1.5z"/>
+        <path class="f-mid" d="M12 9.5c.5 3 4.2 4.4 4.2 8.3a4.2 4.2 0 0 1-8.4 0c0-1.5.7-2.5 1.5-3.3.2 1 .7 1.5 1.3 1.6-.2-2.5.4-4.7 1.4-6.6z"/>
+        <path class="f-in" d="M12 16.2c.3 1.5 2 2.1 2 3.9a2 2 0 0 1-4 0c0-.8.4-1.3.8-1.6.1.5.4.8.7.8-.1-1.2.1-2.2.5-3.1z"/>
+        <circle class="f-sp s1" cx="6" cy="9" r=".9"/><circle class="f-sp s2" cx="18.5" cy="11" r=".8"/>
+    </svg></span>`;
     function generateServiceCardHTML(s, isModalCtx = false, disableCompare = false) {
         if(!s) return '';
         let isSelected = false; let compareModeActive = false;
@@ -2251,7 +2253,7 @@ window.saveStore = function() {
 
         let descHtml = s.descToggleHTML || '';
         let availHtml = s.availabilityHTML ? `<div style="margin-top:8px;">${s.availabilityHTML}</div>` : '';
-        let focusHtml = (s.isFocus && !isSelected) ? `<span class="animated-fire">🔥</span>` : '';
+        let focusHtml = (s.isFocus && !isSelected) ? FIRE_HTML : '';
 
         let discountHtml = '';
         if (s.discount && s.discount !== "0%" && s.discount !== "0" && s.discount !== "" && s.discount !== "-") {
@@ -2286,6 +2288,27 @@ window.saveStore = function() {
         </div>`;
     }
 
+    const CLS_LABEL = { 'brand-support': 'Support', 'brand-ekta': 'Екта', 'brand-epz': 'EPZ', 'brand-settings': 'Налаштування', 'brand-install': 'Монтаж', 'brand-other': 'Інше' };
+    let svcFilter = '', svcFilterFor = null;
+    function closeSvcFilter() { const pop = document.getElementById('svcFilterPop'); if (pop) pop.classList.remove('show'); const b = document.getElementById('svcFilterBtn'); if (b) b.classList.remove('open'); }
+    function updateSvcFilterUI(all) {
+        const btn = document.getElementById('svcFilterBtn'), pop = document.getElementById('svcFilterPop'), lbl = document.getElementById('svcFilterLbl');
+        if (!btn || !pop) return;
+        const counts = {}; all.forEach(s => { counts[s.cls] = (counts[s.cls] || 0) + 1; });
+        const keys = Object.keys(CLS_LABEL).filter(k => counts[k]);
+        if (keys.length < 2) { btn.style.display = 'none'; closeSvcFilter(); svcFilter = ''; return; }
+        if (svcFilter && !counts[svcFilter]) svcFilter = '';
+        btn.style.display = 'inline-flex'; btn.classList.toggle('active', !!svcFilter);
+        lbl.textContent = svcFilter ? CLS_LABEL[svcFilter] : 'Фільтр';
+        pop.innerHTML = `<button class="svc-chip${svcFilter ? '' : ' on'}" data-k="">Усі <b>${all.length}</b></button>` +
+            keys.map(k => `<button class="svc-chip${svcFilter === k ? ' on' : ''}" data-k="${k}"><i class="${k}"></i>${CLS_LABEL[k]} <b>${counts[k]}</b></button>`).join('');
+        pop.querySelectorAll('.svc-chip').forEach(c => c.onclick = () => { svcFilter = c.getAttribute('data-k'); closeSvcFilter(); renderServices(); });
+    }
+    window.toggleSvcFilter = function () {
+        const pop = document.getElementById('svcFilterPop'), b = document.getElementById('svcFilterBtn'); if (!pop) return;
+        const on = pop.classList.toggle('show'); b.classList.toggle('open', on);
+    };
+
     function renderServices() {
         try {
             const p = parseFloat(elPriceInput.value) || 0;
@@ -2295,6 +2318,12 @@ window.saveStore = function() {
                 renderTechInfo();
                 let dataForSort = calculateServicesArray(currentCategoryData, p);
                 window.lastCalculatedServices = dataForSort;
+
+                // фільтр категорій (Support / Екта / EPZ ...)
+                const catKey = currentCategoryData.ua || '';
+                if (svcFilterFor !== catKey) { svcFilterFor = catKey; svcFilter = ''; closeSvcFilter(); }
+                updateSvcFilterUI(dataForSort);
+                if (svcFilter) dataForSort = dataForSort.filter(s => s.cls === svcFilter);
 
                 let compareableCount = dataForSort.filter(s => !s.isPackage).length;
 

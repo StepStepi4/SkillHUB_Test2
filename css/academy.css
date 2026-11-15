@@ -546,12 +546,12 @@ body.academy-open { overflow: hidden; }
 .ex-drawer-head{display:flex;justify-content:space-between;align-items:center;font-size:18px;margin-bottom:10px;color:var(--text-main)}
 .ex-drawer-body{overflow:auto;display:flex;flex-direction:column;gap:8px;padding-bottom:12px}
 .ex-dsec{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin:10px 2px 2px}
-.ex-dbtn{height:46px;border:1.5px solid var(--border);background:var(--card-bg);color:var(--text-main);border-radius:12px;font:700 14px inherit;font-family:inherit;text-align:left;padding:0 14px;cursor:pointer}
+.ex-dbtn{height:46px;border:1.5px solid var(--border);background:var(--card-bg);color:var(--text-main);border-radius:12px;font-weight:700;font-size:14px;font-family:inherit;text-align:left;padding:0 14px;cursor:pointer}
 .ex-dbtn:active{background:var(--input-bg)}
 .bulk-bar{flex-shrink:0;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;padding:10px;background:var(--card-bg);border:1.5px solid var(--border);border-radius:16px;}
 .bulk-count{font-size:13px;font-weight:600;text-align:center;color:var(--text-main)}
 .bulk-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.bulk-btns button{height:40px;border:0;border-radius:10px;font:700 13px inherit;font-family:inherit;background:var(--text-main);color:var(--card-bg);cursor:pointer;padding:0}
+.bulk-btns button{height:40px;border:0;border-radius:10px;font-weight:700;font-size:13px;font-family:inherit;background:var(--text-main);color:var(--card-bg);cursor:pointer;padding:0}
 .bulk-btns button.ghost{background:var(--input-bg);color:var(--text-main);border:1.5px solid var(--border)}
 .bulk-chk{width:24px;height:24px;flex:0 0 24px;border-radius:8px;border:2px solid var(--border);margin-right:12px;display:flex;align-items:center;justify-content:center;color:var(--card-bg)}
 .bulk-chk.on{background:var(--text-main);border-color:var(--text-main)}
@@ -562,7 +562,7 @@ body.academy-open { overflow: hidden; }
 .ex-lbl{font-size:12px;font-weight:700;color:var(--text-muted);margin-top:10px}
 .ex-input.err{border-color:#dc2626}
 .ex-chips{display:flex;flex-wrap:wrap;gap:6px}
-.ex-chip{border:1.5px solid var(--border);background:var(--input-bg);color:var(--text-main);border-radius:999px;padding:6px 12px;font:600 12px inherit;font-family:inherit;cursor:pointer}
+.ex-chip{border:1.5px solid var(--border);background:var(--input-bg);color:var(--text-main);border-radius:999px;padding:6px 12px;font-weight:600;font-size:12px;font-family:inherit;cursor:pointer}
 .ex-chip.on{background:var(--text-main);color:var(--card-bg);border-color:var(--text-main)}
 .ex-oral-dot{width:8px;height:8px;border-radius:50%;background:var(--border);display:inline-block}
 .ex-oral-dot.ok{background:#16a34a}.ex-oral-dot.warn{background:#d97706}.ex-oral-dot.bad{background:#dc2626}
@@ -574,7 +574,7 @@ body.academy-open { overflow: hidden; }
 .fp-title{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-top:6px}
 .fp-grid{display:grid;grid-template-columns:1fr;gap:10px}
 .fp-select{padding:11px 14px !important;border-radius:12px !important;font-size:14px !important}
-.fp-reset{height:42px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text-main);border-radius:12px;font:700 13px inherit;font-family:inherit;cursor:pointer;margin-top:6px}
+.fp-reset{height:42px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text-main);border-radius:12px;font-weight:700;font-size:13px;font-family:inherit;cursor:pointer;margin-top:6px}
 
 .back-btn-sleek.spin img{animation:exSpin .8s linear infinite}
 @keyframes exSpin{to{transform:rotate(360deg)}}
@@ -583,7 +583,7 @@ body.academy-open { overflow: hidden; }
 .ex-drawer-panel{padding:16px 14px calc(104px + env(safe-area-inset-bottom))}
 .ex-drawer-body{gap:10px}
 .ex-dsec{margin:6px 2px 0;display:flex;justify-content:space-between;align-items:center}
-.ex-link{border:0;background:none;color:var(--text-muted);font:700 12px inherit;font-family:inherit;cursor:pointer;padding:4px 2px;text-transform:none}
+.ex-link{border:0;background:none;color:var(--text-muted);font-weight:700;font-size:12px;font-family:inherit;cursor:pointer;padding:4px 2px;text-transform:none}
 .filter-panel{gap:10px}
 .fp-grid{grid-template-columns:1fr 1fr;gap:8px}
 #exDrawer .custom-checkbox-wrapper{margin:0 !important;height:42px;padding:0 6px;border:1.5px solid var(--border);border-radius:12px;background:var(--card-bg);justify-content:center;text-align:center;font-size:12px;font-weight:600;color:var(--text-main);line-height:1.15;transition:background .15s,color .15s,border-color .15s}

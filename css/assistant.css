@@ -594,7 +594,7 @@ body[data-favmode="float"] #topFavBtn, body[data-favmode="off"] #topFavBtn { dis
 
 body.fav-open .fav-float { z-index: 100001; }
 body.no-select, body.no-select * { -webkit-user-select: none !important; user-select: none !important; }
-.ex-select { width:100%; border:1.5px solid var(--border); background:var(--input-bg); color:var(--text-main); border-radius:12px; padding:12px; font:600 14px inherit; font-family:inherit; }
+.ex-select { width:100%; border:1.5px solid var(--border); background:var(--input-bg); color:var(--text-main); border-radius:12px; padding:12px; font-weight:600;font-size:14px;font-family:inherit; }
 
 .has-new .news-mega{animation:megaNudge 2.4s ease-in-out infinite;transform-origin:30% 60%}
 @keyframes megaNudge{0%,60%,100%{transform:rotate(0)}70%{transform:rotate(-10deg)}80%{transform:rotate(8deg)}90%{transform:rotate(-5deg)}}
@@ -610,3 +610,77 @@ button, .list-item, .nav-item, .list-card, .chip, [onclick] { touch-action: mani
 /* Новини: центр кнопки на чверті ширини від правого краю шапки */
 #mainHeader { position: relative; }
 #newsBtn.news-btn { position: absolute; right: 25%; top: 50%; transform: translate(50%, -50%); margin: 0 !important; }
+
+/* ===== Пошук: інформаційний блок, фокус-вогник, картки послуг ===== */
+.ei { width: 1em; height: 1em; display: block; flex-shrink: 0; }
+.desc-icon-box .ei, .tech-icon .ei { width: 20px; height: 20px; color: var(--text-main); }
+.tech-info-block { padding: 6px; margin-bottom: 16px; border-radius: 18px; }
+.tech-row { display: grid; grid-template-columns: 36px 1fr; align-items: center; gap: 12px; padding: 10px 10px; border-bottom: 1px solid var(--border); }
+.tech-row:last-of-type { border-bottom: none; }
+.tech-icon { width: 36px; height: 36px; border-radius: 11px; background: var(--input-bg); display: flex; align-items: center; justify-content: center; font-size: 0; flex-shrink: 0; }
+.tech-icon img { width: 24px; height: 24px; object-fit: contain; display: block; }
+.tech-text-wrap { gap: 3px; min-width: 0; }
+.tech-label { font-size: 10.5px; letter-spacing: .6px; }
+.tech-value { font-size: 14px; font-weight: 600; color: var(--text-main); line-height: 1.35; overflow-wrap: anywhere; }
+.tech-calc { font-weight: 700; color: var(--primary); white-space: nowrap; margin-left: 4px; }
+.cx-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.cx-pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+.cx-pill.crit { color: var(--danger); } .cx-pill.crit i { background: var(--danger); }
+.cx-pill.high { color: #f97316; } .cx-pill.high i { background: #f97316; }
+.cx-pill.mid { color: #ca8a04; } .cx-pill.mid i { background: #eab308; }
+.cx-pill.low { color: #10b981; } .cx-pill.low i { background: #10b981; }
+.tech-row.negarant { background: rgba(239, 68, 68, .08); border: 1.5px solid rgba(239, 68, 68, .55); border-radius: 14px; margin: 6px 0 2px; padding: 10px; }
+.tech-row.negarant .tech-icon { background: rgba(239, 68, 68, .12); }
+.tech-row.negarant .tech-label { color: var(--danger); }
+[data-theme="dark"] .tech-row.negarant { background: rgba(239, 68, 68, .12); border-color: rgba(239, 68, 68, .6); }
+.tech-photo-wrapper { margin-top: 6px; padding: 10px; gap: 12px; border-radius: 14px; display: grid; grid-template-columns: 36px 1fr 20px; align-items: center; }
+.tech-photo-wrapper .tech-icon { background: var(--card-bg); }
+.photo-title { font-size: 14px; } .photo-subtitle { color: var(--text-muted); font-size: 12px; }
+.photo-arrow { width: 18px; height: 18px; color: var(--text-muted); }
+
+/* вогник фокусних позицій */
+.fire-ico { display: inline-flex; width: 18px; height: 22px; flex-shrink: 0; margin-right: 2px; position: relative; filter: drop-shadow(0 0 5px rgba(255, 110, 20, .55)); animation: fireGlow 1.6s ease-in-out infinite; }
+.fire-ico svg { width: 100%; height: 100%; overflow: visible; }
+.fire-ico path { transform-box: fill-box; transform-origin: 50% 100%; }
+.f-out { fill: #ff5a1f; animation: flameA 1.1s ease-in-out infinite; }
+.f-mid { fill: #ff9b21; animation: flameB .85s ease-in-out infinite; }
+.f-in { fill: #ffe066; animation: flameC .65s ease-in-out infinite; }
+.f-sp { fill: #ffb347; opacity: 0; transform-box: fill-box; }
+.f-sp.s1 { animation: spark 1.6s ease-out infinite; } .f-sp.s2 { animation: spark 1.6s ease-out .8s infinite; }
+@keyframes flameA { 0%,100% { transform: scale(1, 1) skewX(0); } 30% { transform: scale(.94, 1.07) skewX(-3deg); } 60% { transform: scale(1.04, .96) skewX(3deg); } }
+@keyframes flameB { 0%,100% { transform: scale(1, 1) skewX(0); } 40% { transform: scale(.9, 1.1) skewX(3deg); } 70% { transform: scale(1.05, .93) skewX(-3deg); } }
+@keyframes flameC { 0%,100% { transform: scale(1, 1); } 50% { transform: scale(.85, 1.15); } }
+@keyframes fireGlow { 0%,100% { filter: drop-shadow(0 0 3px rgba(255, 110, 20, .45)); } 50% { filter: drop-shadow(0 0 8px rgba(255, 90, 10, .8)); } }
+@keyframes spark { 0% { opacity: 0; transform: translateY(2px); } 20% { opacity: .95; } 100% { opacity: 0; transform: translateY(-9px); } }
+@media (prefers-reduced-motion: reduce) { .fire-ico, .fire-ico * { animation: none !important; } }
+
+/* картки послуг — лаконічніше */
+.service-card { padding: 12px 14px; border-radius: 16px; margin-bottom: 10px; box-shadow: none; }
+.sc-header { align-items: center; margin-bottom: 0; gap: 12px; }
+.sc-brand { font-size: 9.5px; padding: 3px 7px; margin-bottom: 5px; letter-spacing: .4px; }
+.sc-title { font-size: 14.5px; font-weight: 600; line-height: 1.3; }
+.sc-price { font-size: 14px; padding: 5px 10px; border-radius: 9px; background: transparent; border: 1.5px solid var(--border); white-space: nowrap; }
+.desc-toggle-wrapper { margin-top: 2px; padding: 4px 0 0; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.desc-toggle-wrapper svg { width: 14px; height: 14px; }
+.desc-content { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 6px; }
+.desc-line { padding: 8px 0 !important; border-bottom: 1px solid var(--border) !important; }
+.desc-line:last-child { border-bottom: none !important; }
+.desc-icon-box { width: 28px; min-width: 28px; height: 28px; border-radius: 9px; background: var(--input-bg) !important; font-size: 15px; }
+.desc-line .desc-icon-box + div { font-size: 13px !important; line-height: 1.4 !important; font-weight: 500 !important; }
+.desc-code { padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; }
+
+/* фільтр категорій під блоком інформації */
+.svc-actions { display: flex; gap: 8px; align-items: center; }
+.svc-filter-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--card-bg); color: var(--text-main); font-weight:700;font-size:12px;font-family:inherit; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+.svc-filter-btn svg { width: 15px; height: 15px; }
+.svc-filter-btn.active, .svc-filter-btn.open { background: var(--text-main); color: var(--card-bg); border-color: var(--text-main); }
+.compare-toggle-btn { height: 34px; padding: 0 14px; border-radius: 10px; font-size: 12px; }
+.svc-filter-pop { display: none; flex-wrap: wrap; gap: 8px; margin: -2px 0 12px; }
+.svc-filter-pop.show { display: flex; animation: fadeIn .18s ease; }
+.svc-chip { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 999px; border: 1.5px solid var(--border); background: var(--card-bg); color: var(--text-main); font-weight:600;font-size:12px;font-family:inherit; cursor: pointer; }
+.svc-chip b { font-weight: 700; color: var(--text-muted); }
+.svc-chip i { width: 8px; height: 8px; border-radius: 50%; }
+.svc-chip i.brand-support { background: var(--clr-support-text); } .svc-chip i.brand-ekta { background: var(--clr-ekta-text); } .svc-chip i.brand-epz { background: var(--clr-epz-text); }
+.svc-chip i.brand-install { background: var(--clr-install-text); } .svc-chip i.brand-settings, .svc-chip i.brand-other { background: var(--text-muted); }
+.svc-chip.on { background: var(--text-main); color: var(--card-bg); border-color: var(--text-main); } .svc-chip.on b { color: inherit; opacity: .7; }
+.copy-ico { display:inline-flex; vertical-align:middle; width:16px; height:16px; margin-left:4px; color:currentColor; } .copy-ico .ei { width:16px; height:16px; }
