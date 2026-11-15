@@ -527,7 +527,6 @@ body.academy-open { overflow: hidden; }
 .ex-tools button.on{background:var(--text-main);color:var(--card-bg)}
 .bulk-bar{position:sticky;bottom:0;display:flex;gap:6px;align-items:center;padding:10px;background:var(--card-bg);border-top:1px solid var(--border);flex-shrink:0}
 .bulk-bar span{flex:1;font-weight:700;font-size:13px}.bulk-bar button{border:0;border-radius:10px;padding:9px 12px;font-weight:700;background:var(--text-main);color:var(--card-bg);cursor:pointer}
-#academyApp .list-card.bulk-sel{outline:2.5px solid var(--text-main)}
 .today-line{display:flex;flex-direction:column;gap:2px;background:var(--input-bg);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:13px}
 .today-line b{font-size:11px;text-transform:uppercase;color:var(--text-muted);font-weight:700}
 .ex-toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);background:var(--text-main);color:var(--card-bg,#fff);padding:10px 16px;border-radius:999px;font-weight:700;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:100001}
@@ -579,3 +578,24 @@ body.academy-open { overflow: hidden; }
 
 .back-btn-sleek.spin img{animation:exSpin .8s linear infinite}
 @keyframes exSpin{to{transform:rotate(360deg)}}
+
+/* ===== компактне бічне меню ===== */
+.ex-drawer-panel{padding:16px 14px calc(104px + env(safe-area-inset-bottom))}
+.ex-drawer-body{gap:10px}
+.ex-dsec{margin:6px 2px 0;display:flex;justify-content:space-between;align-items:center}
+.ex-link{border:0;background:none;color:var(--text-muted);font:700 12px inherit;font-family:inherit;cursor:pointer;padding:4px 2px;text-transform:none}
+.filter-panel{gap:10px}
+.fp-grid{grid-template-columns:1fr 1fr;gap:8px}
+#exDrawer .custom-checkbox-wrapper{margin:0 !important;height:42px;padding:0 6px;border:1.5px solid var(--border);border-radius:12px;background:var(--card-bg);justify-content:center;text-align:center;font-size:12px;font-weight:600;color:var(--text-main);line-height:1.15;transition:background .15s,color .15s,border-color .15s}
+#exDrawer .custom-checkmark{display:none !important}
+#exDrawer .custom-checkbox-wrapper:has(input:checked){background:var(--text-main);color:var(--card-bg);border-color:var(--text-main);font-weight:700}
+.fp-selects{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fp-field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fp-field:last-child{grid-column:1 / -1}
+.fp-field span{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted)}
+.fp-select{height:42px;padding:0 10px !important;font-size:13px !important;width:100%;min-width:0;text-overflow:ellipsis}
+.ex-dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ex-dbtn{height:44px;text-align:center;padding:0 8px;font-size:13px}
+#academyApp .list-card{box-sizing:border-box;max-width:100%;min-width:0;overflow-wrap:anywhere}
+#statsModalUsersList{padding:2px 2px 8px}
+#exDrawer select.fp-select{padding:0 28px 0 12px !important;line-height:40px;background-position:right 10px center;background-color:var(--card-bg)}

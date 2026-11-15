@@ -53,7 +53,7 @@
         }
         b.style.display = canManage() && windowViewingEmployee ? 'flex' : 'none';
         const v = windowViewingEmployee && windowViewingEmployee.oralExam;
-        b.innerHTML = `<span class="ex-oral-dot ${oralClass(v)}"></span><span>Усний залік</span>`;
+        b.innerHTML = `${v ? `<span class="ex-oral-dot ${oralClass(v)}"></span>` : ''}<span>Усний залік</span>`;
         let st = document.getElementById('oralStatus');
         if (!st) { st = document.createElement('span'); st.id = 'oralStatus'; const meta = document.getElementById('viewingEmployeeMeta'); if (meta) meta.after(st); }
         st.className = 'ex-pill ' + oralClass(v); st.textContent = v ? 'Усний залік: ' + v : ''; st.style.display = v ? '' : 'none';
@@ -212,10 +212,9 @@
         d.innerHTML = `<div class="ex-drawer-panel">
             <div class="ex-drawer-head"><b>Меню</b><button class="ex-x" data-a="close" aria-label="Закрити">✕</button></div>
             <div class="ex-drawer-body">
-                <div class="ex-dsec">Фільтрація</div><div id="exFilterSlot"></div>
+                <div class="ex-dsec ex-dsec-row"><span>Фільтри</span><button class="ex-link" type="button" onclick="resetFilters()">Скинути</button></div><div id="exFilterSlot"></div>
                 <div class="ex-dsec">Звіти</div>
-                <button class="ex-dbtn" data-a="team">Зведення команди</button>
-                <button class="ex-dbtn" data-a="week">Підсумок тижня</button>
+                <div class="ex-dgrid"><button class="ex-dbtn" data-a="team">Зведення</button><button class="ex-dbtn" data-a="week">Підсумок тижня</button></div>
             </div></div>`;
         modal.appendChild(d);
         const fp = document.getElementById('filterPanel');

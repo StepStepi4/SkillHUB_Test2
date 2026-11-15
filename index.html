@@ -69,7 +69,7 @@
         <div style="display: flex; flex-direction: column; justify-content: center; height: 100%; flex: 1;">
             <div class="header-row" id="mainHeader" style="margin-bottom: 4px; justify-content: space-between; align-items: center;">
                 <h2 id="headerTitle" style="line-height: 1; font-size: 24px; margin: 0;">Пошук</h2>
-                <button id="newsBtn" class="fav-btn-top news-btn" onclick="window.openNews()" style="margin-left:auto; margin-right:8px;" aria-label="Новини">
+                <button id="newsBtn" class="fav-btn-top news-btn" onclick="window.openNews()" aria-label="Новини">
                     <img class="news-ico" src="assets/icons/ui/news.svg" alt="Новини">
                 </button>
                 <button id="topFavBtn" class="fav-btn-top" onclick="window.openFavoritesQuickMenu()" style="display:none;">
@@ -640,7 +640,6 @@
 
     <!-- Панель фільтрів -->
     <div id="filterPanel" class="filter-panel">
-        <div class="fp-title">Курси та цілі</div>
         <div class="fp-grid">
         <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
             <input type="checkbox" id="f_assigned" onchange="applyFilters()">
@@ -655,7 +654,7 @@
         <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
             <input type="checkbox" id="f_deadline" onchange="applyFilters()">
             <div class="custom-checkmark"></div>
-            <span>Прострочений дедлайн</span>
+            <span>Прострочено</span>
         </label>
         <label class="custom-checkbox-wrapper" style="margin-bottom: 0;">
             <input type="checkbox" id="f_goals" onchange="applyFilters()">
@@ -683,15 +682,13 @@
             <span>Зустрічі в Meet</span>
         </label>
         </div>
-        <div class="fp-title">Усний залік</div>
-        <select id="f_oral" class="search-input-modern fp-select" onchange="applyFilters()">
+        <div class="fp-selects">
+        <label class="fp-field"><span>Усний залік</span><select id="f_oral" class="search-input-modern fp-select" onchange="applyFilters()">
             <option value="">Усі</option><option value="Успішно здав">Успішно здав</option><option value="Потрібно вивчити">Потрібно вивчити</option><option value="Не здав">Не здав</option><option value="__none">Не виставлено</option>
-        </select>
-        <div class="fp-title">Локація</div>
-        <select id="f_store" class="search-input-modern fp-select" onchange="applyFilters()"><option value="">Усі локації</option></select>
-        <div class="fp-title">Керівник</div>
-        <select id="f_manager" class="search-input-modern fp-select" onchange="applyFilters()"><option value="">Всі керівники</option></select>
-        <button type="button" class="fp-reset" onclick="resetFilters()">Скинути фільтри</button>
+        </select></label>
+        <label class="fp-field"><span>Локація</span><select id="f_store" class="search-input-modern fp-select" onchange="applyFilters()"><option value="">Усі локації</option></select></label>
+        <label class="fp-field"><span>Керівник</span><select id="f_manager" class="search-input-modern fp-select" onchange="applyFilters()"><option value="">Всі керівники</option></select></label>
+        </div>
     </div>
 
     <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between;">

@@ -606,3 +606,7 @@ button, .list-item, .nav-item, .list-card, .chip, [onclick] { touch-action: mani
 .modal-body, .ex-sheet-body, .ex-drawer-body, #statsModalUsersList { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .modal.show .modal-content, .ex-drawer-panel, .ex-sheet-box { will-change: transform; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+/* Новини: центр кнопки на чверті ширини від правого краю шапки */
+#mainHeader { position: relative; }
+#newsBtn.news-btn { position: absolute; right: 25%; top: 50%; transform: translate(50%, -50%); margin: 0 !important; }
