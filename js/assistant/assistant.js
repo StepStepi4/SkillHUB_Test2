@@ -146,7 +146,7 @@
             let displayBrand = brand;
             if(cls === 'brand-ekta') displayBrand = 'ЕКТА';
             if(cls === 'brand-support') displayBrand = 'SUPPORT';
-            if(cls === 'brand-epz') displayBrand = 'ЕПЗ';
+            if(cls === 'brand-epz') displayBrand = 'Ліцензійне ПЗ';
 
             return {
                 origName: origName,
@@ -2210,7 +2210,7 @@ window.saveStore = function() {
             let cls = 'brand-other'; let uBrand = String(brand).toUpperCase();
             if (uBrand.includes('SUPPORT') || uName.includes('SUPPORT') || uName.includes('НАШ СЕРВІС')) cls = 'brand-support';
             else if (uBrand.includes('ЕКТА') || uBrand.includes('EKTA') || uName.includes('EKTA') || uName.includes('ЕКТА')) cls = 'brand-ekta';
-            else if (uBrand.includes('EPZ') || uName.includes('EPZ') || uName.includes('ЕПЗ') || isStaticEpz) cls = 'brand-epz';
+            else if (uBrand.includes('EPZ') || uName.includes('EPZ') || uName.includes('ЕПЗ') || uName.includes('ЛІЦЕНЗІЙНЕ ПЗ') || isStaticEpz) cls = 'brand-epz';
             else if (isPackage || uName.includes('НАЛАШТУВАННЯ')) cls = 'brand-settings';
             else if (uName.includes('МОНТАЖ') || uName.includes('ПІДКЛЮЧЕННЯ') || uName.includes('ВСТАНОВЛЕННЯ')) cls = 'brand-install';
 
@@ -2288,7 +2288,7 @@ window.saveStore = function() {
         </div>`;
     }
 
-    const CLS_LABEL = { 'brand-support': 'Support', 'brand-ekta': 'Екта', 'brand-epz': 'EPZ', 'brand-settings': 'Налаштування', 'brand-install': 'Монтаж', 'brand-other': 'Інше' };
+    const CLS_LABEL = { 'brand-support': 'Support', 'brand-ekta': 'Екта', 'brand-epz': 'Ліцензійне ПЗ', 'brand-settings': 'Налаштування', 'brand-install': 'Монтаж', 'brand-other': 'Інше' };
     let svcFilter = '', svcFilterFor = null;
     function closeSvcFilter() { const pop = document.getElementById('svcFilterPop'); if (pop) pop.classList.remove('show'); const b = document.getElementById('svcFilterBtn'); if (b) b.classList.remove('open'); }
     function updateSvcFilterUI(all) {
@@ -2498,7 +2498,7 @@ window.saveStore = function() {
         if (listA.length === 0 && listB.length === 0) {
             let html = `<div style="overflow-x:auto; border-radius:12px; border:1px solid var(--border);"><table style="width:100%; border-collapse:collapse; font-size:13px; background:var(--card-bg);"><thead><tr>`;
             [sA, sB].forEach(s => {
-                let brandLabel = s.brand || (s.cls === 'brand-ekta' ? 'ЕКТА' : (s.cls === 'brand-support' ? 'SUPPORT' : (s.cls === 'brand-epz' ? 'ЕПЗ' : 'СЕРВІС')));
+                let brandLabel = s.brand || (s.cls === 'brand-ekta' ? 'ЕКТА' : (s.cls === 'brand-support' ? 'SUPPORT' : (s.cls === 'brand-epz' ? 'Ліцензійне ПЗ' : 'СЕРВІС')));
                 html += `<th style="padding:16px; border-bottom:1px solid var(--border); width:50%; vertical-align:top; color:var(--text-main);"><div class="sc-brand ${s.cls}" style="margin-bottom:8px; display:inline-block;">${brandLabel}</div><div style="font-size:12px; font-weight:600; margin-bottom:8px;">${s.title}</div><div style="color:var(--primary);">${s.label || s.priceText}</div></th>`;
             });
             html += `</tr></thead><tbody><tr><td style="padding:16px; border-right:1px solid var(--border);">${descA || 'Опис відсутній'}</td><td style="padding:16px;">${descB || 'Опис відсутній'}</td></tr></tbody></table></div>`; return html;
@@ -2513,7 +2513,7 @@ window.saveStore = function() {
         let html = `<div style="font-size: 11px; color: var(--text-muted); font-weight: 700; margin-bottom: 12px; text-align: center; text-transform: uppercase;">Властивості (унікальні позначені ⭐️)</div>`;
         html += `<div class="compare-wrapper"><table class="compare-table"><thead><tr>`;
         [sA, sB].forEach(s => {
-            let brandLabel = s.brand || (s.cls === 'brand-ekta' ? 'ЕКТА' : (s.cls === 'brand-support' ? 'SUPPORT' : (s.cls === 'brand-epz' ? 'ЕПЗ' : 'СЕРВІС')));
+            let brandLabel = s.brand || (s.cls === 'brand-ekta' ? 'ЕКТА' : (s.cls === 'brand-support' ? 'SUPPORT' : (s.cls === 'brand-epz' ? 'Ліцензійне ПЗ' : 'СЕРВІС')));
             html += `<th style="padding:16px; border-bottom:1px solid var(--border); width:50%; vertical-align:top; color:var(--text-main);"><div class="sc-brand ${s.cls}" style="margin-bottom:8px; display:inline-block;">${brandLabel}</div><div style="font-size:12px; font-weight:600; margin-bottom:8px;">${s.title}</div><div style="color:var(--primary); font-size:16px;">${s.label || s.priceText}</div></th>`;
         });
         html += `</tr></thead><tbody>`;
@@ -2745,7 +2745,7 @@ window.saveStore = function() {
                 let cls = 'brand-settings'; let uName = String(m.service).toUpperCase();
                 if (uName.includes('SUPPORT') || uName.includes('НАШ СЕРВІС')) cls = 'brand-support';
                 else if (uName.includes('EKTA') || uName.includes('ЕКТА')) cls = 'brand-ekta';
-                else if (uName.includes('EPZ') || uName.includes('ЕПЗ')) cls = 'brand-epz';
+                else if (uName.includes('EPZ') || uName.includes('ЕПЗ') || uName.includes('ЛІЦЕНЗІЙНЕ ПЗ')) cls = 'brand-epz';
                 return { name: m.service, title: String(m.service).replace(/^\[.*?\]\s*/, ''), numCost, priceText, cls: cls, code: m.code, isPackage: false, discount: discountVal };
             });
 
@@ -2811,7 +2811,7 @@ window.saveStore = function() {
                     let cls = 'brand-settings'; let uName = String(m.service).toUpperCase();
                     if (uName.includes('SUPPORT') || uName.includes('НАШ СЕРВІС')) cls = 'brand-support';
                     else if (uName.includes('EKTA') || uName.includes('ЕКТА')) cls = 'brand-ekta';
-                    else if (uName.includes('EPZ') || uName.includes('ЕПЗ')) cls = 'brand-epz';
+                    else if (uName.includes('EPZ') || uName.includes('ЕПЗ') || uName.includes('ЛІЦЕНЗІЙНЕ ПЗ')) cls = 'brand-epz';
                     return { name: m.service, title: String(m.service).replace(/^\[.*?\]\s*/, ''), numCost, priceText, cls: cls, code: m.code, isPackage: false, discount: discountVal };
                 });
 

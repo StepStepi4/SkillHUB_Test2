@@ -576,8 +576,6 @@ body.academy-open { overflow: hidden; }
 .fp-select{padding:11px 14px !important;border-radius:12px !important;font-size:14px !important}
 .fp-reset{height:42px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text-main);border-radius:12px;font-weight:700;font-size:13px;font-family:inherit;cursor:pointer;margin-top:6px}
 
-.back-btn-sleek.spin img{animation:exSpin .8s linear infinite}
-@keyframes exSpin{to{transform:rotate(360deg)}}
 
 /* ===== компактне бічне меню ===== */
 .ex-drawer-panel{padding:16px 14px calc(104px + env(safe-area-inset-bottom))}

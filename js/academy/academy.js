@@ -706,11 +706,8 @@
         if (_eduManualBusy) return;
         if (!navigator.onLine) { refreshToast('Немає підключення до інтернету'); return; }
         _eduManualBusy = true;
-        const btn = document.querySelector('#cabinetNavActions [onclick="forceRefresh()"]');
-        if (btn) btn.classList.add('spin');
         let r = 'fail';
         try { r = await fetchFreshDataSilent(true); } catch (e) {}
-        if (btn) btn.classList.remove('spin');
         _eduManualBusy = false;
         refreshToast(r === 'ok' ? 'Дані оновлено' : r === 'pending' ? 'Є невідправлені зміни — спробуйте за мить' : r === 'offline' ? 'Немає підключення до інтернету' : r === 'noauth' ? 'Потрібен повторний вхід' : 'Не вдалося оновити. Спробуйте ще раз');
     }

@@ -684,3 +684,6 @@ button, .list-item, .nav-item, .list-card, .chip, [onclick] { touch-action: mani
 .svc-chip i.brand-install { background: var(--clr-install-text); } .svc-chip i.brand-settings, .svc-chip i.brand-other { background: var(--text-muted); }
 .svc-chip.on { background: var(--text-main); color: var(--card-bg); border-color: var(--text-main); } .svc-chip.on b { color: inherit; opacity: .7; }
 .copy-ico { display:inline-flex; vertical-align:middle; width:16px; height:16px; margin-left:4px; color:currentColor; } .copy-ico .ei { width:16px; height:16px; }
+
+.ei-wrap { display:inline-flex; width:1.1em; height:1.1em; vertical-align:-0.18em; align-items:center; justify-content:center; } .ei-wrap .ei { width:100%; height:100%; }
+.ei-wrap, .ei-wrap * { pointer-events: none; }
