@@ -130,6 +130,20 @@
         free: '<rect x="3" y="6" width="18" height="12" rx="2.500"/><path d="M8 15v-6h3M8 12h2.500M13.500 15v-6h2a1.700 1.700 0 0 1 0 3.500h-2M15.800 12.500 17 15"/>',
         minus: '<path d="M5 12h14"/>',
         plus: '<path d="M12 5v14M5 12h14"/>',
+        infinity: '<path d="M12 12c-2-3-4-4.500-6-4.500a4.500 4.500 0 0 0 0 9c2 0 4-1.500 6-4.500zm0 0c2 3 4 4.500 6 4.500a4.500 4.500 0 0 0 0-9c-2 0-4 1.500-6 4.500z"/>',
+        idcard: '<rect x="3" y="5.500" width="18" height="13" rx="2.500"/><circle cx="9" cy="11" r="2"/><path d="M5.800 16c.5-1.800 1.800-2.600 3.200-2.600s2.700.8 3.200 2.600M14.500 10h4M14.500 13.500h3"/>',
+        paw: '<path d="M8.500 20c-2 0-3-1.500-2-3.500 1-2 3-5 5.500-5s4.500 3 5.500 5-.5 3.500-2.500 3.500c-1.500 0-2-.8-3-.8s-1.500.8-3.500.8z"/><circle cx="6" cy="10" r="1.500"/><circle cx="10" cy="6.500" r="1.500"/><circle cx="14.500" cy="6.500" r="1.500"/><circle cx="18" cy="10" r="1.500"/>',
+        leaf: '<path d="M5 19c0-9 5-14 14-14 0 9-5 14-14 14zM5 19l8-8"/>',
+        plane: '<path d="M21 3 3 10.500l6.500 2.500L12 20l2.500-6.500zM9.500 13 21 3"/>',
+        ball: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+        folder: '<path d="M3 7.500V18a1.500 1.500 0 0 0 1.500 1.500h15A1.500 1.500 0 0 0 21 18V9a1.500 1.500 0 0 0-1.500-1.500H12L10 5H4.500A1.500 1.500 0 0 0 3 6.500z"/>',
+        play: '<path d="M8 5v14l11-7z"/>',
+        square: '<rect x="5" y="5" width="14" height="14" rx="2.500" fill="currentColor"/>',
+        ring: '<circle cx="12" cy="12" r="8"/>',
+        tri: '<path d="M12 4 21 19H3z"/>',
+        cup: '<path d="M5 8h12v6a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5zM17 9.500h1.500a2.500 2.500 0 0 1 0 5H17M8 3.500v2M12 3.500v2"/>',
+        skull: '<path d="M12 3.500c4 0 7 2.700 7 6.500 0 2.200-1 3.800-2.500 4.800V18h-9v-3.200C6 13.800 5 12.200 5 10c0-3.800 3-6.500 7-6.500zM9.500 18v2.500M14.500 18v2.500"/><circle cx="9.500" cy="10.500" r="1.200"/><circle cx="14.500" cy="10.500" r="1.200"/>',
+        building: '<path d="M5 20.500V4h9v16.500M14 9h5v11.500M3 20.500h18M8 8h3M8 12h3M8 16h3"/>',
         flame: '<path d="M12 3c.5 3.3 4.8 5.4 4.8 10a4.8 4.8 0 0 1-9.6 0c0-1.7.8-2.8 1.7-3.8.2 1.2.9 1.9 1.6 2C10.2 8.6 10.6 5.6 12 3z"/>'
     };
     const MAP = {
@@ -159,6 +173,8 @@
         '🔘': 'radio', '💥': 'sparkle', '🚗': 'car', '🚙': 'car', '📎': 'clip', '🖇️': 'clip', '🔓': 'unlock', '📉': 'trenddown', '🗳️': 'ballot', '🗳': 'ballot', '⚖️': 'scale', '⚖': 'scale',
         '✍️': 'pencil', '✍': 'pencil', '🖍️': 'pencil', '🖍': 'pencil', '✏️': 'pencil', '👏': 'hand', '🙌': 'hand', '🙏': 'hand', '💪': 'hand', '👌': 'check', '✌️': 'hand', '✌': 'hand', '☝️': 'arrow', '☝': 'arrow',
         '👈': 'arrow', '👆': 'arrow', '⬅️': 'arrow', '⬅': 'arrow', '🔝': 'top', '🆓': 'free',
+        '♾️': 'infinity', '🪪': 'idcard', '🧑‍💻': 'user', '👨‍💻': 'user', '👩‍💻': 'user', '☠️': 'skull', '💀': 'skull', '⭕': 'ring', '✈️': 'plane', '🛫': 'plane', '🛬': 'plane', '🏦': 'building', '🏭': 'building', '🏥': 'building', '🏨': 'building',
+        '⚪': 'ring', '⚫': 'radio', '▫️': 'square', '⚰️': 'box', '⚱️': 'box', '⚧️': 'user', '⛹️': 'user',
         '➖': 'minus', '➕': 'plus', '🔹': 'dot', '🔸': 'dot', '▫️': 'dot', '•': 'dot', '🔷': 'diamond', '🔶': 'diamond', '🎯': 'target', '📊': 'chart', '📈': 'chart', '📶': 'signal',
         '🖨️': 'printer', '⌨️': 'keyboard', '🖱️': 'mouse', '📢': 'mega', '📣': 'mega', '💯': 'percent', '🔥': 'flame'
     };
@@ -170,9 +186,50 @@
     }
     const RX = /([\u{1F1E6}-\u{1F1FF}]{2}|\p{Extended_Pictographic}\uFE0F?(?:\u200D\p{Extended_Pictographic}\uFE0F?)*)|[✕✖✓✔❯❮➔↕✦]/gu;
     const SKIP = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, TEXTAREA: 1, INPUT: 1, OPTION: 1, SELECT: 1, TITLE: 1, SVG: 1, CODE: 1 };
+    // Резервна категорія за діапазоном Unicode — щоб жоден емодзі не став «крапкою»
+    const RANGES = [
+        [0x1F550, 0x1F567, 'clock'], [0x23E9, 0x23EF, 'play'], [0x23F8, 0x23FA, 'play'], [0x25C0, 0x25C0, 'play'],
+        [0x2194, 0x21AA, 'arrow'], [0x2934, 0x2935, 'arrow'], [0x2B05, 0x2B07, 'arrow'], [0x1F500, 0x1F503, 'refresh'], [0x1F519, 0x1F51D, 'arrow'],
+        [0x1F7E0, 0x1F7EB, 'square'], [0x2B1B, 0x2B1C, 'square'], [0x25FB, 0x25FE, 'square'], [0x25AA, 0x25AB, 'square'], [0x1F532, 0x1F533, 'square'], [0x1F534, 0x1F534, 'rdot'], [0x1F53A, 0x1F53B, 'tri'],
+        [0x1F493, 0x1F49F, 'heart'], [0x1F90D, 0x1F90E, 'heart'], [0x1F5A4, 0x1F5A4, 'heart'], [0x2763, 0x2763, 'heart'], [0x1F48B, 0x1F48D, 'heart'], [0x1F490, 0x1F492, 'heart'],
+        [0x2648, 0x2653, 'star'], [0x26CE, 0x26CE, 'star'], [0x1F52F, 0x1F52F, 'star'], [0x2721, 0x2721, 'star'], [0x2733, 0x2734, 'sparkle'], [0x2747, 0x2747, 'sparkle'],
+        [0x1F300, 0x1F320, 'cloud'], [0x2602, 0x2604, 'cloud'], [0x2614, 0x2614, 'drop'], [0x26C4, 0x26C8, 'cloud'], [0x1F311, 0x1F318, 'moon'], [0x1F31A, 0x1F31C, 'moon'], [0x1F31D, 0x1F31E, 'sun'],
+        [0x1F330, 0x1F335, 'leaf'], [0x1F337, 0x1F344, 'leaf'], [0x2618, 0x2618, 'leaf'], [0x1F940, 0x1F940, 'leaf'], [0x1F395, 0x1F395, 'leaf'],
+        [0x1F345, 0x1F37C, 'food'], [0x1F37D, 0x1F37E, 'food'], [0x1F32D, 0x1F32F, 'food'], [0x1F950, 0x1F96F, 'food'], [0x1F9C0, 0x1F9CB, 'food'], [0x1F95B, 0x1F95B, 'cup'], [0x1F375, 0x1F37A, 'cup'],
+        [0x1F400, 0x1F43E, 'paw'], [0x1F980, 0x1F9AE, 'paw'], [0x1F985, 0x1F98B, 'paw'], [0x1F9A0, 0x1F9A0, 'paw'],
+        [0x1F440, 0x1F445, 'eye'], [0x1F446, 0x1F450, 'hand'], [0x1F90C, 0x1F90C, 'hand'], [0x1F90F, 0x1F90F, 'hand'], [0x1F932, 0x1F932, 'hand'], [0x1F595, 0x1F596, 'hand'], [0x270A, 0x270D, 'hand'], [0x1F9B5, 0x1F9B6, 'hand'], [0x1F9BE, 0x1F9BF, 'hand'],
+        [0x1F466, 0x1F469, 'user'], [0x1F46A, 0x1F46B, 'users'], [0x1F46C, 0x1F46D, 'users'], [0x1F46E, 0x1F478, 'user'], [0x1F9D1, 0x1F9DF, 'user'], [0x1F930, 0x1F931, 'user'], [0x1F934, 0x1F93A, 'user'], [0x1F93C, 0x1F93E, 'user'], [0x1F9B8, 0x1F9B9, 'user'],
+        [0x1F3C3, 0x1F3C4, 'user'], [0x1F3CA, 0x1F3CC, 'user'], [0x1F6B4, 0x1F6B6, 'user'], [0x1F6C0, 0x1F6C0, 'user'], [0x1F6CC, 0x1F6CC, 'user'], [0x1F483, 0x1F483, 'user'], [0x1F57A, 0x1F57A, 'user'], [0x1F935, 0x1F936, 'user'], [0x1F9CD, 0x1F9CF, 'user'],
+        [0x1F479, 0x1F47F, 'skull'], [0x1F480, 0x1F480, 'skull'], [0x2620, 0x2620, 'skull'], [0x1F47D, 0x1F47E, 'gamepad'], [0x1F9DE, 0x1F9DF, 'user'],
+        [0x1F452, 0x1F462, 'bag'], [0x1F45B, 0x1F45D, 'bag'], [0x1F392, 0x1F392, 'bag'], [0x1F9E3, 0x1F9E6, 'bag'], [0x1F97B, 0x1F97F, 'bag'], [0x1F453, 0x1F454, 'tag'],
+        [0x1F682, 0x1F68F, 'truck'], [0x1F690, 0x1F6A3, 'car'], [0x1F6B2, 0x1F6B3, 'car'], [0x1F6B5, 0x1F6B5, 'car'], [0x1F6F4, 0x1F6FC, 'car'], [0x1F681, 0x1F681, 'plane'], [0x26F5, 0x26F5, 'plane'], [0x26F4, 0x26F4, 'plane'], [0x1F6A4, 0x1F6A4, 'plane'], [0x1F6A2, 0x1F6A2, 'plane'], [0x1F6F8, 0x1F6F8, 'rocket'],
+        [0x1F6A5, 0x1F6A7, 'warn'], [0x1F6AA, 0x1F6AA, 'home'], [0x1F6AB, 0x1F6AF, 'cross'], [0x1F6B7, 0x1F6B8, 'warn'], [0x1F6B9, 0x1F6BE, 'user'], [0x1F6C1, 0x1F6C5, 'note'], [0x1F6D1, 0x1F6D1, 'cross'],
+        [0x1F3E1, 0x1F3E5, 'home'], [0x1F3E7, 0x1F3E7, 'card'], [0x1F3E9, 0x1F3F0, 'home'], [0x1F54B, 0x1F54E, 'home'], [0x26EA, 0x26EA, 'home'], [0x26E9, 0x26E9, 'home'], [0x1F5FB, 0x1F5FF, 'home'], [0x26F0, 0x26F3, 'flag'], [0x26FA, 0x26FA, 'home'], [0x1F3EE, 0x1F3EE, 'bulb'],
+        [0x1F3A0, 0x1F3A2, 'puzzle'], [0x1F3AA, 0x1F3AA, 'puzzle'], [0x1F3AD, 0x1F3AD, 'film'], [0x1F3A6, 0x1F3A6, 'film'], [0x1F3A3, 0x1F3A3, 'puzzle'], [0x1F3B0, 0x1F3B4, 'puzzle'], [0x1F0CF, 0x1F0CF, 'puzzle'], [0x1F004, 0x1F004, 'puzzle'],
+        [0x1F3B7, 0x1F3BC, 'music'], [0x1F941, 0x1F941, 'music'], [0x1F3B3, 0x1F3B3, 'ball'], [0x1F3BD, 0x1F3BD, 'tag'], [0x1F3BE, 0x1F3C0, 'ball'], [0x1F3C8, 0x1F3C9, 'ball'], [0x1F3CF, 0x1F3D3, 'ball'], [0x1F3F8, 0x1F3F9, 'target'], [0x26BD, 0x26BE, 'ball'], [0x1F94A, 0x1F94F, 'ball'], [0x1F93F, 0x1F93F, 'ball'],
+        [0x1F380, 0x1F393, 'gift'], [0x1F3A3, 0x1F3A3, 'gift'], [0x1F3C2, 0x1F3C2, 'user'], [0x26F7, 0x26F8, 'user'], [0x1F3FA, 0x1F3FA, 'cup'],
+        [0x1F4C1, 0x1F4C2, 'folder'], [0x1F4C3, 0x1F4D3, 'note'], [0x1F4D4, 0x1F4DC, 'book'], [0x1F4DB, 0x1F4DB, 'tag'], [0x1F4E4, 0x1F4E8, 'mail'], [0x1F4E9, 0x1F4EF, 'mail'], [0x1F4F0, 0x1F4F0, 'note'], [0x1F4F3, 0x1F4F5, 'phone'], [0x1F4E0, 0x1F4E0, 'printer'], [0x1F4FF, 0x1F4FF, 'ring'],
+        [0x1F4B1, 0x1F4B2, 'money'], [0x1F4B9, 0x1F4B9, 'chart'], [0x1F4BC, 0x1F4BC, 'bag'], [0x1F4BD, 0x1F4BD, 'save'], [0x1F4C7, 0x1F4C7, 'idcard'], [0x1F4A0, 0x1F4A0, 'diamond'], [0x1F4A2, 0x1F4A2, 'excl'], [0x1F4A3, 0x1F4A3, 'flash'], [0x1F4A4, 0x1F4A4, 'moon'], [0x1F4A5, 0x1F4A5, 'sparkle'], [0x1F4A6, 0x1F4A6, 'drop'], [0x1F4A8, 0x1F4A8, 'wave'], [0x1F4A9, 0x1F4A9, 'dot'], [0x1F4AB, 0x1F4AB, 'sparkle'], [0x1F4AD, 0x1F4AD, 'speak'], [0x1F4AE, 0x1F4AE, 'star'], [0x1F4AC, 0x1F4AC, 'speak'], [0x1F5E8, 0x1F5EF, 'speak'],
+        [0x1F489, 0x1F48A, 'drop'], [0x1F484, 0x1F487, 'user'], [0x1F488, 0x1F488, 'tools'], [0x1F4BA, 0x1F4BA, 'home'],
+        [0x1F507, 0x1F50A, 'speaker'], [0x1F515, 0x1F515, 'bell'], [0x1F516, 0x1F516, 'tag'], [0x1F50F, 0x1F50F, 'lock'], [0x1F51E, 0x1F51E, 'warn'], [0x1F51F, 0x1F524, 'note'], [0x1F520, 0x1F524, 'note'], [0x1F529, 0x1F52C, 'tools'], [0x1F52E, 0x1F52E, 'sparkle'], [0x1F531, 0x1F531, 'tools'],
+        [0x1F9F0, 0x1F9FF, 'tools'], [0x1F9E7, 0x1F9E7, 'gift'], [0x1F9E0, 0x1F9E0, 'bulb'], [0x1F9E1, 0x1F9E2, 'bag'], [0x1F9E8, 0x1F9E8, 'flash'], [0x1F9E9, 0x1F9EA, 'puzzle'], [0x1F9EB, 0x1F9EC, 'tools'], [0x1F9ED, 0x1F9ED, 'compass'], [0x1F9EE, 0x1F9EE, 'calc'],
+        [0x1FA70, 0x1FAFF, 'tools'], [0x1F90D, 0x1F90D, 'heart'], [0x1F9B0, 0x1F9B3, 'user'], [0x1F9B7, 0x1F9B7, 'tools'], [0x1F9B4, 0x1F9B4, 'skull'], [0x1F9C0, 0x1F9C0, 'food'],
+        [0x2600, 0x2601, 'sun'], [0x2693, 0x2693, 'compass'], [0x2694, 0x2694, 'tools'], [0x2695, 0x2695, 'shield'], [0x2697, 0x2697, 'tools'], [0x2699, 0x2699, 'gear'], [0x269B, 0x269C, 'sparkle'], [0x26CF, 0x26CF, 'tools'], [0x26D1, 0x26D1, 'shield'], [0x26D3, 0x26D3, 'link'], [0x26FD, 0x26FD, 'drop'], [0x2668, 0x2668, 'flame'],
+        [0x2622, 0x2623, 'warn'], [0x2638, 0x2638, 'gear'], [0x262A, 0x262F, 'ring'], [0x2626, 0x2626, 'ring'], [0x271D, 0x271D, 'plus'], [0x2639, 0x263A, 'heart'], [0x2640, 0x2642, 'user'], [0x265F, 0x2666, 'diamond'], [0x267F, 0x267F, 'user'], [0x2692, 0x2692, 'tools'],
+        [0x2712, 0x2712, 'edit'], [0x2795, 0x2797, 'plus'], [0x27B0, 0x27BF, 'refresh'], [0x2705, 0x2705, 'check'], [0x274C, 0x274E, 'cross'], [0x2753, 0x2755, 'ask'], [0x2B50, 0x2B55, 'star'], [0x3030, 0x3030, 'wave'], [0x303D, 0x303D, 'wave'], [0x3297, 0x3299, 'tag'], [0x24C2, 0x24C2, 'ring'],
+        [0x1F170, 0x1F251, 'tag'], [0x2122, 0x2122, 'tag'], [0x203C, 0x2049, 'excl'], [0x1F5A5, 0x1F5A5, 'desktop'], [0x1F5C2, 0x1F5C4, 'folder'], [0x1F5D1, 0x1F5D1, 'trash'], [0x1F5DD, 0x1F5DD, 'key'], [0x1F5E1, 0x1F5E1, 'tools'], [0x1F5F3, 0x1F5F3, 'ballot'], [0x1F5FA, 0x1F5FA, 'globe'],
+        [0x1F30D, 0x1F310, 'globe'], [0x1F301, 0x1F30C, 'cloud'], [0x1F5BC, 0x1F5BC, 'image'], [0x1F3D4, 0x1F3DF, 'home'], [0x1F3F3, 0x1F3F5, 'flag'], [0x1F6E0, 0x1F6EC, 'tools'],
+        [0x1F100, 0x1F1FF, 'tag'], [0x2300, 0x23FF, 'gear'], [0x2600, 0x27BF, 'dot'], [0x2B00, 0x2BFF, 'dot'], [0x1F300, 0x1FAFF, 'dot']
+    ];
+    function byRange(e) {
+        const cp = String(e).codePointAt(0);
+        for (let i = 0; i < RANGES.length; i++) { const r = RANGES[i]; if (cp >= r[0] && cp <= r[1]) return r[2]; }
+        return 'dot';
+    }
     let unknown = {};
     const KEEP = /^(?:[\u{1F1E6}-\u{1F1FF}]{2}|[\u{1F3F3}\u{1F3F4}]\uFE0F?(?:\u200D.+)?|[\u{1F600}-\u{1F64F}\u{1F910}-\u{1F92F}\u{1F970}-\u{1F97A}\u{1F9D0}\u{1F978}\u{1FAE0}-\u{1FAE8}\u{1F635}\u{1F971}\u{1F972}])/u;
-    function iconFor(e) { return svg(e) || (unknown[e] = (unknown[e] || 0) + 1, svg('🔹')); }
+    function shape(name, cls) { return `<svg class="ei ${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${S[name] || S.dot}</svg>`; }
+    function iconFor(e) { return svg(e) || shape(byRange(e)); }
     function convertText(node) {
         const v = node.nodeValue; if (!v || !RX.test(v)) { RX.lastIndex = 0; return; } RX.lastIndex = 0;
         { const all = v.match(RX) || []; RX.lastIndex = 0; if (!all.some(x => !KEEP.test(x))) return; }
@@ -210,7 +267,7 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
     window.EmojiIcons = {
         unknown: () => Object.assign({}, unknown),
-        svg: svg,
+        svg: svg, any: e => KEEP.test(String(e).trim()) ? null : (svg(e) || shape(byRange(e))),
         has: e => !!NORM[norm(e)],
         add: (emoji, inner) => { const n = 'u_' + norm(emoji); S[n] = inner; NORM[norm(emoji)] = n; }
     };

@@ -75,7 +75,7 @@
         if (clean.toLowerCase().endsWith('.svg') || clean.toLowerCase().endsWith('.png')) {
             return `<img src="${SKILLHUB_ICONS_DIR}${clean}" alt="icon" style="width: 100%; height: 100%; object-fit: contain; display: block;">`;
         }
-        const ei = window.EmojiIcons && window.EmojiIcons.svg(clean);
+        const ei = window.EmojiIcons && window.EmojiIcons.any(clean);
         return ei || clean;
     };
 
