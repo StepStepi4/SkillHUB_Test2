@@ -128,6 +128,8 @@
         pencil: '<path d="m4 20 1-4.500L16.500 4a2.100 2.100 0 0 1 3 3L8 18.500zM14.500 6l3 3"/>',
         top: '<path d="M5 4h14M12 20V9M7 13.500l5-5 5 5"/>',
         free: '<rect x="3" y="6" width="18" height="12" rx="2.500"/><path d="M8 15v-6h3M8 12h2.500M13.500 15v-6h2a1.700 1.700 0 0 1 0 3.500h-2M15.800 12.500 17 15"/>',
+        minus: '<path d="M5 12h14"/>',
+        plus: '<path d="M12 5v14M5 12h14"/>',
         flame: '<path d="M12 3c.5 3.3 4.8 5.4 4.8 10a4.8 4.8 0 0 1-9.6 0c0-1.7.8-2.8 1.7-3.8.2 1.2.9 1.9 1.6 2C10.2 8.6 10.6 5.6 12 3z"/>'
     };
     const MAP = {
@@ -157,7 +159,7 @@
         '🔘': 'radio', '💥': 'sparkle', '🚗': 'car', '🚙': 'car', '📎': 'clip', '🖇️': 'clip', '🔓': 'unlock', '📉': 'trenddown', '🗳️': 'ballot', '🗳': 'ballot', '⚖️': 'scale', '⚖': 'scale',
         '✍️': 'pencil', '✍': 'pencil', '🖍️': 'pencil', '🖍': 'pencil', '✏️': 'pencil', '👏': 'hand', '🙌': 'hand', '🙏': 'hand', '💪': 'hand', '👌': 'check', '✌️': 'hand', '✌': 'hand', '☝️': 'arrow', '☝': 'arrow',
         '👈': 'arrow', '👆': 'arrow', '⬅️': 'arrow', '⬅': 'arrow', '🔝': 'top', '🆓': 'free',
-        '🔹': 'dot', '🔸': 'dot', '▫️': 'dot', '•': 'dot', '🔷': 'diamond', '🔶': 'diamond', '🎯': 'target', '📊': 'chart', '📈': 'chart', '📶': 'signal',
+        '➖': 'minus', '➕': 'plus', '🔹': 'dot', '🔸': 'dot', '▫️': 'dot', '•': 'dot', '🔷': 'diamond', '🔶': 'diamond', '🎯': 'target', '📊': 'chart', '📈': 'chart', '📶': 'signal',
         '🖨️': 'printer', '⌨️': 'keyboard', '🖱️': 'mouse', '📢': 'mega', '📣': 'mega', '💯': 'percent', '🔥': 'flame'
     };
     const norm = v => String(v || '').trim().replace(/️/g, '');
@@ -204,6 +206,7 @@
             if (!raf) raf = requestAnimationFrame(flush);
         }).observe(document.body, { childList: true, subtree: true, characterData: true });
     }
+    (function () { try { const st = document.createElement('style'); st.id = 'ei-base'; st.textContent = '.ei{width:1em;height:1em;display:block;flex-shrink:0}.ei-wrap{display:inline-flex;width:1.1em;height:1.1em;vertical-align:-0.18em;align-items:center;justify-content:center}.ei-wrap .ei{width:100%;height:100%}.ei-wrap,.ei-wrap *{pointer-events:none}'; (document.head || document.documentElement).insertBefore(st, (document.head || document.documentElement).firstChild); } catch (e) {} })();
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
     window.EmojiIcons = {
         unknown: () => Object.assign({}, unknown),

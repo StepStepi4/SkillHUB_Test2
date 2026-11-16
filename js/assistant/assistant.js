@@ -2607,7 +2607,7 @@ window.saveStore = function() {
                 <div class="input-group">
                     <select id="montazhCity" class="montazh-select">
                         <option value="">-- Оберіть місто --</option>
-                        ${cities.map(c => { let emoji = window.cityStatusMap.get(c) ? "🟢" : "🔴"; return `<option value="${c}">${emoji}${c}</option>`; }).join('')}
+                        ${cities.map(c => { let emoji = window.cityStatusMap.get(c) ? "✓ " : "✕ "; return `<option value="${c}">${emoji}${c}</option>`; }).join('')}
                     </select>
                 </div>
                 <div class="input-group">

@@ -2207,7 +2207,7 @@
         if (testTimerInterval) clearInterval(testTimerInterval);
         document.body.classList.add('cheating');
         if (currentUser) { let cheats = parseInt(localStorage.getItem('cheats_' + currentUser)) || 0; localStorage.setItem('cheats_' + currentUser, cheats + 1); }
-        setTimeout(() => { alert("⛔ Порушення правил! Ви згорнули вікно або відвели фокус. Спробу зараховано з результатом 0%."); document.body.classList.remove('cheating'); submitTest(true); }, 150);
+        setTimeout(() => { alert("Порушення правил! Ви згорнули вікно або відвели фокус. Спробу зараховано з результатом 0%."); document.body.classList.remove('cheating'); submitTest(true); }, 150);
     }
     window.addEventListener('blur', triggerAntiCheat); window.addEventListener('pagehide', triggerAntiCheat); document.addEventListener('visibilitychange', () => { if (document.hidden) triggerAntiCheat(); }); document.addEventListener('touchcancel', triggerAntiCheat);
 

@@ -25,4 +25,5 @@ function upd(){var d=boxes.filter(function(x){return x.checked}).length;document
 boxes.forEach(function(x){x.checked=!!st[x.dataset.i];x.addEventListener('change',function(){st[x.dataset.i]=x.checked?1:0;try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}upd()})});
 function resetAll(){if(!confirm('Скинути всі відмітки?'))return;st={};try{localStorage.removeItem(K)}catch(e){}boxes.forEach(function(x){x.checked=false});upd()}
 upd();
-</script></body></html>
+</script><script src="js/core/emoji-icons.js"></script>
+</body></html>
