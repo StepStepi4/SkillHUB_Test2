@@ -613,7 +613,7 @@ button, .list-item, .nav-item, .list-card, .chip, [onclick] { touch-action: mani
 
 /* ===== Пошук: інформаційний блок, фокус-вогник, картки послуг ===== */
 .ei { width: 1em; height: 1em; display: block; flex-shrink: 0; }
-.desc-icon-box .ei, .tech-icon .ei { width: 20px; height: 20px; color: var(--text-main); }
+.desc-icon-box .ei, .tech-icon .ei { width: 24px; height: 24px; color: var(--text-main); }
 .tech-info-block { padding: 6px; margin-bottom: 16px; border-radius: 18px; }
 .tech-row { display: grid; grid-template-columns: 36px 1fr; align-items: center; gap: 12px; padding: 10px 10px; border-bottom: 1px solid var(--border); }
 .tech-row:last-of-type { border-bottom: none; }
@@ -683,9 +683,9 @@ button, .list-item, .nav-item, .list-card, .chip, [onclick] { touch-action: mani
 .svc-chip i.brand-support { background: var(--clr-support-text); } .svc-chip i.brand-ekta { background: var(--clr-ekta-text); } .svc-chip i.brand-epz { background: var(--clr-epz-text); }
 .svc-chip i.brand-install { background: var(--clr-install-text); } .svc-chip i.brand-settings, .svc-chip i.brand-other { background: var(--text-muted); }
 .svc-chip.on { background: var(--text-main); color: var(--card-bg); border-color: var(--text-main); } .svc-chip.on b { color: inherit; opacity: .7; }
-.copy-ico { display:inline-flex; vertical-align:middle; width:16px; height:16px; margin-left:4px; color:currentColor; } .copy-ico .ei { width:16px; height:16px; }
+.copy-ico { display:inline-flex; vertical-align:middle; width:19px; height:19px; margin-left:4px; color:currentColor; } .copy-ico .ei { width:19px; height:19px; }
 
-.ei-wrap { display:inline-flex; width:1.1em; height:1.1em; vertical-align:-0.18em; align-items:center; justify-content:center; } .ei-wrap .ei { width:100%; height:100%; }
+.ei-wrap { display:inline-flex; width:1.32em; height:1.32em; vertical-align:-0.26em; align-items:center; justify-content:center; } .ei-wrap .ei { width:100%; height:100%; }
 .ei-wrap, .ei-wrap * { pointer-events: none; }
 
 /* Інструкція */
@@ -700,3 +700,8 @@ button, .list-item, .nav-item, .list-card, .chip, [onclick] { touch-action: mani
 .gd-shot{margin:4px 0 14px;text-align:center}
 .gd-shot img{width:100%;max-width:300px;border-radius:14px;border:1px solid var(--border)}
 .gd-shot figcaption{font-size:12px;opacity:.65;margin-top:6px}
+.gd-live{pointer-events:none;margin:8px 0}
+.gd-ex{border-left:3px solid var(--primary,#007aff);background:rgba(127,127,127,.08);border-radius:10px;padding:10px 12px;margin:10px 0}
+.gd-ex-t{font-weight:700;font-size:13px;margin-bottom:6px}
+.gd-steps{margin:0;padding-left:20px}.gd-steps li{margin:0 0 6px}
+.gd-note{font-size:12.5px;opacity:.7}

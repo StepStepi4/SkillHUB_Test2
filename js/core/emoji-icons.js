@@ -263,7 +263,7 @@
             if (!raf) raf = requestAnimationFrame(flush);
         }).observe(document.body, { childList: true, subtree: true, characterData: true });
     }
-    (function () { try { const st = document.createElement('style'); st.id = 'ei-base'; st.textContent = '.ei{width:1em;height:1em;display:block;flex-shrink:0}.ei-wrap{display:inline-flex;width:1.1em;height:1.1em;vertical-align:-0.18em;align-items:center;justify-content:center}.ei-wrap .ei{width:100%;height:100%}.ei-wrap,.ei-wrap *{pointer-events:none}'; (document.head || document.documentElement).insertBefore(st, (document.head || document.documentElement).firstChild); } catch (e) {} })();
+    (function () { try { const st = document.createElement('style'); st.id = 'ei-base'; st.textContent = '.ei{width:1em;height:1em;display:block;flex-shrink:0}.ei-wrap{display:inline-flex;width:1.32em;height:1.32em;vertical-align:-0.26em;align-items:center;justify-content:center}.ei-wrap .ei{width:100%;height:100%}.ei-wrap,.ei-wrap *{pointer-events:none}'; (document.head || document.documentElement).insertBefore(st, (document.head || document.documentElement).firstChild); } catch (e) {} })();
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
     window.EmojiIcons = {
         unknown: () => Object.assign({}, unknown),

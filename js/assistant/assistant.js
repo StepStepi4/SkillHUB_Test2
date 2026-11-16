@@ -69,6 +69,8 @@
         }
     }
 
+    // Доступ для інструкції: живі приклади з реальної бази
+    window.SkillDB = { db: () => db, card: (s, m, d) => generateServiceCardHTML(s, m, d), desc: (d, c) => generateDescToggleHTML(d, c), norm: s => normalizeServiceName(s) };
     window.renderIcon = function(val) {
         if (!val) return '';
         let clean = String(val).trim();

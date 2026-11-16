@@ -1,6 +1,6 @@
 // SkillHUB Assistant - Service Worker (offline-first)
 // ВАЖЛИВО: при кожному релізі міняйте VERSION - тоді всі пристрої підтягнуть нові файли.
-const VERSION = 'v-bc86e3c89a';
+const VERSION = 'v-ecf4890d62';
 const SHELL_CACHE = 'skillhub-shell-' + VERSION;   // "оболонка": сторінки, іконки, бібліотеки
 const RUNTIME_CACHE = 'skillhub-runtime-v1';       // шрифти, картинки досягнень та інше, що завантажується під час роботи
 
@@ -31,24 +31,6 @@ const SHELL = [
   "./assets/fonts/Inter-Medium.woff",
   "./assets/fonts/Inter-Regular.woff",
   "./assets/fonts/Inter-SemiBold.woff",
-  "./assets/guide/academy-cabinet.webp",
-  "./assets/guide/academy-cabinet2.webp",
-  "./assets/guide/academy-login.webp",
-  "./assets/guide/calc.webp",
-  "./assets/guide/fav-select.webp",
-  "./assets/guide/news.webp",
-  "./assets/guide/options.webp",
-  "./assets/guide/reserves.webp",
-  "./assets/guide/search-compare.webp",
-  "./assets/guide/search-compare2.webp",
-  "./assets/guide/search-filter.webp",
-  "./assets/guide/search-home.webp",
-  "./assets/guide/search-price.webp",
-  "./assets/guide/search-service.webp",
-  "./assets/guide/search-services.webp",
-  "./assets/guide/search-suggest.webp",
-  "./assets/guide/search-techinfo.webp",
-  "./assets/guide/skillhub.webp",
   "./assets/icons/academy/Target.svg",
   "./assets/icons/academy/achievement.svg",
   "./assets/icons/academy/course.svg",
