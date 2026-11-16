@@ -91,6 +91,43 @@
         sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/>',
         moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
         cloud: '<path d="M7 18a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 9.5 4.3 4.3 0 0 1 17 18z"/>',
+        cap: '<path d="m2.5 9.5 9.5-5 9.5 5-9.5 5z"/><path d="M6.5 12v4.5c0 1.4 2.5 2.8 5.5 2.8s5.5-1.4 5.5-2.8V12M21.5 9.5v6"/>',
+        store: '<path d="M4 9.5 5.5 4h13L20 9.5M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0M5.5 12.5V20h13v-7.5M10 20v-4.5h4V20"/>',
+        bag: '<path d="M5 8h14l-1 12.5H6zM9 8V6.5a3 3 0 0 1 6 0V8"/>',
+        rocket: '<path d="M12 3c3.5 2 5.5 5.5 5 10l-3 3h-4l-3-3c-.5-4.500 1.500-8 5-10zM9 16l-2.500 4.500 4-1M15 16l2.500 4.500-4-1"/><circle cx="12" cy="10" r="1.800"/>',
+        toolbox: '<rect x="3" y="8" width="18" height="12" rx="2.200"/><path d="M8.500 8V5.500h7V8M3 13h18M10.500 13v2.500h3V13"/>',
+        plug: '<path d="M9 3v5M15 3v5M6.500 8h11v3a5.500 5.500 0 0 1-11 0zM12 16.500V21"/>',
+        save: '<path d="M5 4h11l3.500 3.500V20H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/>',
+        image: '<rect x="3.500" y="4.500" width="17" height="15" rx="2.500"/><circle cx="9" cy="10" r="1.800"/><path d="m4 17 5-4.500 3.500 3 3-2.500 4.500 4"/>',
+        music: '<path d="M9 18V6l10-2v12"/><circle cx="6.500" cy="18" r="2.500"/><circle cx="16.500" cy="16" r="2.500"/>',
+        video: '<rect x="3" y="6.500" width="12.500" height="11" rx="2.200"/><path d="m15.500 10.500 5.500-3v9l-5.500-3"/>',
+        mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.500 11.500a6.500 6.500 0 0 0 13 0M12 18v3"/>',
+        speaker: '<path d="M4 9.500h3.500L12 5.500v13l-4.500-4H4zM15.500 9a4 4 0 0 1 0 6M18 6.500a7.500 7.500 0 0 1 0 11"/>',
+        watch: '<rect x="7" y="6.500" width="10" height="11" rx="3"/><path d="M9 6.500 10 3h4l1 3.500M9 17.500 10 21h4l1-3.500M12 10v2.500l1.500 1"/>',
+        broom: '<path d="m14 4 6 6M13 5l-4.500 6.500M8.500 11.500 4 21c4-.5 8-2 10.500-6.500zM7.500 16c1.500.5 3 .3 4.500-.5"/>',
+        disc: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.500"/><path d="M12 3a9 9 0 0 1 9 9"/>',
+        thermo: '<path d="M10 14.500V5a2 2 0 0 1 4 0v9.500a4 4 0 1 1-4 0zM12 9v7"/>',
+        drop: '<path d="M12 3.500c3.500 4 6 7 6 10.500a6 6 0 0 1-12 0c0-3.500 2.500-6.500 6-10.500z"/>',
+        fan: '<circle cx="12" cy="12" r="1.800"/><path d="M12 10.200C11 6 12 3.500 14.500 4s2.500 3.500-.7 6.200M13.800 13c4 1.500 6 .5 5.500-2s-3.500-2.500-6.200.7M10.200 13.800c-.5 4.200-2.500 5.700-4.500 4.200s-.5-4 3.500-4.700"/>',
+        snow: '<path d="M12 3v18M4.200 7.500l15.600 9M4.200 16.500l15.600-9M9.500 4.500 12 6.500l2.500-2M9.500 19.500 12 17.500l2.500 2"/>',
+        flash: '<path d="M13 3 5 13.500h6L10 21l8-10.500h-6z"/>',
+        wifi: '<path d="M3 9a13 13 0 0 1 18 0M6 12.500a9 9 0 0 1 12 0M9 16a5 5 0 0 1 6 0M12 19.500h.1"/>',
+        usb: '<path d="M12 3v14M9 6l3-3 3 3M5.500 12v2a2 2 0 0 0 2 2H12M18.500 10v3a2 2 0 0 1-2 2H12"/><circle cx="12" cy="19" r="2"/>',
+        rubl: '<path d="M7 20V4h6a4 4 0 0 1 0 8H7M5 16h9"/>',
+        flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+        crown: '<path d="m3.500 18 1.500-10 5 4.500 2-7 2 7 5-4.500 1.500 10zM4 20.500h16"/>',
+        diamondgem: '<path d="M6 4h12l3.500 5L12 20.500 2.500 9zM2.500 9h19M9 4l3 5 3-5M12 20.500 9 9M12 20.500 15 9"/>',
+        car: '<path d="M4 15.500V12l2-5h12l2 5v3.500zM4 15.500V18h3v-2.500M20 15.500V18h-3v-2.500M4 12h16"/><circle cx="7.500" cy="14" r=".6"/><circle cx="16.500" cy="14" r=".6"/>',
+        clip: '<path d="m17 10-6.500 6.500a2.500 2.500 0 0 1-3.500-3.500L14 6a4 4 0 0 1 5.500 5.500L12 19a5.500 5.500 0 0 1-8-7.500"/>',
+        unlock: '<rect x="5" y="11" width="14" height="9.500" rx="2.200"/><path d="M8 11V7.500a4 4 0 0 1 7.700-1.500"/>',
+        trenddown: '<path d="m3.500 7 6 6 4-4 7 7M20.500 11.500V16.500h-5"/>',
+        ballot: '<path d="M4 14h16v6H4zM8 14V9.500M16 14V9.500M9 4l3 4 3-4"/><path d="M11 9l1 1 2-2"/>',
+        scale: '<path d="M12 4v16M7 20h10M5 7h14M5 7l-2.500 6a3 3 0 0 0 5 0zM19 7l-2.500 6a3 3 0 0 0 5 0z"/>',
+        radio: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.500" fill="currentColor"/>',
+        hand: '<path d="M8 12V5.500a1.500 1.500 0 0 1 3 0V11M11 10V4a1.500 1.500 0 0 1 3 0v6.500M14 10V5.500a1.500 1.500 0 0 1 3 0V13M17 9.500a1.500 1.500 0 0 1 3 0V15a6 6 0 0 1-6 6h-1.500a6 6 0 0 1-5-2.700L4.500 14c-.6-1 .4-2.200 1.500-1.700L8 14"/>',
+        pencil: '<path d="m4 20 1-4.500L16.500 4a2.100 2.100 0 0 1 3 3L8 18.500zM14.500 6l3 3"/>',
+        top: '<path d="M5 4h14M12 20V9M7 13.500l5-5 5 5"/>',
+        free: '<rect x="3" y="6" width="18" height="12" rx="2.500"/><path d="M8 15v-6h3M8 12h2.500M13.500 15v-6h2a1.700 1.700 0 0 1 0 3.500h-2M15.800 12.500 17 15"/>',
         flame: '<path d="M12 3c.5 3.3 4.8 5.4 4.8 10a4.8 4.8 0 0 1-9.6 0c0-1.7.8-2.8 1.7-3.8.2 1.2.9 1.9 1.6 2C10.2 8.6 10.6 5.6 12 3z"/>'
     };
     const MAP = {
@@ -112,6 +149,14 @@
         '➕': 'plus', '🔍': 'search', '🔎': 'search', '🧩': 'puzzle', '🧭': 'compass', '⭐️': 'star', '🟢': 'gdot', '🔴': 'rdot', '🟡': 'ydot', '🟠': 'ydot', '🔵': 'bdot', '⚪': 'dot', '⚫': 'dot',
         '❯': 'chevr', '❮': 'chevl', '✦': 'sparkle', '➔': 'arrow', '↕': 'sort', '🗣️': 'speak', '🗣': 'speak', '💬': 'speak', '🍽️': 'food', '⬆️': 'up', '⬇️': 'down', '🔼': 'up', '🔽': 'down',
         '✉️': 'mail', '📧': 'mail', '📩': 'mail', '🌐': 'globe', '🔗': 'link', '👁️': 'eye', '👀': 'eye', '🗑️': 'trash', '✏️': 'edit', '🖊️': 'edit', '⚡': 'lightning', '☀️': 'sun', '🌙': 'moon', '☁️': 'cloud',
+        '🎓': 'cap', '🏪': 'store', '🏬': 'store', '🛍️': 'bag', '🛍': 'bag', '🚀': 'rocket', '🧰': 'toolbox', '🔌': 'plug', '💾': 'save', '💿': 'disc', '📀': 'disc', '🖼️': 'image', '🖼': 'image',
+        '🎵': 'music', '🎶': 'music', '📹': 'video', '📼': 'video', '🎤': 'mic', '🎙️': 'mic', '🔊': 'speaker', '🔉': 'speaker', '📻': 'speaker', '⌚': 'watch', '🧹': 'broom', '🌡️': 'thermo', '🌡': 'thermo',
+        '💧': 'drop', '🚿': 'drop', '🌀': 'fan', '❄️': 'snow', '🧊': 'snow', '🔆': 'sun', '📡': 'wifi', '🛜': 'wifi', '🔰': 'shield', '🏁': 'flag', '🚩': 'flag', '👑': 'crown', '💎': 'diamondgem',
+        '🔥': 'flame', '🥂': 'gift', '🎉': 'gift', '🎊': 'gift', '🧠': 'bulb', '🤖': 'gear', '🕹️': 'gamepad', '🎲': 'puzzle', '👨‍💼': 'user', '👩‍💼': 'user', '🧑‍💼': 'user',
+        '📲': 'phone', '🔭': 'search', '🧯': 'flame', '🛋️': 'home', '🪑': 'home', '🍳': 'food', '☕': 'food', '🥤': 'food', '🧴': 'drop', '🪫': 'battery', '🔦': 'bulb', '📐': 'tools', '📏': 'tools', '✂️': 'tools', '🖌️': 'edit', '🎨': 'edit',
+        '🔘': 'radio', '💥': 'sparkle', '🚗': 'car', '🚙': 'car', '📎': 'clip', '🖇️': 'clip', '🔓': 'unlock', '📉': 'trenddown', '🗳️': 'ballot', '🗳': 'ballot', '⚖️': 'scale', '⚖': 'scale',
+        '✍️': 'pencil', '✍': 'pencil', '🖍️': 'pencil', '🖍': 'pencil', '✏️': 'pencil', '👏': 'hand', '🙌': 'hand', '🙏': 'hand', '💪': 'hand', '👌': 'check', '✌️': 'hand', '✌': 'hand', '☝️': 'arrow', '☝': 'arrow',
+        '👈': 'arrow', '👆': 'arrow', '⬅️': 'arrow', '⬅': 'arrow', '🔝': 'top', '🆓': 'free',
         '🔹': 'dot', '🔸': 'dot', '▫️': 'dot', '•': 'dot', '🔷': 'diamond', '🔶': 'diamond', '🎯': 'target', '📊': 'chart', '📈': 'chart', '📶': 'signal',
         '🖨️': 'printer', '⌨️': 'keyboard', '🖱️': 'mouse', '📢': 'mega', '📣': 'mega', '💯': 'percent', '🔥': 'flame'
     };
@@ -121,16 +166,19 @@
         const name = NORM[norm(emoji)]; if (!name) return null;
         return `<svg class="ei ${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${S[name]}</svg>`;
     }
-    const RX = /(\p{Extended_Pictographic}\uFE0F?(?:\u200D\p{Extended_Pictographic}\uFE0F?)*)|[✕✖✓✔❯❮➔↕✦]/gu;
+    const RX = /([\u{1F1E6}-\u{1F1FF}]{2}|\p{Extended_Pictographic}\uFE0F?(?:\u200D\p{Extended_Pictographic}\uFE0F?)*)|[✕✖✓✔❯❮➔↕✦]/gu;
     const SKIP = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, TEXTAREA: 1, INPUT: 1, OPTION: 1, SELECT: 1, TITLE: 1, SVG: 1, CODE: 1 };
     let unknown = {};
+    const KEEP = /^(?:[\u{1F1E6}-\u{1F1FF}]{2}|[\u{1F3F3}\u{1F3F4}]\uFE0F?(?:\u200D.+)?|[\u{1F600}-\u{1F64F}\u{1F910}-\u{1F92F}\u{1F970}-\u{1F97A}\u{1F9D0}\u{1F978}\u{1FAE0}-\u{1FAE8}\u{1F635}\u{1F971}\u{1F972}])/u;
     function iconFor(e) { return svg(e) || (unknown[e] = (unknown[e] || 0) + 1, svg('🔹')); }
     function convertText(node) {
         const v = node.nodeValue; if (!v || !RX.test(v)) { RX.lastIndex = 0; return; } RX.lastIndex = 0;
+        { const all = v.match(RX) || []; RX.lastIndex = 0; if (!all.some(x => !KEEP.test(x))) return; }
         const par = node.parentNode; if (!par || SKIP[par.nodeName] || (par.closest && par.closest('.no-ei,[contenteditable],pre'))) return;
         const frag = document.createDocumentFragment(); let last = 0, m;
         while ((m = RX.exec(v))) {
             if (m.index > last) frag.appendChild(document.createTextNode(v.slice(last, m.index)));
+            if (KEEP.test(m[0])) { frag.appendChild(document.createTextNode(m[0])); last = m.index + m[0].length; continue; }
             const w = document.createElement('span'); w.className = 'ei-wrap'; w.innerHTML = iconFor(m[0]); frag.appendChild(w);
             last = m.index + m[0].length;
         }

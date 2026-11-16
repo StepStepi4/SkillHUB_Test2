@@ -151,6 +151,19 @@
             </div>
         </button>
 
+        <button class="list-item" id="guideRow" data-func="Інструкція" onclick="window.openGuide()" style="margin-bottom: 16px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+            <div style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex-shrink: 0; margin-right: 12px;">
+                <img src="assets/icons/ui/guide.svg" alt="" style="width: 24px; height: 24px;">
+            </div>
+            <div class="list-item-content" style="flex:1; text-align:left;">
+                <span class="list-item-title">Інструкція</span>
+                <span class="list-item-subtitle">Як користуватися додатком</span>
+            </div>
+            <div class="list-item-arrow" style="margin-left: auto;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; stroke-width: 2.5;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </div>
+        </button>
+
         <div class="list-group" id="dynamicSkillHubButtons"></div>
 
         <div class="list-group" style="margin-top:16px;">
@@ -302,6 +315,16 @@
 </div>
 
 <!-- МОДАЛКА: ЗВОРОТНИЙ ЗВ'ЯЗОК -->
+<div id="guideModal" class="modal">
+    <div class="modal-content" style="max-height: 92vh;">
+        <div class="modal-header">
+            <div class="modal-title">Інструкція</div>
+            <button class="modal-close" onclick="window.closeModalBase('guideModal')"></button>
+        </div>
+        <div class="modal-body" id="guideBody"></div>
+    </div>
+</div>
+
 <div id="feedbackModal" class="modal">
     <div class="modal-content" style="max-height: 92vh;">
         <div class="modal-header">
@@ -1061,6 +1084,7 @@
 <script src="js/core/richtext.js"></script>
 <script src="js/assistant/assistant.js"></script>
 <script src="js/assistant/ux.js"></script>
+<script src="js/assistant/guide.js"></script>
 <script src="js/academy/academy.js"></script>
 <script src="js/academy/extras.js"></script>
 </body>

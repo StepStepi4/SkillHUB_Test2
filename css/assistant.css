@@ -687,3 +687,16 @@ button, .list-item, .nav-item, .list-card, .chip, [onclick] { touch-action: mani
 
 .ei-wrap { display:inline-flex; width:1.1em; height:1.1em; vertical-align:-0.18em; align-items:center; justify-content:center; } .ei-wrap .ei { width:100%; height:100%; }
 .ei-wrap, .ei-wrap * { pointer-events: none; }
+
+/* Інструкція */
+.gd-ch{border:1px solid var(--border);border-radius:14px;background:var(--card-bg);margin-bottom:10px;overflow:hidden}
+.gd-ch summary{display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer;list-style:none;font-weight:600;color:var(--text)}
+.gd-ch summary::-webkit-details-marker{display:none}
+.gd-ch summary::after{content:'';margin-left:auto;width:8px;height:8px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg);transition:transform .2s;opacity:.6}
+.gd-ch[open] summary::after{transform:rotate(225deg)}
+.gd-n{width:26px;height:26px;border-radius:50%;background:var(--accent,#007aff);color:#fff;font-size:13px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.gd-b{padding:0 14px 14px;font-size:14px;line-height:1.5;color:var(--text)}
+.gd-b p{margin:0 0 10px}
+.gd-shot{margin:4px 0 14px;text-align:center}
+.gd-shot img{width:100%;max-width:300px;border-radius:14px;border:1px solid var(--border)}
+.gd-shot figcaption{font-size:12px;opacity:.65;margin-top:6px}
