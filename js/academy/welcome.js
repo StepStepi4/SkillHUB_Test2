@@ -172,7 +172,7 @@
         const map = {
             off: ['off', 'Офлайн' + (ts ? ' · дані на ' + ts : '') + (pend ? ' · очікує відправки: ' + pend : '')],
             sync: ['sync', 'Оновлення…'], ok: ['ok', 'Дані оновлено'], fail: ['off', 'Сервер недоступний' + (ts ? ' · дані на ' + ts : '')],
-            idle: ['idle', pend ? 'Очікує відправки: ' + pend : '']
+            idle: pend ? ['sync', 'Відправляємо зміни…'] : ['idle', '']
         };
         const [cls, txt] = map[st] || map.idle;
         c.className = 'sync-chip ' + cls + (txt ? ' show' : ''); c.textContent = txt;
@@ -187,7 +187,7 @@
         if (state === 'ok') setTimeout(() => { if (state === 'ok') { state = 'idle'; syncChip(); } }, 2500);
         return r;
     };
-    window.addEventListener('offline', syncChip);
+    window.addEventListener('offline', syncChip); window.addEventListener('skillhub-outbox', syncChip);
     window.addEventListener('online', () => { syncChip(); if (currentUser && window.Academy && window.Academy.isOpen) setTimeout(() => fetchFreshDataSilent(), 800); });
     setInterval(syncChip, 30000);
 })();

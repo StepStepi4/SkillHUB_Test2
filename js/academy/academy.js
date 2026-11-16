@@ -597,15 +597,19 @@
         const q = outboxRead();
         item.id = newId(); item.actor = lowLogin(currentUser); item.ts = Date.now(); item.tries = 0;
         q.push(item); outboxWrite(q);
+        try { window.dispatchEvent(new Event('skillhub-outbox')); } catch (e) {}
         flushOutbox();
         return item.id;
     }
 
-    let _flushing = false;
+    let _flushing = false, _flushAgain = false, _retryT = null;
     async function flushOutbox() {
-        if (_flushing || !auth || !navigator.onLine) return;
+        if (!auth || !navigator.onLine) return;
+        if (_flushing) { _flushAgain = true; return; }   // нові елементи черги підхопить поточна відправка
         _flushing = true;
         try {
+          do {
+            _flushAgain = false;
             // міграція черги старої версії
             try {
                 const legacy = localStorage.getItem('skillhub_offline_queue');
@@ -632,7 +636,14 @@
                 } catch (e) { break; } // мережа - спробуємо пізніше
             }
             outboxWrite(outboxRead().filter(x => !finished.has(x.id)).map(x => { if (tries[x.id]) x.tries = tries[x.id]; return x; }));
-        } finally { _flushing = false; }
+            if (outboxPending() && finished.size) _flushAgain = true;   // у чергу могли додати щось під час відправки
+          } while (_flushAgain && auth);
+        } finally {
+            _flushing = false;
+            clearTimeout(_retryT);
+            if (auth && outboxPending()) _retryT = setTimeout(flushOutbox, 5000);   // не вдалося - повторюємо самі
+            try { window.dispatchEvent(new Event('skillhub-outbox')); } catch (e) {}
+        }
     }
 
     let _eduFetching = false;
