@@ -53,7 +53,7 @@
     function setBadge() {
         if (!badgeOk()) return;
         const nb = document.getElementById('newsBtn');
-        const n = (nb && nb.classList.contains('has-new') ? 1 : 0) + (window._updPending ? 1 : 0);
+        const n = (nb && nb.classList.contains('has-new') ? 1 : 0) + (window._updPending ? 1 : 0) + (window._eduEvents || 0) + (window._hubEvents || 0);
         try { (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => {}); } catch (e) {}
     }
     function badge() {
@@ -81,4 +81,36 @@
         document.addEventListener('visibilitychange', () => { if (!document.hidden) apply(); });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+/* Червоні крапки з цифрами на рядках SkillHUB і вкладці SkillHUB: нові новини, відкрите голосування */
+(function () {
+    const lsg = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+    function put(el, n) {
+        if (!el) return;
+        let b = el.querySelector(':scope > .evt-badge');
+        if (!n) { if (b) b.remove(); return; }
+        if (!b) { b = document.createElement('span'); b.className = 'evt-badge'; el.appendChild(b); }
+        b.textContent = n > 9 ? '9+' : String(n);
+    }
+    function update() {
+        const d = (window.SkillDB && window.SkillDB.db()) || {};
+        const seen = parseInt(lsg('skillhub_news_seen') || '0', 10) || 0;
+        const news = (d.news || []).filter(x => (x.ts || 0) > seen).length;
+        const vote = d.voteOpen && !lsg('skillhub_vote_seen') ? 1 : 0;
+        if (!d.voteOpen) { try { localStorage.removeItem('skillhub_vote_seen'); } catch (e) {} }
+        put(document.getElementById('newsRow'), news);
+        put(document.getElementById('voteRow'), vote);
+        const tab = document.querySelector('.nav-item[data-func="SkillHUB"]');
+        put(tab, news + vote);
+        const prev = window._hubEvents; window._hubEvents = news + vote;
+        if (prev !== window._hubEvents) { try { document.dispatchEvent(new Event('skillhub-badge')); } catch (e) {} }
+    }
+    window.updateHubBadges = update;
+    function wrap(name, after) { const f = window[name]; if (typeof f !== 'function' || f.__hb) return; const w = function () { const r = f.apply(this, arguments); try { after(); } catch (e) {} return r; }; w.__hb = 1; window[name] = w; }
+    function init() {
+        wrap('renderNewsBadge', update); wrap('renderVoteRow', update);
+        wrap('openVote', () => { try { localStorage.setItem('skillhub_vote_seen', '1'); } catch (e) {} update(); });
+        update(); setInterval(update, 4000);
+    }
+    if (document.readyState === 'complete') init(); else window.addEventListener('load', init);
 })();

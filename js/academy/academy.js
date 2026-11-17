@@ -2259,9 +2259,14 @@
             } else if (navigator.onLine) {
                 document.documentElement.classList.remove('edu-fast-boot');
                 document.documentElement.style.setProperty('--edu-loader-display', 'flex'); document.getElementById('loader').style.display = 'flex';
-                await fetchFreshDataSilent(true);
+                let _st = 'fail';
+                for (let _i = 0; _i < 3 && _st !== 'ok' && _st !== 'noauth' && navigator.onLine; _i++) {
+                    _st = await fetchFreshDataSilent(true);
+                    if (_st === 'fail') await new Promise(r => setTimeout(r, 1200 * (_i + 1)));   // повтор із паузою
+                }
                 document.getElementById('loader').style.display = 'none';
-                if (auth && eduDb && eduDb.users && eduDb.users.length > 0) bootFromCache(); else switchView('loginView');
+                if (auth && eduDb && eduDb.users && eduDb.users.length > 0) bootFromCache();
+                else { switchView('loginView'); if (_st === 'fail') showLoginError('Не вдалося завантажити дані. Перевірте інтернет і спробуйте ще раз.'); }
             } else {
                 document.documentElement.classList.remove('edu-fast-boot');
                 document.getElementById('loader').style.display = 'none'; switchView('loginView');

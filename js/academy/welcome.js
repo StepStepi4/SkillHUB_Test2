@@ -35,44 +35,42 @@
     };
 
     /* ---------------- Вітальне вікно ---------------- */
+    function availableGroups(u) {
+        try {
+            if (detectRoleGroup(u.role) === 'guest') return [];
+            const mine = new Set((u.assigned || []).map(n => getCleanName(n))), groups = {};
+            (eduDb.courses || []).forEach(c => { const g = String(c.course || 'Курси').trim(); (groups[g] = groups[g] || []).push(getCleanName(cleanCourseTitle(c.product))); });
+            return Object.keys(groups).filter(g => !groups[g].some(n => mine.has(n)));
+        } catch (e) { return []; }
+    }
     function buildWelcome(u) {
-        const m = computeUserMetrics(u), courses = courseRows(u), goals = goalRows(u), dl = deadlineText(u);
+        const courses = courseRows(u), goals = goalRows(u), dl = deadlineText(u);
         const first = extractFirstNameCapitalized(u);
         const hour = new Date().getHours();
         const hi = hour < 6 ? 'Доброї ночі' : hour < 12 ? 'Доброго ранку' : hour < 18 ? 'Доброго дня' : 'Доброго вечора';
-        const total = m.totalAssigned, done = m.completed;
-        const prog = total ? done / total * 100 : 0;
+        const total = courses.length, done = courses.filter(c => c.state === 'done').length, prog = total ? done / total * 100 : 0;
 
-        const kpi = `<div class="wl-kpi">
-            <div><b>${total}</b><small>Призначено</small></div>
-            <div><b>${done}</b><small>Пройдено</small></div>
-            <div><b>${m.remaining}</b><small>Залишилось</small></div>
-            <div><b>${esc(m.avgScoreFormatted)}</b><small>Середній бал</small></div></div>`;
+        // Цілі на сьогодні — окремі блоки
+        const T = window.ExtrasToday ? window.ExtrasToday.goals(u) : { items: [] }, TC = window.ExtrasToday ? window.ExtrasToday.courses(u) : null;
+        const tiles = T.items.map(i => `<div class="wl-tile"><b>${fmtNum(i.val)}</b><span>${esc(i.label)}</span></div>`);
+        if (TC) tiles.push(`<div class="wl-tile course"><b>${fmtNum(TC.per)}</b><span>Курси</span></div>`);
+        const todayHtml = tiles.length ? `<div class="wl-sec">Ціль на сьогодні</div><div class="wl-tiles">${tiles.join('')}</div>` : '';
 
         const goalsHtml = goals.length
             ? `<div class="wl-sec">Мої цілі</div><div class="wl-rings">${goals.map(g => ring(g.pct, g.label,
                 g.has ? `${fmtNum(g.fact)}${g.unit} з ${fmtNum(g.goal)}${g.unit}` : `ціль ${fmtNum(g.goal)}${g.unit}`, g.pct >= 100 ? 'ok' : (g.has && g.pct < 50 ? 'low' : ''))).join('')}</div>`
-            : '<div class="wl-sec">Мої цілі</div><div class="wl-empty">Цілі ще не призначені. Вони з’являться тут, коли керівник їх задасть.</div>';
+            : '<div class="wl-sec">Мої цілі</div><div class="wl-empty">Цілі ще не призначені.</div>';
 
-        const todo = courses.filter(c => c.state !== 'done').sort((a, b) => (a.state === 'prog' ? 0 : 1) - (b.state === 'prog' ? 0 : 1));
+        const sorted = courses.slice().sort((a, b) => (a.state === 'done') - (b.state === 'done') || (a.state === 'prog' ? 0 : 1) - (b.state === 'prog' ? 0 : 1));
         const coursesHtml = courses.length
-            ? `<div class="wl-sec">Курси${dl ? `<span class="wl-dl ${dl.bad ? 'bad' : ''}">${esc(dl.txt)}</span>` : ''}</div>
+            ? `<div class="wl-sec">Призначені курси${dl ? `<span class="wl-dl ${dl.bad ? 'bad' : ''}">${esc(dl.txt)}</span>` : ''}</div>
                <div class="wl-prog"><div style="width:${Math.round(prog)}%"></div></div>
-               <div class="wl-courses">${courses.map(c => `<div class="wl-course ${c.state}"><span class="wl-dot"></span><span class="wl-cn">${esc(c.name)}</span><span class="wl-cs">${c.state === 'done' ? c.score + '%' : c.state === 'prog' ? 'спроб: ' + c.attempts : 'нові'}</span></div>`).join('')}</div>`
-            : '<div class="wl-sec">Курси</div><div class="wl-empty">Курсів поки немає.</div>';
+               <div class="wl-courses">${sorted.map(c => `<div class="wl-course ${c.state}"><span class="wl-dot"></span><span class="wl-cn">${esc(c.name)}</span><span class="wl-cs">${c.state === 'done' ? c.score + '%' : c.state === 'prog' ? 'спроб: ' + c.attempts : 'нове'}</span></div>`).join('')}</div>`
+            : '<div class="wl-sec">Призначені курси</div><div class="wl-empty">Курсів поки немає.</div>';
+        const av = availableGroups(u);
+        const availHtml = av.length ? `<div class="wl-sec">Доступні курси</div><div class="wl-courses">${av.map(g => `<div class="wl-course avail"><span class="wl-dot"></span><span class="wl-cn">${esc(g)}</span></div>`).join('')}</div>` : '';
 
-        const what = todo.length
-            ? `<div class="wl-sec">Що вчити зараз</div><div class="wl-next">${todo.slice(0, 3).map((c, i) => `<div><span>${i + 1}</span>${esc(c.name)}</div>`).join('')}${todo.length > 3 ? `<small>і ще ${todo.length - 3}</small>` : ''}</div>`
-            : (courses.length ? '<div class="wl-sec">Що вчити зараз</div><div class="wl-empty ok">Усі курси пройдено — так тримати!</div>' : '');
-
-        const guide = `<div class="wl-sec">Як проходити</div><ol class="wl-how">
-            <li>Відкрийте курс у вкладці «Навчання» та уважно прочитайте матеріал.</li>
-            <li>Натисніть «Пройти тест»: на кожне питання <b>35 секунд</b>, прохідний бал — <b>80%</b>.</li>
-            <li>Не згортайте додаток і не перемикайтесь під час тесту — спроба буде скасована.</li>
-            <li>Не вдалося з першого разу — перечитайте теорію й повторіть тест.</li></ol>`;
-
-        return `<div class="wl-hero"><div class="wl-hi">${hi},</div><div class="wl-name">${esc(first)}!</div><div class="wl-role">${esc(u.role || '')}</div></div>
-            ${kpi}${goalsHtml}${coursesHtml}${what}${guide}`;
+        return `<div class="wl-hero"><div class="wl-hi">${hi},</div><div class="wl-name">${esc(first)}!</div></div>${todayHtml}${goalsHtml}${coursesHtml}${availHtml}`;
     }
     function openWelcome(force) {
         const u = me(); if (!u) return;
@@ -98,6 +96,7 @@
         _stmc.apply(this, arguments);
         const u = me(); if (!u) return;
         let seen = false; try { seen = !!sessionStorage.getItem('skillhub_welcome_' + lowLogin(u.login)); } catch (e) {}
+        try { celebrate(); } catch (e) {}
         if (!seen && !isTestActive && !window.__noWelcome) setTimeout(() => { if (currentUser && !$('welcomeOverlay')) openWelcome(); }, 250);
         injectDashBtn(); syncChip();
     };
@@ -117,7 +116,7 @@
     const codes = u => String((u && u.achievements) || '').split(',').map(s => s.trim()).filter(Boolean);
     let celebrating = false;
     function celebrate() {
-        if (celebrating || isTestActive || $('welcomeOverlay') || !currentUser || windowViewingEmployee) return;
+        if (celebrating || isTestActive || !currentUser || windowViewingEmployee) return;
         if (!window.Academy || !window.Academy.isOpen) return;
         const u = me(); if (!u) return;
         const now = codes(u), raw = ls.get(seenKey(u));
@@ -148,6 +147,13 @@
         try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch (e) {}
     }
     setInterval(celebrate, 4000);
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) return;
+        if (window.Academy && window.Academy.isOpen && navigator.onLine && currentUser) { Promise.resolve(fetchFreshDataSilent()).then(() => celebrate()); celebrate(); }
+        else bgPoll();
+    });
+    const _open = window.Academy.open;
+    window.Academy.open = async function () { const r = await _open.apply(this, arguments); setTimeout(celebrate, 150); return r; };
     const _cna = checkNewAchievements;
     checkNewAchievements = function (u) { _cna.apply(this, arguments); setTimeout(celebrate, 300); };
 
@@ -161,6 +167,7 @@
     }
     let state = 'idle';   // idle | sync | ok | off | fail
     function syncChip() {
+        return;
         let c = $('eduSyncChip');
         const host = $('userWelcome') && $('userWelcome').parentNode;
         if (!c && host) { c = document.createElement('div'); c.id = 'eduSyncChip'; c.className = 'sync-chip'; host.appendChild(c); }
@@ -190,4 +197,86 @@
     window.addEventListener('offline', syncChip); window.addEventListener('skillhub-outbox', syncChip);
     window.addEventListener('online', () => { syncChip(); if (currentUser && window.Academy && window.Academy.isOpen) setTimeout(() => fetchFreshDataSilent(), 800); });
     setInterval(syncChip, 30000);
+
+    /* ---------------- Події: червона крапка з цифрою на «Академія» ---------------- */
+    const K = (n, u) => 'skillhub_seen_' + n + '_' + lowLogin(u.login);
+    const goalSig = u => JSON.stringify(GOAL_DEFS.map(d => { const o = ((u && u.goals) || {})[d.key] || {}; return o.goal == null ? '' : o.goal; }));
+    function computeEvents(u) {
+        if (!u) return 0;
+        let n = 0;
+        // ачивки
+        const rawA = ls.get(seenKey(u));
+        if (rawA !== null) { let seen = []; try { seen = JSON.parse(rawA) || []; } catch (e) {} n += codes(u).filter(c => !seen.includes(c)).length; }
+        // курси
+        const asg = (u.assigned || []).map(x => getCleanName(x)), rawC = ls.get(K('assigned', u));
+        if (rawC === null) ls.set(K('assigned', u), JSON.stringify(asg));
+        else { let seen = []; try { seen = JSON.parse(rawC) || []; } catch (e) {} n += asg.filter(c => !seen.includes(c)).length; }
+        // цілі
+        const sig = goalSig(u), rawG = ls.get(K('goals', u));
+        if (rawG === null) ls.set(K('goals', u), sig); else if (rawG !== sig && sig !== goalSig({})) n += 1;
+        return n;
+    }
+    function markSeen(u) {
+        ls.set(K('assigned', u), JSON.stringify((u.assigned || []).map(x => getCleanName(x)))); ls.set(K('goals', u), goalSig(u));
+    }
+    function paintBadge(n) {
+        window._eduEvents = n;
+        document.querySelectorAll('.nav-academy').forEach(b => {
+            let el = b.querySelector('.evt-badge');
+            if (!n) { if (el) el.remove(); return; }
+            if (!el) { el = document.createElement('span'); el.className = 'evt-badge'; b.appendChild(el); }
+            el.textContent = n > 9 ? '9+' : String(n);
+        });
+        try { document.dispatchEvent(new Event('skillhub-badge')); } catch (e) {}
+    }
+    let cachedUser = null;
+    async function refreshBadge() {
+        let data = null, login = null;
+        try { const a = readAuth(); login = a && a.login; } catch (e) {}
+        if (!login) { paintBadge(0); return; }
+        let u = (eduDb && eduDb.users) ? eduDb.users.find(x => lowLogin(x.login) === lowLogin(login)) : null;
+        if (!u) { try { data = await eduLoadCache(); u = data && data.educationData.users.find(x => lowLogin(x.login) === lowLogin(login)); } catch (e) {} }
+        if (u && !globalAchievements.length && data) globalAchievements = data.achievementData || [];
+        cachedUser = u || null;
+        // Якщо кабінет відкритий і користувач його бачить - це вже не «подія»
+        if (u && window.Academy && window.Academy.isOpen && !windowViewingEmployee && !$('welcomeOverlay') && lowLogin(currentUser) === lowLogin(u.login)) markSeen(u);
+        paintBadge(computeEvents(u));
+    }
+    window.refreshEduBadge = refreshBadge;
+    // фонове опитування сервера, коли Академія закрита
+    let bgBusy = false, lastBg = 0;
+    async function bgPoll() {
+        if (bgBusy || !navigator.onLine || document.hidden || (window.Academy && window.Academy.isOpen)) { refreshBadge(); return; }
+        if (Date.now() - lastBg < 60000) { refreshBadge(); return; }
+        const a = (function () { try { return readAuth(); } catch (e) { return null; } })();
+        if (!a) { paintBadge(0); return; }
+        bgBusy = true; lastBg = Date.now();
+        try {
+            const pend = outboxRead().some(x => x.actor === lowLogin(a.login));
+            const d = await apiPost({ action: 'edu', login: a.login, token: a.token }, 15000);
+            if (d && d.success && d.educationData && d.educationData.users && !pend && !(window.Academy && window.Academy.isOpen)) {
+                eduDb = d.educationData; globalAchievements = d.achievementData || [];
+                window.fullData = { educationData: d.educationData, achievementData: globalAchievements, me: d.me || null };
+                eduSaveCache(JSON.stringify(window.fullData));
+            }
+        } catch (e) {} finally { bgBusy = false; }
+        refreshBadge();
+    }
+    window.addEventListener('load', () => setTimeout(bgPoll, 1500));
+    window.addEventListener('online', () => setTimeout(bgPoll, 1000));
+    setInterval(bgPoll, 120000);
+    setInterval(refreshBadge, 5000);
+    const _fn = fetchFreshDataSilent;
+    let _retry = 0;
+    fetchFreshDataSilent = async function () {
+        const r = await _fn.apply(this, arguments);
+        refreshBadge();
+        // свіжі дані прийшли, поки відкрите вітальне вікно - оновлюємо його вміст на місці
+        const o = $('welcomeOverlay'), u = me();
+        if (r === 'ok' && o && u) { const sc = o.querySelector('.wl-scroll'), top = sc.scrollTop; sc.innerHTML = buildWelcome(u); sc.scrollTop = top; }
+        // тихий повтор при збої мережі/сервера (до 3 разів із наростаючою паузою)
+        if (r === 'fail' && currentUser && window.Academy && window.Academy.isOpen && navigator.onLine && _retry < 3) { _retry++; setTimeout(() => fetchFreshDataSilent(), 3000 * _retry); }
+        if (r === 'ok') _retry = 0;
+        return r;
+    };
 })();

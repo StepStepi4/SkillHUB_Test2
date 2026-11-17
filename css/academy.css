@@ -599,13 +599,12 @@ body.academy-open { overflow: hidden; }
 #exDrawer select.fp-select{padding:0 28px 0 12px !important;line-height:40px;background-position:right 10px center;background-color:var(--card-bg)}
 
 /* ===== Вітальне вікно / дашборд ===== */
-.wl-overlay,.ac-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;display:flex;align-items:flex-end;justify-content:center;opacity:0;transition:opacity .25s;backdrop-filter:blur(4px)}
+.wl-overlay,.ac-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;display:flex;align-items:stretch;justify-content:center;opacity:0;transition:opacity .25s}
 .wl-overlay.show,.ac-overlay.show{opacity:1}
-.wl-box{position:relative;width:100%;max-width:520px;max-height:92vh;background:var(--bg,var(--card-bg));border-radius:26px 26px 0 0;display:flex;flex-direction:column;transform:translateY(40px);transition:transform .3s cubic-bezier(.2,.8,.2,1);overflow:hidden}
-.wl-overlay.show .wl-box{transform:none}
+.wl-box{position:relative;width:100%;max-width:560px;height:100%;background:var(--bg,#f5f6fa);display:flex;flex-direction:column;overflow:hidden}
 .wl-x{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.22);color:#fff;z-index:2;font-size:15px}
 .wl-scroll{overflow-y:auto;padding:0 16px 8px;-webkit-overflow-scrolling:touch}
-.wl-hero{margin:0 -16px 14px;padding:26px 20px 22px;background:linear-gradient(135deg,#0057b7,#2b7fe0 60%,#ffd700 160%);color:#fff}
+.wl-hero{margin:0 -16px 14px;padding:calc(30px + env(safe-area-inset-top)) 20px 22px;background:linear-gradient(135deg,#0057b7,#2b7fe0 60%,#ffd700 160%);color:#fff}
 .wl-hi{font-size:14px;font-weight:600;opacity:.9}.wl-name{font-size:30px;font-weight:800;line-height:1.1;margin:2px 0 4px}.wl-role{font-size:13px;opacity:.85;font-weight:600}
 .wl-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px}
 .wl-kpi>div{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:10px 4px;text-align:center}
@@ -647,3 +646,16 @@ body.academy-open { overflow: hidden; }
 .sync-chip{display:none;margin-top:5px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;width:fit-content;max-width:100%;line-height:1.4;color:var(--text-muted);background:rgba(127,127,127,.14)}
 .sync-chip.show{display:block}.sync-chip.sync{color:var(--primary);background:rgba(0,122,255,.1)}.sync-chip.ok{color:var(--success,#34c759);background:rgba(52,199,89,.12)}.sync-chip.off{color:#b36b00;background:rgba(255,149,0,.15)}
 .goal-dash{border:1px solid var(--border);background:var(--card-bg);color:var(--primary);font-weight:700;font-size:12px;padding:5px 10px;border-radius:999px;cursor:pointer}
+
+.wl-overlay .wl-box{background:var(--bg,var(--card-bg))}
+.wl-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:10px}
+.wl-tile{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:12px 8px;text-align:center;border-top:3px solid var(--primary)}
+.wl-tile.course{border-top-color:#ff9500}
+.wl-tile b{display:block;font-size:26px;line-height:1.1;color:var(--text-main)}.wl-tile span{font-size:12px;font-weight:700;color:var(--text-muted)}
+.wl-course.avail{opacity:.75}.wl-course.avail .wl-dot{background:var(--primary)}
+/* Головне вікно Academy: чистка */
+#academyApp #deadlineContainer{display:none !important}
+#academyApp .goal-dl,#todayLine,#eduSyncChip,#academyApp .goal-sort{display:none !important}
+#academyApp .goal-head small.goal-ok{color:#16a34a;font-weight:800}
+#academyApp .chart-canvas-box{height:140px;width:70%;margin:0 auto}
+.wl-scroll{flex:1;min-height:0}

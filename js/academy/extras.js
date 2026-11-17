@@ -100,7 +100,18 @@
         } catch (e) {}
         return txt;
     }
+    window.ExtrasToday = {
+        goals(u) {
+            const out = [], d = goalDaysLeft(u);
+            if (d && u && u.goals) GOAL_DEFS.forEach(g => { if (g.unit === '%') return; const o = u.goals[g.key]; if (!o || !o.goal || o.goal <= (o.fact || 0)) return; out.push({ label: g.short, val: Math.ceil((o.goal - (o.fact || 0)) / d), left: o.goal - (o.fact || 0) }); });
+            return { items: out, days: d };
+        },
+        courses(u) {
+            try { const ms = computeRemainingDeadlineMs(u); if (ms === null || ms <= 0) return null; const m = computeUserMetrics(u); if (m.remaining <= 0) return null; const days = Math.max(1, Math.ceil(ms / 864e5)); return { per: Math.ceil(m.remaining / days * 10) / 10, remaining: m.remaining, days: days }; } catch (e) { return null; }
+        }
+    };
     function renderToday(u) {
+        return;
         const box = document.getElementById('goalsBlock'); if (!box || !u || !hasGoals(u) && !u.deadlineDays) return;
         let el = document.getElementById('todayLine'); if (el) el.remove();
         const txt = todayLine(u); if (!txt) return;
