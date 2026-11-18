@@ -858,6 +858,7 @@
             }
             if (r && !netFail) {
                 if (r.code === 'locked') showLoginError("Забагато спроб. Спробуйте через " + (r.minutes || 15) + " хв.");
+                else if (r.code === 'tg_only') showLoginError("Вхід за паролем вимкнено. Скористайтесь входом через Telegram.");
                 else if (r.code === 'no_password') showLoginError("Для цього акаунту не задано пароль. Зверніться до керівника.");
                 else if (r.error === 'legacy_disabled') showLoginError("Оновіть застосунок.");
                 else showLoginError("Невірний логін або пароль!");

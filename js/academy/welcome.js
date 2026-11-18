@@ -38,9 +38,12 @@
     function availableGroups(u) {
         try {
             if (detectRoleGroup(u.role) === 'guest') return [];
-            const mine = new Set((u.assigned || []).map(n => getCleanName(n))), groups = {};
-            (eduDb.courses || []).forEach(c => { const g = String(c.course || 'Курси').trim(); (groups[g] = groups[g] || []).push(getCleanName(cleanCourseTitle(c.product))); });
-            return Object.keys(groups).filter(g => !groups[g].some(n => mine.has(n)));
+            const mine = new Set((u.assigned || []).map(n => getCleanName(n))), seen = new Set(), out = [];
+            (eduDb.courses || []).forEach(c => {
+                const title = cleanCourseTitle(c.product), k = getCleanName(title);
+                if (k && !mine.has(k) && !seen.has(k)) { seen.add(k); out.push(title); }
+            });
+            return out;
         } catch (e) { return []; }
     }
     function buildWelcome(u) {
@@ -114,36 +117,43 @@
     /* ---------------- Привітання про нову ачивку ---------------- */
     const seenKey = u => 'skillhub_ach_cele_' + lowLogin(u.login);
     const codes = u => String((u && u.achievements) || '').split(',').map(s => s.trim()).filter(Boolean);
-    let celebrating = false;
+    let celebrating = false, opening = false;
     function celebrate() {
         if (celebrating || isTestActive || !currentUser || windowViewingEmployee) return;
-        if (!window.Academy || !window.Academy.isOpen) return;
+        if (!opening && !(window.Academy && window.Academy.isOpen)) return;
         const u = me(); if (!u) return;
         const now = codes(u), raw = ls.get(seenKey(u));
         if (raw === null) { ls.set(seenKey(u), JSON.stringify(now)); return; }   // перший запуск на пристрої: нічого не показуємо
         let seen = []; try { seen = JSON.parse(raw) || []; } catch (e) {}
         const fresh = now.filter(c => !seen.includes(c));
-        if (!fresh.length) return;
-        showAch(fresh, u);
+        if (fresh.length) showAch(fresh, u);
+    }
+    function achHTML(a, left) {
+        return `<div class="ac-top">Вітаємо! Нова відзнака</div><div class="ac-glow"></div>
+            <img class="ac-img" src="assets/achievements/${esc(a.code)}.webp" onerror="this.src='assets/icons/ui/medal.svg'" alt="">
+            <div class="ac-name">${esc(a.name)}</div><div class="ac-desc">${esc(a.description || '')}</div>
+            ${left > 0 ? `<div class="ac-more">Ще відзнак: ${left}</div>` : ''}
+            <button class="btn btn-primary ac-ok">${left > 0 ? 'Дякую! Далі' : 'Дякую!'}</button>`;
     }
     function showAch(list, u) {
         celebrating = true;
-        const code = list[0];
-        const a = (globalAchievements || []).find(x => String(x.code).trim() === code) || { code: code, name: 'Нова відзнака', description: '' };
-        const o = document.createElement('div'); o.id = 'achCele'; o.className = 'ac-overlay';
-        const conf = Array.from({ length: 28 }, (_, i) => `<i style="left:${Math.random() * 100}%;animation-delay:${(Math.random() * 1.2).toFixed(2)}s;background:hsl(${Math.round(Math.random() * 360)},85%,60%);--r:${Math.round(Math.random() * 360)}deg"></i>`).join('');
-        o.innerHTML = `<div class="ac-conf">${conf}</div><div class="ac-box">
-            <div class="ac-top">Вітаємо! Нова відзнака</div>
-            <div class="ac-glow"></div><img class="ac-img" src="assets/achievements/${esc(a.code)}.webp" onerror="this.src='assets/icons/ui/medal.svg'" alt="">
-            <div class="ac-name">${esc(a.name)}</div><div class="ac-desc">${esc(a.description || '')}</div>
-            ${list.length > 1 ? `<div class="ac-more">і ще відзнак: ${list.length - 1}</div>` : ''}
-            <button class="btn btn-primary ac-ok">${list.length > 1 ? 'Далі' : 'Дякую!'}</button></div>`;
-        o.querySelector('.ac-ok').onclick = () => {
-            let seen = []; try { seen = JSON.parse(ls.get(seenKey(u)) || '[]') || []; } catch (e) {}
-            if (seen.indexOf(code) < 0) seen.push(code); ls.set(seenKey(u), JSON.stringify(seen));
-            o.classList.remove('show'); setTimeout(() => { o.remove(); celebrating = false; setTimeout(celebrate, 200); }, 250);
+        const o = document.createElement('div'); o.id = 'achCele'; o.className = 'ac-overlay show';   // без затримок: одразу видно
+        const conf = Array.from({ length: 28 }, () => `<i style="left:${Math.random() * 100}%;animation-delay:${(Math.random() * 1).toFixed(2)}s;background:hsl(${Math.round(Math.random() * 360)},85%,60%);--r:${Math.round(Math.random() * 360)}deg"></i>`).join('');
+        o.innerHTML = `<div class="ac-conf">${conf}</div><div class="ac-box"></div>`;
+        const box = o.querySelector('.ac-box');
+        let i = 0;
+        const paint = () => {
+            const code = list[i], a = (globalAchievements || []).find(x => String(x.code).trim() === code) || { code: code, name: 'Нова відзнака', description: '' };
+            box.innerHTML = achHTML(a, list.length - i - 1);
+            box.classList.remove('swap'); void box.offsetWidth; box.classList.add('swap');
+            box.querySelector('.ac-ok').onclick = () => {
+                let seen = []; try { seen = JSON.parse(ls.get(seenKey(u)) || '[]') || []; } catch (e) {}
+                if (seen.indexOf(code) < 0) seen.push(code); ls.set(seenKey(u), JSON.stringify(seen));
+                if (++i < list.length) { paint(); refreshBadge(); return; }          // наступна відзнака - відразу, без паузи
+                o.remove(); celebrating = false; refreshBadge(); setTimeout(celebrate, 0);
+            };
         };
-        document.body.appendChild(o); requestAnimationFrame(() => o.classList.add('show'));
+        paint(); document.body.appendChild(o);
         try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch (e) {}
     }
     setInterval(celebrate, 4000);
@@ -153,9 +163,9 @@
         else bgPoll();
     });
     const _open = window.Academy.open;
-    window.Academy.open = async function () { const r = await _open.apply(this, arguments); setTimeout(celebrate, 150); return r; };
+    window.Academy.open = async function () { opening = true; try { return await _open.apply(this, arguments); } finally { opening = false; celebrate(); } };
     const _cna = checkNewAchievements;
-    checkNewAchievements = function (u) { _cna.apply(this, arguments); setTimeout(celebrate, 300); };
+    checkNewAchievements = function (u) { _cna.apply(this, arguments); celebrate(); };
 
     /* ---------------- Стан синхронізації / офлайн-кеш ---------------- */
     const TS = 'skillhub_edu_ts';
@@ -278,5 +288,39 @@
         if (r === 'fail' && currentUser && window.Academy && window.Academy.isOpen && navigator.onLine && _retry < 3) { _retry++; setTimeout(() => fetchFreshDataSilent(), 3000 * _retry); }
         if (r === 'ok') _retry = 0;
         return r;
+    };
+
+    /* ---------------- Вхід через Telegram ---------------- */
+    window.toggleTgLogin = function () {
+        const p = $('tgPanel'); if (!p) return;
+        const open = p.style.display === 'none'; p.style.display = open ? 'block' : 'none';
+        if (open) setTimeout(() => { const i = $('tgCodeInput'); i && i.focus(); }, 50);
+    };
+    window.handleTgLogin = async function () {
+        const btn = $('tgSubmitBtn'), inp = $('tgCodeInput'), err = $('errorMsg');
+        const code = String(inp.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (code.length !== 8) { showLoginError('Введіть 8-значний код з бота'); return; }
+        if (!navigator.onLine) { showLoginError('Для входу за кодом потрібен інтернет.'); return; }
+        btn.disabled = true; btn.innerText = 'ВХІД...'; err.style.display = 'none';
+        try {
+            const r = await apiPost({ action: 'tg_login', code: code }, 20000);
+            if (r && r.success && r.me) {
+                writeAuth({ login: r.me.login, token: r.token }, $('rememberMe').checked);
+                applyEduData(r);
+                const user = eduDb.users.find(u => lowLogin(u.login) === lowLogin(r.me.login));
+                currentUser = r.me.login; windowUserRole = detectRoleGroup(user ? user.role : r.me.role); windowViewingEmployee = null; pendingLogin = null;
+                inp.value = '';
+                switchToMyCabinet(); flushOutbox();
+                return;
+            }
+            const m = {
+                bad_code: 'Невірний код. Перевірте й спробуйте ще раз.', code_expired: 'Термін дії коду минув. Отримайте новий у боті.',
+                session_active: 'Ви вже увійшли на іншому пристрої. Вийдіть там або натисніть у боті «Скинути сесію».',
+                blocked: 'Доступ заблоковано. Зверніться до власника додатка.', locked: 'Забагато спроб. Спробуйте через ' + ((r && r.minutes) || 10) + ' хв.',
+                busy: 'Сервер зайнятий. Спробуйте за кілька секунд.'
+            };
+            showLoginError(m[r && r.code] || 'Не вдалося увійти. Спробуйте ще раз.');
+        } catch (e) { showLoginError('Немає зв’язку з сервером. Спробуйте ще раз.'); }
+        finally { btn.disabled = false; btn.innerText = 'УВІЙТИ ЗА КОДОМ'; }
     };
 })();

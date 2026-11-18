@@ -630,8 +630,9 @@ body.academy-open { overflow: hidden; }
 
 /* ===== Привітання про ачивку ===== */
 .ac-overlay{align-items:center;z-index:100002;background:radial-gradient(circle at 50% 40%,rgba(30,40,80,.8),rgba(0,0,0,.85))}
-.ac-box{position:relative;width:min(86vw,360px);text-align:center;background:var(--card-bg);border-radius:28px;padding:26px 22px 22px;transform:scale(.6);transition:transform .45s cubic-bezier(.2,1.4,.3,1);box-shadow:0 20px 60px rgba(0,0,0,.45)}
-.ac-overlay.show .ac-box{transform:scale(1)}
+.ac-box{position:relative;width:min(86vw,360px);text-align:center;background:var(--card-bg);border-radius:28px;padding:26px 22px 22px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.ac-box.swap{animation:acBox .28s cubic-bezier(.2,1.4,.3,1)}
+@keyframes acBox{from{transform:scale(.75);opacity:.4}to{transform:none;opacity:1}}
 .ac-top{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--primary)}
 .ac-glow{position:absolute;left:50%;top:70px;width:220px;height:220px;margin-left:-110px;border-radius:50%;background:radial-gradient(circle,rgba(255,215,0,.55),transparent 65%);animation:acPulse 2s ease-in-out infinite}
 .ac-img{position:relative;width:170px;height:170px;object-fit:contain;margin:14px auto 6px;display:block;animation:acPop .8s cubic-bezier(.2,1.5,.3,1) both;filter:drop-shadow(0 8px 16px rgba(0,0,0,.3))}
@@ -659,3 +660,8 @@ body.academy-open { overflow: hidden; }
 #academyApp .goal-head small.goal-ok{color:#16a34a;font-weight:800}
 #academyApp .chart-canvas-box{height:140px;width:70%;margin:0 auto}
 .wl-scroll{flex:1;min-height:0}
+
+.tg-toggle{display:block;margin:14px auto 0;background:none;border:0;color:var(--primary);font-weight:700;font-size:14px;cursor:pointer;padding:6px}
+.tg-panel{margin-top:10px;padding-top:12px;border-top:1px dashed var(--border)}
+.tg-steps{margin:0 0 12px;padding-left:20px;font-size:13px;line-height:1.5;color:var(--text-muted);text-align:left}
+.tg-code{width:100%;text-align:center;font-size:22px;letter-spacing:.2em;font-weight:800;text-transform:uppercase;padding:12px;margin-bottom:10px;border-radius:14px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-main);box-sizing:border-box}

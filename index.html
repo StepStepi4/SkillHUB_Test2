@@ -833,6 +833,17 @@
                 </label>
 
                 <button class="btn btn-glow" id="loginSubmitBtn" onclick="handleLogin(false)">УВІЙТИ</button>
+
+                <button type="button" class="tg-toggle" id="tgToggle" onclick="toggleTgLogin()">Вхід через Telegram</button>
+                <div id="tgPanel" class="tg-panel" style="display:none">
+                    <ol class="tg-steps">
+                        <li>Відкрийте Telegram-бота і натисніть «Старт».</li>
+                        <li>Напишіть Прізвище та імʼя.</li>
+                        <li>Введіть отриманий код нижче (діє 15 хвилин).</li>
+                    </ol>
+                    <input type="text" id="tgCodeInput" class="tg-code" maxlength="9" autocapitalize="characters" autocomplete="one-time-code" placeholder="КОД З БОТА" onkeypress="if(event.key === 'Enter') handleTgLogin()">
+                    <button class="btn btn-glow" id="tgSubmitBtn" onclick="handleTgLogin()">УВІЙТИ ЗА КОДОМ</button>
+                </div>
             </div>
         </div>
     </div>
