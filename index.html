@@ -19,6 +19,13 @@
     </script>
     <title>SkillHUB</title>
     <script>
+        // Немає авторизації (перший запуск / скидання) -> стартовий екран входу поверх усього застосунку
+        try {
+            var hasAuth = localStorage.getItem('skillhub_auth') || sessionStorage.getItem('skillhub_auth') || localStorage.getItem('skillhub_edu_creds') || localStorage.getItem('skillhub_edu_creds_old');
+            if (!hasAuth) document.documentElement.classList.add('gate-on');
+        } catch (e) {}
+    </script>
+    <script>
         // Тема застосовується ДО першого малювання: без білого/темного блимання при запуску
         try {
             var th = localStorage.getItem('theme') || 'light';
@@ -818,10 +825,10 @@
     <div id="loginView" class="view active">
         <div class="login-wrapper">
             <div class="login-card">
-                <div class="big-emoji">
-                    <img src="assets/achievements/17.webp" alt="SkillHUB Logo" style="width: 80px; height: 80px; object-fit: contain; display: block; margin: 0 auto 16px auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));" onerror="this.style.display='none'">
+                <div class="gate-hero">
+                    <img src="assets/icons/ui/Start_logo.webp" alt="SkillHUB" class="gate-img" onerror="this.onerror=null;this.src='assets/achievements/17.webp';this.classList.add('fallback')">
                 </div>
-                <h1>Вхід в академію</h1>
+                <h1 class="gate-title">Вхід</h1>
 
                 <div id="errorMsg">Невірний логін або пароль!</div>
 
@@ -843,9 +850,10 @@
                 <button class="btn btn-glow" id="loginSubmitBtn" onclick="handleLogin(false)">УВІЙТИ</button>
 
                 <button type="button" class="tg-toggle" id="tgToggle" onclick="toggleTgLogin()">Вхід через Telegram</button>
+                <div class="tg-hint">Код для входу видає <a href="https://t.me/rz_info_bot" target="_blank" rel="noopener">телеграм бота</a> <a href="https://t.me/rz_info_bot" target="_blank" rel="noopener">@rz_info_bot</a></div>
                 <div id="tgPanel" class="tg-panel" style="display:none">
                     <ol class="tg-steps">
-                        <li>Відкрийте Telegram-бота і натисніть «Старт».</li>
+                        <li>Відкрийте <a href="https://t.me/rz_info_bot" target="_blank" rel="noopener">телеграм бота @rz_info_bot</a> і натисніть «Старт».</li>
                         <li>Напишіть Прізвище та імʼя.</li>
                         <li>Введіть отриманий код нижче (діє 15 хвилин).</li>
                     </ol>
@@ -1107,5 +1115,6 @@
 <script src="js/academy/academy.js"></script>
 <script src="js/academy/extras.js"></script>
 <script src="js/academy/welcome.js"></script>
+<script src="js/academy/gate.js"></script>
 </body>
 </html>
