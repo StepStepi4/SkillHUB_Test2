@@ -665,3 +665,8 @@ body.academy-open { overflow: hidden; }
 .tg-panel{margin-top:10px;padding-top:12px;border-top:1px dashed var(--border)}
 .tg-steps{margin:0 0 12px;padding-left:20px;font-size:13px;line-height:1.5;color:var(--text-muted);text-align:left}
 .tg-code{width:100%;text-align:center;font-size:22px;letter-spacing:.2em;font-weight:800;text-transform:uppercase;padding:12px;margin-bottom:10px;border-radius:14px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-main);box-sizing:border-box}
+
+.wl-sub{font-size:12px;font-weight:700;color:var(--text-muted);margin:6px 2px 4px}
+.wl-meet .wl-mt{font-weight:800;color:var(--primary);min-width:46px;font-variant-numeric:tabular-nums}
+.wl-meet.past{opacity:.55}
+.wl-ml{font-size:12px;font-weight:700;color:var(--primary);text-decoration:none;padding:4px 10px;border-radius:999px;background:var(--primary-light)}

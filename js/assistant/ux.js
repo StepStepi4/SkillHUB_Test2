@@ -96,8 +96,11 @@
         const d = (window.SkillDB && window.SkillDB.db()) || {};
         const seen = parseInt(lsg('skillhub_news_seen') || '0', 10) || 0;
         const news = (d.news || []).filter(x => (x.ts || 0) > seen).length;
-        const vote = d.voteOpen && !lsg('skillhub_vote_seen') ? 1 : 0;
-        if (!d.voteOpen) { try { localStorage.removeItem('skillhub_vote_seen'); } catch (e) {} }
+        let voted = {}, res = {}; try { voted = JSON.parse(lsg('skillhub_voted') || '{}') || {}; res = JSON.parse(lsg('skillhub_vote_res') || '{}') || {}; } catch (e) {}
+        // не проголосовані відкриті + нові опубліковані підсумки; проголосував — крапка зникає
+        const vote = Array.isArray(d.voteIds)
+            ? d.voteIds.filter(id => !voted[id]).length + (d.voteClosedIds || []).filter(id => !res[id]).length
+            : (d.voteOpen && !lsg('skillhub_vote_seen') ? 1 : 0);
         put(document.getElementById('newsRow'), news);
         put(document.getElementById('voteRow'), vote);
         const tab = document.querySelector('.nav-item[data-func="SkillHUB"]');
@@ -110,7 +113,8 @@
     function init() {
         wrap('renderNewsBadge', update); wrap('renderVoteRow', update);
         wrap('openVote', () => { try { localStorage.setItem('skillhub_vote_seen', '1'); } catch (e) {} update(); });
-        update(); setInterval(update, 4000);
+        document.addEventListener('skillhub-voted', update);
+        update(); setInterval(() => { if (!document.hidden) update(); }, 4000); document.addEventListener('visibilitychange', () => { if (!document.hidden) update(); });
     }
     if (document.readyState === 'complete') init(); else window.addEventListener('load', init);
 })();

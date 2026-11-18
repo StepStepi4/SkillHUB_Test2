@@ -46,6 +46,29 @@
             return out;
         } catch (e) { return []; }
     }
+    // Власнику: зустрічі на сьогодні і завтра (час, хто, посилання)
+    function meetsHtml(u) {
+        let grp = ''; try { grp = detectRoleGroup(u.role); } catch (e) {}
+        if (grp !== 'owner' || !eduDb || !eduDb.users) return '';
+        const now = new Date(), key = d => d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+        const tk = key(now), tm = key(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
+        const list = [];
+        eduDb.users.forEach(x => {
+            const d = parseUaDate(x.meetDate); if (!d) return;
+            const k = key(d); if (k !== tk && k !== tm) return;
+            let l = String(x.meetLink || '').trim(); if (l === '-') l = '';
+            list.push({ d, k, name: x.name || x.login, link: l, past: k === tk && d.getTime() < now.getTime() - 3600000 });
+        });
+        if (!list.length) return '<div class="wl-sec">Зустрічі</div><div class="wl-empty">На сьогодні і завтра зустрічей немає.</div>';
+        list.sort((a, b) => a.d - b.d);
+        const hm = d => String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        const row = m => {
+            const href = m.link ? (/^https?:/i.test(m.link) ? m.link : 'https://' + m.link) : '';
+            return `<div class="wl-course wl-meet${m.past ? ' past' : ''}"><span class="wl-mt">${hm(m.d)}</span><span class="wl-cn">${esc(m.name)}</span>${href ? `<a class="wl-ml" href="${esc(href)}" target="_blank" rel="noopener">Join</a>` : '<span class="wl-cs">без посилання</span>'}</div>`;
+        };
+        const part = (k, t) => { const a = list.filter(m => m.k === k); return a.length ? `<div class="wl-sub">${t}</div><div class="wl-courses">${a.map(row).join('')}</div>` : ''; };
+        return '<div class="wl-sec">Зустрічі</div>' + part(tk, 'Сьогодні') + part(tm, 'Завтра');
+    }
     function buildWelcome(u) {
         const courses = courseRows(u), goals = goalRows(u), dl = deadlineText(u);
         const first = extractFirstNameCapitalized(u);
@@ -73,7 +96,7 @@
         const av = availableGroups(u);
         const availHtml = av.length ? `<div class="wl-sec">Доступні курси</div><div class="wl-courses">${av.map(g => `<div class="wl-course avail"><span class="wl-dot"></span><span class="wl-cn">${esc(g)}</span></div>`).join('')}</div>` : '';
 
-        return `<div class="wl-hero"><div class="wl-hi">${hi},</div><div class="wl-name">${esc(first)}!</div></div>${todayHtml}${goalsHtml}${coursesHtml}${availHtml}`;
+        return `<div class="wl-hero"><div class="wl-hi">${hi},</div><div class="wl-name">${esc(first)}!</div></div>${meetsHtml(u)}${todayHtml}${goalsHtml}${coursesHtml}${availHtml}`;
     }
     function openWelcome(force) {
         const u = me(); if (!u) return;
@@ -156,7 +179,7 @@
         paint(); document.body.appendChild(o);
         try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch (e) {}
     }
-    setInterval(celebrate, 4000);
+    setInterval(() => { if (!document.hidden) celebrate(); }, 4000);
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) return;
         if (window.Academy && window.Academy.isOpen && navigator.onLine && currentUser) { Promise.resolve(fetchFreshDataSilent()).then(() => celebrate()); celebrate(); }
@@ -206,7 +229,7 @@
     };
     window.addEventListener('offline', syncChip); window.addEventListener('skillhub-outbox', syncChip);
     window.addEventListener('online', () => { syncChip(); if (currentUser && window.Academy && window.Academy.isOpen) setTimeout(() => fetchFreshDataSilent(), 800); });
-    setInterval(syncChip, 30000);
+    setInterval(() => { if (!document.hidden) syncChip(); }, 30000);
 
     /* ---------------- Події: червона крапка з цифрою на «Академія» ---------------- */
     const K = (n, u) => 'skillhub_seen_' + n + '_' + lowLogin(u.login);
@@ -274,8 +297,9 @@
     }
     window.addEventListener('load', () => setTimeout(bgPoll, 1500));
     window.addEventListener('online', () => setTimeout(bgPoll, 1000));
-    setInterval(bgPoll, 120000);
-    setInterval(refreshBadge, 5000);
+    setInterval(() => { if (!document.hidden) bgPoll(); }, 120000);
+    setInterval(() => { if (!document.hidden) refreshBadge(); }, 5000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { try { refreshBadge(); celebrate(); } catch (e) {} } });
     const _fn = fetchFreshDataSilent;
     let _retry = 0;
     fetchFreshDataSilent = async function () {

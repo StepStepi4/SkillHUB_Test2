@@ -205,6 +205,7 @@
     let currentTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', currentTheme);
     updateToggleUI();
+    requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.add('theme-ready')));
 
     document.getElementById('themeToggle').onclick = () => {
         currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -545,7 +546,8 @@
     }
     window.renderVoteRow = function() {
         const row = document.getElementById('voteRow');
-        if (row) row.style.display = (db && db.voteOpen) ? '' : 'none';
+        const has = db && (db.voteOpen || (db.voteClosedIds && db.voteClosedIds.length));
+        if (row) row.style.display = has ? '' : 'none';
     };
     window.openNews = function(auto) {
         const news = (db && db.news) || [];
@@ -599,7 +601,7 @@
             db.serverRev = r.serverRev;
             if (Array.isArray(r.news)) db.news = r.news;
             if (Array.isArray(r.feedback)) db.feedback = r.feedback;
-            db.voteOpen = !!r.voteOpen;
+            db.voteOpen = !!r.voteOpen; db.voteIds = r.voteIds; db.voteClosedIds = r.voteClosedIds;
             window.renderNewsBadge(); window.renderVoteRow(); window.renderServerRev();
             window.maybeShowNewsPopup();
         } catch (e) { extrasAt = 0; }
@@ -694,23 +696,32 @@
         try {
             const r = await fetchJsonT(API_URL + '?action=vote&uid=' + encodeURIComponent(deviceUid()), 10000);
             if (!r || !Array.isArray(r.questions)) throw new Error('old');
-            const open = (r && r.questions || []).filter(q => q.status !== 'closed');
-            if (db) db.voteOpen = open.length > 0; window.renderVoteRow();
-            renderVote(open);
+            const all = r.questions || [];
+            const open = all.filter(q => q.status !== 'closed'), closed = all.filter(q => q.status === 'closed');
+            // голос, що вже є на сервері, запамʼятовуємо локально — сповіщення зникає
+            const v = lsJson('skillhub_voted'); let ch = false;
+            all.forEach(q => { if (q.voted >= 0 && !v[q.id]) { v[q.id] = 1; ch = true; } });
+            if (ch) lsSetJson('skillhub_voted', v);
+            if (db) { db.voteOpen = open.length > 0; db.voteIds = open.map(q => q.id); db.voteClosedIds = closed.map(q => q.id); }
+            const seen = lsJson('skillhub_vote_res'); closed.forEach(q => { seen[q.id] = 1; }); lsSetJson('skillhub_vote_res', seen);
+            window.renderVoteRow(); if (window.updateHubBadges) window.updateHubBadges();
+            renderVote(open.concat(closed));
         } catch (e) { body.innerHTML = '<div class="news-empty">' + OLD_SCRIPT_MSG + '</div>'; }
     };
     function renderVote(qs) {
         const body = document.getElementById('voteBody');
         const voted = lsJson('skillhub_voted');
-        if (!qs.length) { body.innerHTML = '<div class="news-empty">Відкритих голосувань зараз немає</div>'; return; }
+        if (!qs.length) { body.innerHTML = '<div class="news-empty">Голосувань зараз немає</div>'; return; }
         body.innerHTML = qs.map((q, qi) => {
             const closed = q.status === 'closed';
             const tag = `<span class="vt-tag ${closed ? 'closed' : 'open'}">${closed ? 'Закрито' : 'Відкрито'}</span>`;
             const head = `<div class="fb-q-title">${safeText(q.q)}${tag}</div>`;
             if (closed) {
-                const total = q.options.reduce((s, o) => s + (o.votes || 0), 0);
-                const max = Math.max(0, ...q.options.map(o => o.votes || 0));
-                return `<div class="vt-q">${head}${q.options.map(o => { const p = total ? Math.round((o.votes || 0) * 100 / total) : 0; return `<div class="vt-bar${max > 0 && o.votes === max ? ' win' : ''}"><i style="width:${p}%"></i><span>${safeText(o.text)}</span><span>${o.votes || 0} · ${p}%</span></div>`; }).join('')}<div class="fb-rate-hint"><span>Всього голосів: ${total}</span></div></div>`;
+                const opts = q.options.slice().sort((a, b) => (b.votes || 0) - (a.votes || 0));
+                const total = opts.reduce((s, o) => s + (o.votes || 0), 0);
+                const max = Math.max(0, ...opts.map(o => o.votes || 0));
+                let place = 0, prev = null;
+                return `<div class="vt-q">${head}${opts.map((o, i) => { const vv = o.votes || 0; if (vv !== prev) { place = i + 1; prev = vv; } const p = total ? Math.round(vv * 100 / total) : 0; return `<div class="vt-bar${max > 0 && vv === max ? ' win' : ''}"><i style="width:${p}%"></i><span>${place}. ${safeText(o.text)}</span><span>${vv} · ${p}%</span></div>`; }).join('')}<div class="fb-rate-hint"><span>Підсумковий рейтинг · всього голосів: ${total}</span></div></div>`;
             }
             if (q.voted >= 0 || voted[q.id]) return `<div class="vt-q">${head}<div class="fb-done">✓ Ваш голос враховано. Результати з'являться після закриття голосування</div></div>`;
             return `<div class="vt-q" data-q="${qi}">${head}${q.options.map((o, oi) => `<button type="button" class="vt-opt" onclick="window.pickVote(${qi}, ${oi}, this)"><span class="vt-dot"></span>${safeText(o.text)}</button>`).join('')}<button class="btn btn-primary" style="margin-top:12px;" onclick="window.submitVote(${qi}, this)">Проголосувати</button></div>`;

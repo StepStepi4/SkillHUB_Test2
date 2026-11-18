@@ -59,8 +59,8 @@
         body {
             font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main);
             margin: 0; padding: 0; display: flex; justify-content: center; align-items: flex-start;
-            min-height: 100vh; -webkit-font-smoothing: antialiased; transition: background 0.3s ease, color 0.3s ease;
-            animation: seamlessEnter 0.25s ease-out;
+            min-height: 100vh; -webkit-font-smoothing: antialiased;
+            animation: none;
         }
 
         @keyframes seamlessEnter {
@@ -96,7 +96,7 @@
             display: flex; flex-direction: column;
         }
 
-        .app-tab { display: none; animation: fade 0.2s ease; }
+        .app-tab { display: none; animation: tabfade 0.14s ease-out; }
         .app-tab.active { display: block; }
         @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -714,3 +714,11 @@ button, .list-item, .nav-item, .list-card, .chip, [onclick] { touch-action: mani
 @keyframes evtPop{from{transform:scale(0)}to{transform:scale(1)}}
 .list-item .evt-badge{animation:none}
 #guideRow{display:none !important}
+
+/* Плавність: без блимання при старті/перемиканні */
+html { background: var(--bg); }
+html.theme-ready body { transition: background-color .25s ease, color .25s ease; }
+@keyframes tabfade { from { opacity: 0; } to { opacity: 1; } }
+.app-tab.active { contain: layout style; }
+.bottom-nav, .nav-item { -webkit-tap-highlight-color: transparent; }
+@media (prefers-reduced-motion: reduce) { .app-tab { animation: none; } }
