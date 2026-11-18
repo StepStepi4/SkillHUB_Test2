@@ -683,3 +683,6 @@ html.gate-on::before { content: ''; position: fixed; inset: 0; background: var(-
 #academyApp .gate-title { text-align: center; margin: 0 0 14px; }
 #academyApp .tg-hint { margin-top: 12px; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-muted); }
 #academyApp .tg-hint a, #academyApp .tg-steps a { color: var(--primary); font-weight: 700; text-decoration: underline; }
+
+html.hud-paused .app-loader { visibility: hidden !important; pointer-events: none !important; }
+.wl-overlay, .ac-overlay { z-index: 1000002; }

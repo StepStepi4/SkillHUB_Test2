@@ -11,13 +11,13 @@
     function hide() {
         if (!on()) return;
         root.classList.remove('gate-on');
-        try { if (!window.__keepAcademy && window.Academy && window.Academy.isOpen) { window.Academy.close({ fromPopstate: true }); } } catch (e) {}
-        try { if (location.hash === '#academy') history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
-        try { if (!window.__keepAcademy && typeof window.switchTab === 'function') window.switchTab(sessionStorage.getItem('skillhub_active_tab') || 'tab-search'); } catch (e) {}
+        // після входу лишаємось у кабінеті Академії (привітальне вікно поверх); HUD завантаження каталогу не перекриває кабінет
+        root.classList.add('hud-paused');
+        try { if (window.Academy && !window.Academy.isOpen) window.Academy.open({ fromPopstate: true }); } catch (e) {}
     }
     // у режимі входу закрити Академію неможливо
     const origClose = window.Academy && window.Academy.close;
-    if (origClose) window.Academy.close = function (o) { if (on() && !(o && o.force)) return; return origClose.call(this, o); };
+    if (origClose) window.Academy.close = function (o) { if (on() && !(o && o.force)) return; root.classList.remove('hud-paused'); return origClose.call(this, o); };
     // будь-який перехід на екран входу (вихід, сесія завершена, інший пристрій) = стартовий екран
     const sv = window.switchView;
     if (typeof sv === 'function') window.switchView = function (id) { const r = sv.apply(this, arguments); if (id === 'loginView') show(); return r; };
