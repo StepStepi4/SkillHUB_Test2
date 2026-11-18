@@ -677,9 +677,9 @@ html.gate-on #academyApp { z-index: 1000001; padding-bottom: 0; }
 html.gate-on #floatingExitBtn { display: none !important; }
 html.gate-on body > .container { visibility: hidden; }
 html.gate-on::before { content: ''; position: fixed; inset: 0; background: var(--bg, #f2f2f7); z-index: 1000000; }
-#academyApp .gate-hero { text-align: center; margin: -8px -8px 14px; }
-#academyApp .gate-img { width: 100%; max-height: 38vh; object-fit: contain; display: block; margin: 0 auto; }
-#academyApp .gate-img.fallback { width: 96px; height: 96px; }
+#academyApp .gate-hero { margin: -32px -24px 16px; border-radius: 24px 24px 0 0; overflow: hidden; background: #06222b; }
+#academyApp .gate-img { filter: none !important; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: 50% 40%; display: block; }
+#academyApp .gate-img.fallback { width: 96px; height: 96px; aspect-ratio: auto; margin: 16px auto; object-fit: contain; }
 #academyApp .gate-title { text-align: center; margin: 0 0 14px; }
 #academyApp .tg-hint { margin-top: 12px; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-muted); }
 #academyApp .tg-hint a, #academyApp .tg-steps a { color: var(--primary); font-weight: 700; text-decoration: underline; }
