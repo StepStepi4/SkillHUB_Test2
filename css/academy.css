@@ -676,7 +676,7 @@ html.gate-on .bottom-nav, html.gate-on #scrollTopBtn { display: none !important;
 html.gate-on #academyApp { z-index: 1000001; padding-bottom: 0; }
 html.gate-on #floatingExitBtn { display: none !important; }
 html.gate-on body > .container { visibility: hidden; }
-html.gate-on::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg, #f2f2f7); z-index: 1000000; }
+html.gate-on::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #06222b; z-index: 1000000; }
 #academyApp .gate-hero { margin: -32px -24px 16px; border-radius: 24px 24px 0 0; overflow: hidden; background: #06222b; }
 #academyApp .gate-img { filter: none !important; width: 100%; height: 56vw; max-height: 300px; object-fit: cover; object-position: 50% 40%; display: block; }
 #academyApp .gate-img.fallback { width: 96px; height: 96px; margin: 16px auto; height: 96px; object-fit: contain; }
@@ -686,3 +686,9 @@ html.gate-on::before { content: ''; position: fixed; top: 0; left: 0; right: 0; 
 
 html.hud-paused .app-loader { visibility: hidden !important; pointer-events: none !important; }
 .wl-overlay, .ac-overlay { z-index: 1000002; }
+
+/* Форма входу видима вже на першому кадрі - без JS, без IndexedDB, без білого екрана */
+html.gate-on #academyApp[hidden] { display: block !important; }
+html.gate-on #academyApp .view { display: none !important; animation: none !important; }
+html.gate-on #academyApp #loginView { display: block !important; }
+html.gate-on #academyApp #loginView .login-card, html.gate-on #academyApp #loginView > div:first-child { opacity: 1; }
