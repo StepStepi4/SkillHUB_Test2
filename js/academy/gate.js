@@ -18,6 +18,7 @@
     function hide() {
         if (!on()) return;
         root.classList.remove('gate-on');
+        try { const th = localStorage.getItem('theme') || 'light'; root.style.backgroundColor = th === 'dark' ? '#000000' : '#f2f2f7'; } catch (e) {}
         // після входу лишаємось у кабінеті Академії (привітальне вікно поверх); HUD завантаження каталогу не перекриває кабінет
         root.classList.add('hud-paused');
         try { if (window.Academy && !window.Academy.isOpen) window.Academy.open({ fromPopstate: true }); } catch (e) {}

@@ -35,8 +35,33 @@
                 try { if (typeof switchView === 'function') switchView('loginView'); } catch (e) {}
                 var v = document.getElementById('loginView'); if (v && !v.classList.contains('active')) { var all = a.querySelectorAll('.view'); for (var i = 0; i < all.length; i++) all[i].classList.remove('active'); v.classList.add('active'); }
             }
-            setTimeout(function () { if (de.classList.contains('gate-on') && !loginShown()) force(); }, 2500);
-            setTimeout(function () { if (de.classList.contains('gate-on') && !loginShown()) { de.classList.remove('gate-on'); } }, 9000);
+            // 3.5 c: форми немає -> показуємо повідомлення і кнопку «Скинути кеш» (повне самовідновлення)
+            function rescue() {
+                if (!de.classList.contains('gate-on') || loginShown() || document.getElementById('gateRescue')) return;
+                var d = document.createElement('div'); d.id = 'gateRescue';
+                d.style.cssText = 'position:fixed;left:0;right:0;top:0;bottom:0;z-index:2000000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#06222b;color:#fff;font:600 16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px';
+                d.innerHTML = '<div>Завантаження SkillHUB…</div><button id="gateRescueBtn" style="padding:14px 22px;border:0;border-radius:14px;background:#2ecc71;color:#06222b;font:700 16px -apple-system,system-ui,sans-serif">Оновити застосунок</button>';
+                document.body.appendChild(d);
+                document.getElementById('gateRescueBtn').onclick = function () {
+                    this.textContent = 'Оновлюємо…';
+                    var done = function () { location.replace(location.pathname + '?r=' + Date.now()); };
+                    try {
+                        Promise.all([
+                            navigator.serviceWorker ? navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }) : 0,
+                            window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }) : 0
+                        ]).then(done, done);
+                        setTimeout(done, 4000);
+                    } catch (e) { done(); }
+                };
+            }
+            function tick() {
+                if (!de.classList.contains('gate-on')) { var r = document.getElementById('gateRescue'); if (r) r.remove(); return; }
+                if (loginShown()) { var r2 = document.getElementById('gateRescue'); if (r2) r2.remove(); }
+                setTimeout(tick, 600);
+            }
+            setTimeout(function () { if (de.classList.contains('gate-on') && !loginShown()) force(); }, 2000);
+            setTimeout(function () { if (de.classList.contains('gate-on') && !loginShown()) rescue(); tick(); }, 3500);
+            setTimeout(function () { if (de.classList.contains('gate-on') && !loginShown()) { de.classList.remove('gate-on'); } }, 20000);
         })();
     </script>
     <script>
