@@ -1,6 +1,6 @@
 // SkillHUB Assistant - Service Worker (offline-first)
 // ВАЖЛИВО: при кожному релізі міняйте VERSION - тоді всі пристрої підтягнуть нові файли.
-const VERSION = 'v-1c1a4bff95';
+const VERSION = 'v-97af4d0662';
 const SHELL_CACHE = 'skillhub-shell-' + VERSION;   // "оболонка": сторінки, іконки, бібліотеки
 const RUNTIME_CACHE = 'skillhub-runtime-v1';       // шрифти, картинки досягнень та інше, що завантажується під час роботи
 
@@ -197,11 +197,17 @@ self.addEventListener('message', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.map((k) => {
-      const oldShell = (k.startsWith('skillhub-shell-') && k !== SHELL_CACHE) || k.startsWith('skillhub-test-cache');
-      return oldShell ? caches.delete(k) : null;
-    }));
+    // апгрейд = у браузера вже були кеші попередньої версії (в т.ч. зі старого репозиторію з іншими назвами)
+    const upgrading = keys.some((k) => k !== SHELL_CACHE && k !== RUNTIME_CACHE);
+    await Promise.all(keys.map((k) => (k !== SHELL_CACHE && k !== RUNTIME_CACHE) ? caches.delete(k) : null));
     await self.clients.claim();
+    // Безшовне оновлення: відкриті вкладки/PWA зі старим кодом одразу перезавантажуються на нову версію (один раз, при активації)
+    if (upgrading) {
+      try {
+        const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        await Promise.all(list.map((c) => c.navigate(c.url).catch(() => {})));
+      } catch (e) {}
+    }
   })());
 });
 

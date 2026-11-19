@@ -21,9 +21,23 @@
     <script>
         // Немає авторизації (перший запуск / скидання) -> стартовий екран входу поверх усього застосунку
         try {
-            var hasAuth = localStorage.getItem('skillhub_auth') || sessionStorage.getItem('skillhub_auth') || localStorage.getItem('skillhub_edu_creds') || localStorage.getItem('skillhub_edu_creds_old');
+            var hasAuth = localStorage.getItem('skillhub_auth') || sessionStorage.getItem('skillhub_auth');
             if (!hasAuth) document.documentElement.classList.add('gate-on');
         } catch (e) {}
+        // АВАРІЙНА СТРАХОВКА: екран входу ніколи не лишиться «білим». Якщо за кілька секунд він не зʼявився - примусово
+        // показуємо форму входу, а якщо й це не допомогло - знімаємо блокування, щоб застосунок був видимий.
+        (function () {
+            var de = document.documentElement;
+            function loginShown() { var a = document.getElementById('academyApp'), v = document.getElementById('loginView'); return a && !a.hidden && v && v.offsetHeight > 0; }
+            function force() {
+                var a = document.getElementById('academyApp'); if (!a) return;
+                a.hidden = false; document.body.classList.add('academy-open');
+                try { if (typeof switchView === 'function') switchView('loginView'); } catch (e) {}
+                var v = document.getElementById('loginView'); if (v && !v.classList.contains('active')) { var all = a.querySelectorAll('.view'); for (var i = 0; i < all.length; i++) all[i].classList.remove('active'); v.classList.add('active'); }
+            }
+            setTimeout(function () { if (de.classList.contains('gate-on') && !loginShown()) force(); }, 2500);
+            setTimeout(function () { if (de.classList.contains('gate-on') && !loginShown()) { de.classList.remove('gate-on'); } }, 9000);
+        })();
     </script>
     <script>
         // Тема застосовується ДО першого малювання: без білого/темного блимання при запуску

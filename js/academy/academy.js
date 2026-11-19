@@ -2235,7 +2235,7 @@
         _academyInit = (async () => {
         await purgeLegacyStorage();
         let hasCache = false;
-        const cached = await eduLoadCache();
+        const cached = await Promise.race([eduLoadCache().catch(() => null), new Promise(r => setTimeout(() => r(null), 3500))]);
         if (cached) {
             window.fullData = cached;
             eduDb = cached.educationData;
@@ -2304,7 +2304,7 @@
             if (typeof window.closeModalBase === 'function') {
                 ['favQuickMenuModal', 'favSelectModal'].forEach(id => { try { window.closeModalBase(id); } catch (e) {} });
             }
-            await academyInit();
+            try { await Promise.race([academyInit(), new Promise(r => setTimeout(r, 9000))]); } catch (e) {}
             root.hidden = false;
             document.body.classList.add('academy-open');
             this.isOpen = true;

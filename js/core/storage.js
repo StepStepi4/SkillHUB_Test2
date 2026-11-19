@@ -14,6 +14,7 @@ function openIDB() {
             req.onerror = () => reject(req.error);
             req.onblocked = () => reject(new Error('idb blocked'));
         } catch (e) { reject(e); }
+        setTimeout(() => reject(new Error('idb timeout')), 3000);   // після скидання/на деяких Android open може зависнути
     });
     _idbPromise.catch(() => { _idbPromise = null; });
     return _idbPromise;
@@ -22,6 +23,7 @@ function openIDB() {
 async function idbGet(key) {
     const idb = await openIDB();
     return new Promise((resolve, reject) => {
+        setTimeout(() => reject(new Error('idb get timeout')), 3000);
         const rq = idb.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(key);
         rq.onsuccess = () => resolve(rq.result);
         rq.onerror = () => reject(rq.error);

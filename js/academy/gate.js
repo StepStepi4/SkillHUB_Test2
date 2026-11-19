@@ -3,10 +3,17 @@
 (function () {
     const root = document.documentElement;
     const on = () => root.classList.contains('gate-on');
+    // Показуємо форму входу НЕГАЙНО (без очікування IndexedDB/мережі/події load), ініціалізація Академії - слідом у фоні
+    function paintLogin() {
+        const r = document.getElementById('academyApp'); if (!r) return;
+        r.hidden = false; document.body.classList.add('academy-open');
+        const v = document.getElementById('loginView');
+        if (v && !v.classList.contains('active')) { document.querySelectorAll('#academyApp .view').forEach(e => e.classList.remove('active')); v.classList.add('active'); }
+    }
     function show() {
-        if (on() && window.Academy && window.Academy.isOpen) return;
         root.classList.add('gate-on');
-        try { if (window.Academy && !window.Academy.isOpen) window.Academy.open({ fromPopstate: true }); } catch (e) {}
+        paintLogin();
+        try { if (window.Academy && !window.Academy.isOpen) window.Academy.open({ fromPopstate: true }).catch(() => {}); } catch (e) {}
     }
     function hide() {
         if (!on()) return;
@@ -24,5 +31,7 @@
     // увійшли -> застосунок розблоковано
     window.addEventListener('skillhub-user', () => { let cu = null; try { cu = currentUser; } catch (e) {} if (cu) hide(); });
     const start = () => { if (on()) show(); };
-    if (document.readyState === 'complete') start(); else window.addEventListener('load', start);
+    start();
+    // повторна страховка, якщо щось сховало екран входу
+    setTimeout(() => { if (on()) { const r = document.getElementById('academyApp'); if (r && r.hidden) paintLogin(); } }, 1500);
 })();

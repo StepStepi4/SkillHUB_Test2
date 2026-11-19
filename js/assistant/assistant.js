@@ -996,8 +996,10 @@
             try { sessionStorage.clear(); } catch (e) {}
             // скидання не повинно знову показувати інструкцію зі встановлення
             try { if (wasInstalled) localStorage.setItem('skillhub_installed', wasInstalled); sessionStorage.setItem('skillhub_skip_start', '1'); } catch (e) {}
+            try { if (_idbPromise) _idbPromise.then(d => { try { d.close(); } catch (e) {} }).catch(() => {}); } catch (e) {}
             try { indexedDB.deleteDatabase(IDB_NAME); } catch (e) {}
-            setTimeout(() => window.location.reload(), 150);
+            try { if (window.caches) caches.keys().then(ks => ks.filter(k => k.indexOf('skillhub-runtime') === 0).forEach(k => caches.delete(k))); } catch (e) {}
+            setTimeout(() => window.location.reload(), 400);
         }
     };
 
