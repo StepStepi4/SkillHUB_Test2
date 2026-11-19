@@ -1362,7 +1362,14 @@
         const timeoutId = setTimeout(() => controller.abort(), 60000);
         let response;
         try {
-            response = await fetch(API_URL + '?action=catalog', { signal: controller.signal });
+            // короткий збій мережі (Safari: «Load failed», обрив при оновленні/перезапуску) - тихо повторюємо до 3 разів
+            for (let attempt = 0; ; attempt++) {
+                try { response = await fetch(API_URL + '?action=catalog', { signal: controller.signal }); break; }
+                catch (e) {
+                    if ((e && e.name === 'AbortError') || attempt >= 2 || navigator.onLine === false) throw e;
+                    await new Promise(r => setTimeout(r, 900 * (attempt + 1)));
+                }
+            }
         } catch (e) {
             if (e && e.name === 'AbortError') throw new Error('Час очікування вичерпано');
             throw e;
