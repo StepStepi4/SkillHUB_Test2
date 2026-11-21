@@ -94,6 +94,7 @@
     }
     function update() {
         const d = (window.SkillDB && window.SkillDB.db()) || {};
+        if (lsg('skillhub_news_seen') === null && (d.news || []).length && window.renderNewsBadge) { try { window.renderNewsBadge(); } catch (e) {} }
         const seen = parseInt(lsg('skillhub_news_seen') || '0', 10) || 0;
         const news = (d.news || []).filter(x => (x.ts || 0) > seen).length;
         let voted = {}, res = {}; try { voted = JSON.parse(lsg('skillhub_voted') || '{}') || {}; res = JSON.parse(lsg('skillhub_vote_res') || '{}') || {}; } catch (e) {}

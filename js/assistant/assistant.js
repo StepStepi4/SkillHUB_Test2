@@ -178,6 +178,7 @@
         data.skillHubButtons = data.skillHubButtons || [];
         data.sellerRatings = data.sellerRatings || [];
         data.news = Array.isArray(data.news) ? data.news : [];
+        data.contest = (data.contest && typeof data.contest === 'object') ? { active: !!data.contest.active, showTable: !!data.contest.showTable } : { active: false, showTable: false };
         data.access = (data.access && typeof data.access === 'object') ? data.access : {};
         data.klochCalcData = data.klochCalcData || { rules: [], relevance: "" };
         return data;
@@ -469,7 +470,7 @@
     window.isDenied = function(name) { return deniedList().indexOf(String(name || '').trim()) !== -1; };
 
     window.applyAccess = function() {
-        if (!ACCESS_ENABLED) { if (window.renderVoteRow) window.renderVoteRow(); return; }
+        if (!ACCESS_ENABLED) { if (window.renderVoteRow) window.renderVoteRow(); if (window.renderContestRow) window.renderContestRow(); return; }
         const denied = deniedList();
         document.querySelectorAll('[data-func]').forEach(el => {
             el.style.display = denied.indexOf(el.getAttribute('data-func')) !== -1 ? 'none' : '';
@@ -511,7 +512,18 @@
     };
 
     // Новини: A — дата, B — текст (розмітка як в Academy)
-    function newsSeenTs() { try { return parseInt(localStorage.getItem('skillhub_news_seen') || '0', 10) || 0; } catch (e) { return 0; } }
+    function newsSeenTs() {
+        try {
+            const raw = localStorage.getItem('skillhub_news_seen');
+            if (raw === null) {   // перший запуск на пристрої: уже опубліковані новини не вважаємо новими
+                const news = (db && db.news) || [];
+                if (!news.length) return 0;
+                const latest = news.reduce((m, n) => Math.max(m, n.ts || 0), 0);
+                localStorage.setItem('skillhub_news_seen', String(latest)); return latest;
+            }
+            return parseInt(raw || '0', 10) || 0;
+        } catch (e) { return 0; }
+    }
     window.renderNewsBadge = function() {
         const btn = document.getElementById('newsBtn') || document.createElement('i');
         const news = (db && db.news) || [];
@@ -544,6 +556,19 @@
         try { localStorage.setItem('skillhub_news_seen', String(latest)); } catch (e) {}
         window.renderNewsBadge();
     }
+    // «Змагання»: кнопка видима, лише якщо в листі B1 = «Активне»; таблиця - якщо B2 = «Так»
+    window.renderContestRow = function() {
+        const row = document.getElementById('contestRow');
+        if (row) row.style.display = (db && db.contest && db.contest.active) ? '' : 'none';
+    };
+    window.openContest = function() {
+        const c = (db && db.contest) || {};
+        const stub = '<div class="news-empty">Поки немає активних змагань</div>';
+        document.getElementById('modalTitle').innerHTML = '🏆 Змагання';
+        // умови та підсумкова таблиця будуть підключені пізніше - поки заглушка
+        safeUpdateHTML('modalBody', stub + (c.showTable ? '' : ''));
+        window.openModalBase('descModal');
+    };
     window.renderVoteRow = function() {
         const row = document.getElementById('voteRow');
         const has = db && (db.voteOpen || (db.voteClosedIds && db.voteClosedIds.length));
@@ -601,6 +626,8 @@
             db.serverRev = r.serverRev;
             if (Array.isArray(r.news)) db.news = r.news;
             if (Array.isArray(r.feedback)) db.feedback = r.feedback;
+            if (r.contest && typeof r.contest === 'object') db.contest = { active: !!r.contest.active, showTable: !!r.contest.showTable };
+            window.renderContestRow();
             db.voteOpen = !!r.voteOpen; db.voteIds = r.voteIds; db.voteClosedIds = r.voteClosedIds;
             window.renderNewsBadge(); window.renderVoteRow(); window.renderServerRev();
             window.maybeShowNewsPopup();
@@ -992,7 +1019,11 @@
         if(confirm("Ви впевнені, що хочете повністю скинути всі налаштування, кеш додатку та збережені дані? Це поверне додаток до початкового стану.")) {
             let wasInstalled = null;
             try { wasInstalled = localStorage.getItem('skillhub_installed'); } catch (e) {}
+            // «прочитано / пройдено» і ідентифікатор голосування НЕ скидаємо: сповіщення не повертаються
+            const keep = {};
+            try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^(skillhub_seen_|skillhub_ach_cele_|skillhub_news_seen|skillhub_vote_seen|skillhub_voted|skillhub_vote_res|skillhub_uid)/.test(k)) keep[k] = localStorage.getItem(k); } } catch (e) {}
             try { localStorage.clear(); } catch (e) {}
+            try { Object.keys(keep).forEach(k => localStorage.setItem(k, keep[k])); } catch (e) {}
             try { sessionStorage.clear(); } catch (e) {}
             // скидання не повинно знову показувати інструкцію зі встановлення
             try { if (wasInstalled) localStorage.setItem('skillhub_installed', wasInstalled); sessionStorage.setItem('skillhub_skip_start', '1'); } catch (e) {}
@@ -1345,7 +1376,7 @@
         window.renderSkillHubTab();
         window.renderNewsBadge();
         window.renderNewsTop();
-        window.renderVoteRow();
+        window.renderVoteRow(); if (window.renderContestRow) window.renderContestRow();
         window.renderServerRev();
         window.applyAccess();
         setTimeout(() => window.loadExtras(true), 400);
@@ -2879,48 +2910,24 @@ window.saveStore = function() {
         let blocks = String(changelogText).split(/(?:\r?\n)?\s*--\s*(?:\r?\n)?/);
         let html = '<div style="display:flex; flex-direction:column; gap:12px;">';
 
+        // Те саме форматування, що й у новинах/описах (RichText); старі маркери (AA+) (Кр+) тощо підтримуються
+        const legacy = line => {
+            let l = line.trim(); if (!l) return '';
+            let st = '';
+            const m = l.match(/^\((AA\+|Аа\+|аа\*|КР\+|Кр\+|кр\*)\)/);
+            if (m) {
+                const tag = m[1]; l = l.substring(m[0].length).trim();
+                if (tag === 'AA+' || tag === 'КР+') l = l.toUpperCase();
+                else if (tag === 'Аа+' || tag === 'Кр+') l = l.charAt(0).toUpperCase() + l.slice(1);
+                if (tag === 'аа*' || tag === 'кр*') st += 'font-style:italic;'; else st += 'font-weight:700;';
+                if (/^(КР|Кр|кр)/.test(tag)) st += 'color:var(--danger);';
+            }
+            return `<div class="news-line" style="${st}">${RichText.inline(l)}</div>`;
+        };
         blocks.forEach((block) => {
             if (!block.trim()) return;
-
-            let lines = block.split(/\r?\n/);
-            let blockHtml = '';
-
-            lines.forEach((line, index) => {
-                let l = line.trim();
-                if (!l) return;
-
-                let lineStyle = "";
-
-                if (l.startsWith('(AA+)')) {
-                    l = l.substring(5).trim().toUpperCase();
-                    lineStyle += " font-weight: 700;";
-                } else if (l.startsWith('(Аа+)')) {
-                    l = l.substring(5).trim();
-                    l = l.charAt(0).toUpperCase() + l.slice(1);
-                    lineStyle += " font-weight: 700;";
-                } else if (l.startsWith('(аа*)')) {
-                    l = l.substring(5).trim();
-                    lineStyle += " font-style:italic;";
-                } else if (l.startsWith('(КР+)')) {
-                    l = l.substring(5).trim().toUpperCase();
-                    lineStyle += " font-weight: 700; color:var(--danger);";
-                } else if (l.startsWith('(Кр+)')) {
-                    l = l.substring(5).trim();
-                    lineStyle += " font-weight: 700; color:var(--danger);";
-                } else if (l.startsWith('(кр*)')) {
-                    l = l.substring(5).trim();
-                    lineStyle += " font-style:italic; color:var(--danger);";
-                }
-
-                l = l.replace(/([\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g, '<span style="font-size: 1.5em; vertical-align: middle; line-height: 1;">$1</span>');
-
-                let margin = blockHtml !== '' ? "margin-top: 6px;" : "";
-                blockHtml += `<div style="${lineStyle} ${margin}">${RichText.inline(l)}</div>`;
-            });
-
-            if (blockHtml) {
-                html += `<div style="background:var(--card-bg); padding:12px 16px; border-radius:16px; border:1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.04); font-size:14px; line-height:1.5; color:var(--text-main);">${blockHtml}</div>`;
-            }
+            const blockHtml = RichText.render(block, { plain: legacy });
+            if (blockHtml) html += `<div style="background:var(--card-bg); padding:12px 16px; border-radius:16px; border:1px solid var(--border); font-size:14px; line-height:1.5; color:var(--text-main);">${blockHtml}</div>`;
         });
 
         html += '</div>';

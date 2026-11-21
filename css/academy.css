@@ -691,3 +691,15 @@ html.gate-on #academyApp[hidden] { display: block !important; }
 html.gate-on #academyApp .view { display: none !important; animation: none !important; }
 html.gate-on #academyApp #loginView { display: block !important; }
 html.gate-on #academyApp #loginView .login-card, html.gate-on #academyApp #loginView > div:first-child { opacity: 1; }
+
+/* Вітальне вікно: без шапки і кольорових смуг, компактні блоки з показниками */
+.wl-x{background:rgba(127,127,127,.18);color:var(--text-main)}
+.wl-scroll{padding-top:calc(48px + env(safe-area-inset-top))}
+.wl-tiles{grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:8px}
+.wl-tile,.wl-tile.course{border-top:1px solid var(--border);border-radius:12px;padding:8px 6px}
+.wl-tile b{font-size:20px}.wl-tile span{font-size:11px}
+.wl-sec{margin:14px 2px 6px;font-size:14px}
+.wl-rings{gap:8px}.wl-ring{padding:8px;border-radius:12px;gap:8px}
+.wl-ring-c{width:44px;height:44px}.wl-ring-c span{width:34px;height:34px;font-size:11px}
+.wl-ring-t b{font-size:12.5px}.wl-ring-t small{font-size:11px}
+.wl-course{padding:7px 10px;border-radius:10px;margin-bottom:5px;font-size:13px}

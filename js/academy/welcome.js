@@ -96,7 +96,7 @@
         const av = availableGroups(u);
         const availHtml = av.length ? `<div class="wl-sec">Доступні курси</div><div class="wl-courses">${av.map(g => `<div class="wl-course avail"><span class="wl-dot"></span><span class="wl-cn">${esc(g)}</span></div>`).join('')}</div>` : '';
 
-        return `<div class="wl-hero"><div class="wl-hi">${hi},</div><div class="wl-name">${esc(first)}!</div></div>${meetsHtml(u)}${todayHtml}${goalsHtml}${coursesHtml}${availHtml}`;
+        return `${meetsHtml(u)}${todayHtml}${goalsHtml}${coursesHtml}${availHtml}`;
     }
     function openWelcome(force) {
         const u = me(); if (!u) return;
@@ -247,10 +247,17 @@
         // цілі
         const sig = goalSig(u), rawG = ls.get(K('goals', u));
         if (rawG === null) ls.set(K('goals', u), sig); else if (rawG !== sig && sig !== goalSig({})) n += 1;
+        // призначена/змінена зустріч (лише майбутня)
+        const msig = meetSig(u), rawM = ls.get(K('meet', u));
+        if (rawM === null) ls.set(K('meet', u), msig); else if (rawM !== msig && msig) n += 1;
         return n;
     }
+    function meetSig(u) {
+        const d = parseUaDate(u && u.meetDate); if (!d || d.getTime() < Date.now() - 36e5) return '';
+        return d.getTime() + '|' + String(u.meetLink || '');
+    }
     function markSeen(u) {
-        ls.set(K('assigned', u), JSON.stringify((u.assigned || []).map(x => getCleanName(x)))); ls.set(K('goals', u), goalSig(u));
+        ls.set(K('assigned', u), JSON.stringify((u.assigned || []).map(x => getCleanName(x)))); ls.set(K('goals', u), goalSig(u)); ls.set(K('meet', u), meetSig(u));
     }
     function paintBadge(n) {
         window._eduEvents = n;
