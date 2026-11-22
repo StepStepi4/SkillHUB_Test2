@@ -2936,16 +2936,27 @@ window.saveStore = function() {
         window.openModalBase('descModal');
     };
 
-    const SELLER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9yWtQnj_8toHmk5X-Pce9FtaJiuKeb_ekcZbb0A5nBBymqs_buBsO_v5YUW6sRWS6IA/exec";
-
+    // Зміна продавця: список магазинів/причин і відправка заявки — у новій таблиці SkillHUB (лист «🔄 Заміна продавця»)
+    let sellerLists = null;
+    function fillSellerLists(data) {
+        const s = document.getElementById('sellerStore'), r = document.getElementById('sellerReason');
+        s.innerHTML = '<option value="" disabled selected>Оберіть магазин</option>';
+        r.innerHTML = '<option value="" disabled selected>Оберіть причину</option>';
+        (data.stores || []).forEach(item => s.add(new Option(item, item)));
+        (data.reasons || []).forEach(item => r.add(new Option(item, item)));
+    }
     window.openSellerModal = function() {
         window.openModalBase('sellerModal');
-        if(document.getElementById('sellerStore').options.length <= 1) {
-            const scriptTag = document.createElement('script');
-            scriptTag.src = `${SELLER_SCRIPT_URL}?action=getFormData&callback=handleSellerResponse`;
-            document.body.appendChild(scriptTag);
+        if (sellerLists) fillSellerLists(sellerLists);
+        else {
+            try { const c = JSON.parse(localStorage.getItem('skillhub_seller_lists') || 'null'); if (c && c.stores) fillSellerLists(c); } catch (e) {}
+            fetchJsonT(API_URL + '?action=seller_form', 12000).then(d => {
+                if (d && Array.isArray(d.stores)) {
+                    sellerLists = d; fillSellerLists(d);
+                    try { localStorage.setItem('skillhub_seller_lists', JSON.stringify(d)); } catch (e) {}
+                }
+            }).catch(() => {});
         }
-
         document.getElementById('sellerFormSubmit').style.display = 'block';
         document.getElementById('sellerStatusOverlay').style.display = 'none';
         document.getElementById('submitSellerBtn').disabled = false;
@@ -2953,35 +2964,22 @@ window.saveStore = function() {
         document.getElementById('sellerFormSubmit').reset();
     }
 
-    window.handleSellerResponse = function(data) {
-        const s = document.getElementById('sellerStore');
-        const r = document.getElementById('sellerReason');
-        s.innerHTML = '<option value="" disabled selected>Оберіть магазин</option>';
-        r.innerHTML = '<option value="" disabled selected>Оберіть причину</option>';
-        data.stores.forEach(item => s.add(new Option(item, item)));
-        data.reasons.forEach(item => r.add(new Option(item, item)));
-    }
-
     document.getElementById('sellerFormSubmit').onsubmit = function(e) {
         e.preventDefault();
         const btn = document.getElementById('submitSellerBtn');
         const overlay = document.getElementById('sellerStatusOverlay');
         const form = document.getElementById('sellerFormSubmit');
-
+        const v = id => String(document.getElementById(id).value || '').trim();
         btn.disabled = true;
         btn.innerText = 'НАДСИЛАЄМО...';
-
-        fetch(SELLER_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: new FormData(this)
-        })
-        .then(() => {
+        postPublic({ action: 'seller_submit', store: v('sellerStore'), fio: v('sellerFio'), bill: v('sellerBill'), amount: v('sellerAmount'), reason: v('sellerReason') })
+        .then(r => {
+            if (!r || !r.success) throw new Error((r && r.message) || 'fail');
             form.style.display = 'none';
             overlay.style.display = 'block';
         })
-        .catch(() => {
-            alert("Помилка відправки.");
+        .catch(err => {
+            alert('Не вдалося відправити заявку' + (err && err.message && err.message !== 'fail' ? ': ' + err.message : '. Спробуйте ще раз.'));
             btn.disabled = false;
             btn.innerText = 'ВІДПРАВИТИ';
         });

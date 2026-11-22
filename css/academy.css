@@ -312,7 +312,7 @@
         #academyApp .ach-card.zoomed .ach-icon-wrapper { width: 112px; height: 112px; }
         
         #academyApp .ach-img { width: 100%; height: 100%; object-fit: contain; transition: 0.35s; }
-        #academyApp .ach-card:not(.locked) .ach-img { filter: drop-shadow(0 6px 12px rgba(0,0,0,0.15)); transform: scale(1.05); } 
+        #academyApp .ach-card .ach-img { background: transparent !important; filter: none; box-shadow: none; } 
         
         #academyApp .ach-card.locked { opacity: 0.32; filter: grayscale(100%); cursor: default; background: transparent; border-style: dashed; border-color: var(--text-muted); }
         #academyApp .ach-card.locked:active { transform: none; background: transparent; }

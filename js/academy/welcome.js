@@ -80,7 +80,7 @@
         const T = window.ExtrasToday ? window.ExtrasToday.goals(u) : { items: [] }, TC = window.ExtrasToday ? window.ExtrasToday.courses(u) : null;
         const tiles = T.items.map(i => `<div class="wl-tile"><b>${fmtNum(i.val)}</b><span>${esc(i.label)}</span></div>`);
         if (TC) tiles.push(`<div class="wl-tile course"><b>${fmtNum(TC.per)}</b><span>Курси</span></div>`);
-        const todayHtml = tiles.length ? `<div class="wl-sec">Ціль на сьогодні</div><div class="wl-tiles">${tiles.join('')}</div>` : '';
+        const todayHtml = '';   // блок «Ціль на сьогодні» прибрано
 
         const goalsHtml = goals.length
             ? `<div class="wl-sec">Мої цілі</div><div class="wl-rings">${goals.map(g => ring(g.pct, g.label,

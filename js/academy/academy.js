@@ -1077,9 +1077,9 @@
         document.getElementById('userWelcome').innerHTML = `Вітаю, ${escapeHTMLAttr(firstName)} <span style="font-size: 15px; margin-left: 4px;">👋</span>`;
 
         const managerBar = document.getElementById('managerActionBar');
-        if (windowUserRole === 'owner' || windowUserRole === 'manager') {
+        if (windowUserRole === 'owner' || windowUserRole === 'manager' || windowUserRole === 'seller') {
             managerBar.style.display = 'grid';
-            managerBar.style.gridTemplateColumns = (windowUserRole === 'owner') ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)';
+            managerBar.style.gridTemplateColumns = (windowUserRole === 'owner') ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)';   // керівник і продавець: Навчання + Команда
             
             document.getElementById('btnMyEducation').classList.add('active');
             document.getElementById('btnTeamStats').classList.remove('active');
@@ -1129,6 +1129,7 @@
             if (!u.name || String(u.name).trim() === "") return false;
             if (detectRoleGroup(u.role) === 'guest') return false;
             if (windowUserRole === 'owner') return true;
+            if (windowUserRole === 'seller') return detectRoleGroup(u.role) === 'seller' && String(u.login).toLowerCase() !== String(me.login).toLowerCase();
             if (windowUserRole === 'manager') {
                 let uManager = String(u.manager || u.director || "").toLowerCase().trim();
                 if (!uManager) return false;
@@ -1139,12 +1140,12 @@
     }
 
     function openStatsModal() {
-        if (windowUserRole !== 'owner' && windowUserRole !== 'manager') return;
+        if (windowUserRole !== 'owner' && windowUserRole !== 'manager' && windowUserRole !== 'seller') return;
         document.getElementById('btnMyEducation').classList.remove('active');
         document.getElementById('btnTeamStats').classList.add('active');
         if (windowUserRole === 'owner') document.getElementById('btnMyMeets').classList.remove('active');
         
-        document.getElementById('modalRoleScopeHint').innerText = windowUserRole === 'owner' ? 'Усі співробітники (Власник)' : 'Підпорядковані співробітники (Керівник)';
+        document.getElementById('modalRoleScopeHint').innerText = windowUserRole === 'owner' ? 'Усі співробітники (Власник)' : (windowUserRole === 'seller' ? 'Колеги (пошук за ПІБ)' : 'Підпорядковані співробітники (Керівник)');
         
         document.getElementById('empSearchInput').value = '';
         document.getElementById('empSearchClearBtn').style.display = 'none';
@@ -1172,7 +1173,7 @@
         document.getElementById('empSearchSuggestions').classList.remove('open');
         academyScroll(false);
         
-        if (!windowViewingEmployee && (windowUserRole === 'owner' || windowUserRole === 'manager')) {
+        if (!windowViewingEmployee && (windowUserRole === 'owner' || windowUserRole === 'manager' || windowUserRole === 'seller')) {
             document.getElementById('btnMyEducation').classList.add('active');
             document.getElementById('btnTeamStats').classList.remove('active');
         }
