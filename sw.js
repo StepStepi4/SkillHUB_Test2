@@ -1,8 +1,13 @@
 // SkillHUB Assistant - Service Worker (offline-first)
 // ВАЖЛИВО: при кожному релізі міняйте VERSION - тоді всі пристрої підтягнуть нові файли.
-const VERSION = 'v-d095fbdb6d';
-const SHELL_CACHE = 'skillhub-shell-' + VERSION;   // "оболонка": сторінки, іконки, бібліотеки
-const RUNTIME_CACHE = 'skillhub-runtime-v1';       // шрифти, картинки досягнень та інше, що завантажується під час роботи
+const VERSION = 'v-992b12de31';
+// Кеші прив'язані до шляху (репозиторію) застосунку: кілька застосунків на одному github.io не стирають кеші одне одного
+const SCOPE_URL = new URL(self.registration ? self.registration.scope : self.location.href);
+const REPO_KEY = (SCOPE_URL.pathname.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '').toLowerCase()) || 'root';
+const SHELL_PREFIX = 'skillhub-shell-' + REPO_KEY + '-';
+const RUNTIME_PREFIX = 'skillhub-runtime-' + REPO_KEY + '-';
+const SHELL_CACHE = SHELL_PREFIX + VERSION;        // "оболонка": сторінки, іконки, бібліотеки
+const RUNTIME_CACHE = RUNTIME_PREFIX + 'v1';       // шрифти, картинки досягнень та інше, що завантажується під час роботи
 
 const SHELL = [
   "./",
@@ -127,6 +132,7 @@ const SHELL = [
   "./css/richtext.css",
   "./index.html",
   "./js/academy/academy.js",
+  "./js/academy/blitz.js",
   "./js/academy/extras.js",
   "./js/academy/gate.js",
   "./js/academy/welcome.js",
@@ -206,14 +212,22 @@ self.addEventListener('message', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    // апгрейд = у браузера вже були кеші попередньої версії (в т.ч. зі старого репозиторію з іншими назвами)
-    const upgrading = keys.some((k) => k !== SHELL_CACHE && k !== RUNTIME_CACHE);
-    await Promise.all(keys.map((k) => (k !== SHELL_CACHE && k !== RUNTIME_CACHE) ? caches.delete(k) : null));
+    const stale = [];
+    for (const k of keys) {
+      if (k === SHELL_CACHE || k === RUNTIME_CACHE) continue;
+      if (k.indexOf(SHELL_PREFIX) === 0 || k.indexOf(RUNTIME_PREFIX) === 0) { stale.push(k); continue; }
+      // старі назви без ключа репозиторію: видаляємо лише ті, що містять файли ЦЬОГО застосунку (чужі не чіпаємо)
+      if (/^skillhub-shell-v-|^skillhub-runtime-v1$/.test(k)) {
+        try { const first = (await (await caches.open(k)).keys())[0]; if (first && first.url.indexOf(SCOPE_URL.href) === 0) stale.push(k); } catch (e) {}
+      }
+    }
+    const upgrading = stale.length > 0;
+    await Promise.all(stale.map((k) => caches.delete(k)));
     await self.clients.claim();
     // Безшовне оновлення: відкриті вкладки/PWA зі старим кодом одразу перезавантажуються на нову версію (один раз, при активації)
     if (upgrading) {
       try {
-        const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        const list = (await self.clients.matchAll({ type: 'window', includeUncontrolled: true })).filter((c) => c.url.indexOf(SCOPE_URL.href) === 0);   // лише вікна цього застосунку
         await Promise.all(list.map((c) => c.navigate(c.url).catch(() => {})));
       } catch (e) {}
     }

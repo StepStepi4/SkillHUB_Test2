@@ -743,3 +743,7 @@ html.theme-ready body { transition: background-color .25s ease, color .25s ease;
 .sf-done{width:72px;height:72px;margin:0 auto;border-radius:50%;background:linear-gradient(135deg,var(--rozetka-green-light),var(--rozetka-green-dark));display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 10px 24px rgba(0,160,70,.35);animation:sfPop .45s cubic-bezier(.2,1.4,.4,1)}
 .sf-done .sf-ic{width:38px;height:38px;stroke-width:2.6}
 @keyframes sfPop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* Екран після оновлення видно з першого кадру (до завантаження скриптів) */
+html.post-upd .app-loader { display: flex !important; opacity: 1 !important; pointer-events: auto !important; z-index: 2147483000 !important; }
+html.post-upd body { overflow: hidden; }

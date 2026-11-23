@@ -47,8 +47,8 @@
                     var done = function () { location.replace(location.pathname + '?r=' + Date.now()); };
                     try {
                         Promise.all([
-                            navigator.serviceWorker ? navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }) : 0,
-                            window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }) : 0
+                            navigator.serviceWorker ? navigator.serviceWorker.getRegistrations().then(function (rs) { var sc = new URL('./', location.href).href; return Promise.all(rs.filter(function (r) { return r.scope === sc; }).map(function (r) { return r.unregister(); })); }) : 0,
+                            window.caches ? caches.keys().then(function (ks) { var key = (location.pathname.replace(/\/[^\/]*$/, '/').replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '').toLowerCase()) || 'root'; return Promise.all(ks.filter(function (k) { return k.indexOf('-' + key + '-') !== -1 || /^skillhub-(shell-v-|runtime-v1$)/.test(k); }).map(function (k) { return caches.delete(k); })); }) : 0
                         ]).then(done, done);
                         setTimeout(done, 4000);
                     } catch (e) { done(); }
@@ -84,9 +84,11 @@
     <meta name="view-transition" content="same-origin">
 
     <script>
+        // Після кнопки «Оновити додаток»: екран перевірки («DONE») показуємо з першого кадру - без миготіння застосунку
+        try { if (sessionStorage.getItem('skillhub_post_update') === '1') { document.documentElement.classList.add('post-upd'); setTimeout(function () { document.documentElement.classList.remove('post-upd'); }, 15000); } } catch (e) {}
         // Маленький прапорець "кеш є" (сам кеш лежить в IndexedDB)
         try {
-            if (localStorage.getItem('skillhub_has_cache') === '1') {
+            if (localStorage.getItem('skillhub_has_cache') === '1' && !document.documentElement.classList.contains('post-upd')) {
                 document.documentElement.style.setProperty('--loader-display', 'none');
                 document.documentElement.classList.add('fast-boot');
             }
@@ -115,6 +117,14 @@
         <div class="hud-info"><span class="loader-text" id="mainLoaderText">Підготовка</span><b id="hudPct">0%</b></div>
     </div>
 </div>
+<script>
+    if (document.documentElement.classList.contains('post-upd')) {
+        document.getElementById('hudTitle').textContent = 'DONE';
+        document.getElementById('mainLoaderText').textContent = 'Перевірка після перезапуску…';
+        document.getElementById('hudPct').textContent = '100%';
+        document.getElementById('progressBar').style.width = '100%';
+    }
+</script>
 
 <div class="container">
 
@@ -1160,6 +1170,7 @@
 <script src="js/academy/academy.js"></script>
 <script src="js/academy/extras.js"></script>
 <script src="js/academy/welcome.js"></script>
+<script src="js/academy/blitz.js"></script>
 <script src="js/academy/gate.js"></script>
 </body>
 </html>

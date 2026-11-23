@@ -1029,7 +1029,7 @@
             try { if (wasInstalled) localStorage.setItem('skillhub_installed', wasInstalled); sessionStorage.setItem('skillhub_skip_start', '1'); } catch (e) {}
             try { if (_idbPromise) _idbPromise.then(d => { try { d.close(); } catch (e) {} }).catch(() => {}); } catch (e) {}
             try { indexedDB.deleteDatabase(IDB_NAME); } catch (e) {}
-            try { if (window.caches) caches.keys().then(ks => ks.filter(k => k.indexOf('skillhub-runtime') === 0).forEach(k => caches.delete(k))); } catch (e) {}
+            try { if (window.caches) caches.keys().then(ks => ks.filter(k => k.indexOf('skillhub-runtime-' + REPO_KEY + '-') === 0).forEach(k => caches.delete(k))); } catch (e) {}
             setTimeout(() => window.location.reload(), 400);
         }
     };
@@ -1505,7 +1505,7 @@
 
     // Ручне оновлення: свіжі дані -> повне очищення кешу застосунку -> перевстановлення -> перевірка цілісності -> тестовий перезапуск
     function showHud() { _hudBusy = true; const l = document.getElementById('appLoader'); document.documentElement.classList.remove('fast-boot'); l.classList.remove('hidden'); l.style.display = 'flex'; l.style.opacity = '1'; l.style.pointerEvents = 'auto'; document.getElementById('progressContainer').style.display = 'block'; }
-    function hideHud() { _hudBusy = false; const l = document.getElementById('appLoader'); l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; l.classList.add('hidden'); }, 250); }
+    function hideHud() { _hudBusy = false; document.documentElement.classList.remove('post-upd'); const l = document.getElementById('appLoader'); l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; l.classList.add('hidden'); }, 250); }
     const sleep = ms => new Promise(r => setTimeout(r, ms));
 
     document.getElementById('forceUpdateBtn').addEventListener('click', async function() {
@@ -1521,10 +1521,10 @@
             clearInterval(tick); hudSet(40, 'Очищення кешу…');
 
             // 2) повне очищення кешу застосунку і перевстановлення Service Worker
-            if ('caches' in window) { const keys = await caches.keys(); await Promise.all(keys.map(k => caches.delete(k))); }
+            if ('caches' in window) { const keys = (await caches.keys()).filter(k => k.indexOf('-' + REPO_KEY + '-') !== -1 || /^skillhub-(shell-v-|runtime-v1$)/.test(k)); await Promise.all(keys.map(k => caches.delete(k))); }
             hudSet(55, 'Перевстановлення додатка…');
             if ('serviceWorker' in navigator) {
-                const regs = await navigator.serviceWorker.getRegistrations();
+                const regs = (await navigator.serviceWorker.getRegistrations()).filter(r => r.scope === new URL('./', location.href).href);   // лише цей застосунок
                 await Promise.all(regs.map(r => r.unregister()));
                 const reg = await navigator.serviceWorker.register('sw.js');
                 // чекаємо, поки новий SW встановить усі файли і активується (прямо за станом, без .ready)
@@ -1559,7 +1559,7 @@
     (function postUpdateCheck() {
         let flag = null; try { flag = sessionStorage.getItem('skillhub_post_update'); sessionStorage.removeItem('skillhub_post_update'); } catch (e) {}
         if (!flag) return;
-        showHud(); hudSet(100, 'Перевірка після перезапуску…', 'CHECK');
+        showHud(); hudSet(100, 'Перевірка після перезапуску…', 'DONE');
         const t0 = Date.now();
         const iv = setInterval(async () => {
             if (!isUsableDb(db) && Date.now() - t0 < 8000) return;

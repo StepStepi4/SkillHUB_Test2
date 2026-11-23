@@ -146,7 +146,7 @@
         });
         await step(rep, 'Кеш застосунку (Cache Storage)', async () => {
             if (!window.caches) return { value: 'недоступно', status: 'warn' };
-            const names = await caches.keys(); let entries = 0;
+            const names = (await caches.keys()).filter(k => k.indexOf('-' + REPO_KEY + '-') !== -1); let entries = 0;
             for (const n of names) entries += (await (await caches.open(n)).keys()).length;
             return { value: names.length + ' сховищ, ' + entries + ' файлів', status: names.length > 2 ? 'warn' : 'ok', detail: names.length > 2 ? 'Є застарілі кеші - натисніть «Оновити додаток і базу даних»' : '' };
         });

@@ -1127,7 +1127,7 @@
 
         return eduDb.users.filter(u => {
             if (!u.name || String(u.name).trim() === "") return false;
-            if (windowUserRole === 'seller') { const g = detectRoleGroup(u.role); return g !== 'owner' && g !== 'manager' && String(u.login).toLowerCase() !== String(me.login).toLowerCase(); }   // продавець: усі, крім Власника і Керівника
+            if (windowUserRole === 'seller') { const g = detectRoleGroup(u.role); return g !== 'owner' && g !== 'manager' && !/тест/i.test(String(u.name)) && String(u.login).toLowerCase() !== String(me.login).toLowerCase(); }   // продавець: усі, крім Власника і Керівника
             if (detectRoleGroup(u.role) === 'guest') return false;
             if (windowUserRole === 'owner') return true;
             if (windowUserRole === 'manager') {
@@ -1160,7 +1160,10 @@
         document.getElementById('filterActiveDot').style.display = 'none';
         
         populateManagerFilter(); populateStoreFilter();
-        
+        const fp = document.getElementById('filterPanel');       // продавцю лишаємо лише вибір магазину
+        if (fp) { const isS = windowUserRole === 'seller';
+            fp.querySelectorAll('.fp-grid').forEach(g => g.style.display = isS ? 'none' : '');
+            ['f_oral', 'f_manager'].forEach(id => { const el = document.getElementById(id); if (el && el.closest('.fp-field')) el.closest('.fp-field').style.display = isS ? 'none' : ''; }); }
         renderStatsModalEmployees('');
         document.getElementById('statsModalOverlay').classList.add('active');
         document.getElementById('statsModal').classList.add('active');
@@ -1500,16 +1503,18 @@
     function renderGoals(user) {
         const box = document.getElementById('goalsBlock');
         if (!box) return;
-        const g = (user && user.goals) || null;
-        if (!g) { box.innerHTML = '<div class="goal-empty">Цілі ще не призначені</div>'; return; }
-        let html = '<div class="goal-top">Ціль / Факт</div>';
+        const g = (user && (user.goals || user.goalsFact)) || null;       // без призначених цілей показуємо поточні показники
+        const anyFact = g && GOAL_DEFS.some(d => g[d.key] && g[d.key].fact !== null && g[d.key].fact !== undefined && g[d.key].fact !== '');
+        if (!g || (!user.goals && !anyFact)) { box.innerHTML = '<div class="goal-empty">Цілі ще не призначені</div>'; return; }
+        const noGoals = !hasGoals(user);
+        let html = '<div class="goal-top">' + (noGoals ? 'Поточні показники' : 'Ціль / Факт') + '</div>';
         GOAL_DEFS.forEach(d => {
             const o = g[d.key] || {};
             const done = (o.done === null || o.done === undefined) ? null : o.done;
             const w = done === null ? 0 : Math.max(0, Math.min(100, done));
             const isDone = done !== null && done >= 100;
             const sub = (o.goal !== null && o.goal !== undefined)
-                ? `${fmtNum(o.goal)}${d.unit} / ${fmtNum(o.fact)}${d.unit}` : 'ціль не задана';
+                ? `${fmtNum(o.goal)}${d.unit} / ${fmtNum(o.fact)}${d.unit}` : (o.fact !== null && o.fact !== undefined && o.fact !== '' ? `факт: ${fmtNum(o.fact)}${d.unit}` : 'ціль не задана');
             const bub = done === null ? '' : `<div class="goal-bubble" style="left:${w}%">${fmtNum(done)}%</div>`;
             html += `<div class="goal-row">
                 <div class="goal-head"><span>${d.short}</span><small class="${isDone ? 'goal-ok' : ''}">${sub}</small></div>
@@ -1528,7 +1533,8 @@
         document.getElementById('modeGoals').classList.toggle('active', goals);
         document.getElementById('modeLearn').classList.toggle('active', !goals);
     }
-    function setDefaultCabinetMode(user) { switchCabinetMode(hasGoals(user) ? 'goals' : 'learn'); }
+    function hasFacts(u) { const g = (u && (u.goalsFact || u.goals)) || {}; return GOAL_DEFS.some(d => g[d.key] && g[d.key].fact !== null && g[d.key].fact !== undefined && g[d.key].fact !== '' && Number(g[d.key].fact) !== 0); }
+    function setDefaultCabinetMode(user) { switchCabinetMode(hasGoals(user) || hasFacts(user) ? 'goals' : 'learn'); }
 
     function buildGoalForm(emp) {
         const box = document.getElementById('assignGoalsBox');
@@ -2113,7 +2119,8 @@
             return `<label class="answer-label ${selectedClass}" id="lbl_q${index}_a${aIndex}"><input type="${q.type}" name="q_${index}" id="q${index}_a${aIndex}" ${checkedAttr} onchange="updateSelection(${index}, ${aIndex})"><span style="flex:1;">${ans.text}</span></label>`;
         }).join('');
         let hint = q.type === 'checkbox' ? `<span style="font-size:13px; font-weight:500; color:var(--text-muted); display:block; margin-top:6px;">(Множинний вибір)</span>` : '';
-        let containerHtml = `<div class="question-card"><div class="question-title">${q.text} ${hint}</div>${answersHtml}</div>`;
+        let svc = q.service ? `<div class="question-service">${escapeHTMLAttr(q.service)}</div>` : '';
+        let containerHtml = `<div class="question-card">${svc}<div class="question-title">${q.text} ${hint}</div>${answersHtml}</div>`;
 
         requestAnimationFrame(() => {
             document.getElementById('testHeaderTitle').innerText = titleText;

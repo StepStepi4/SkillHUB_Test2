@@ -103,7 +103,7 @@ details.t>summary .n{margin-left:auto;color:var(--muted);font-size:12px;font-wei
 (function(){
 var FILE='js/trainer/objections-data.js',SW='sw.js',CFGKEY='obj_admin_cfg';
 var $=function(s){return document.querySelector(s)};
-var openSet={},data=[],snapshot='',editing=null,cfg={repo:'StepStepi4/skillhub_test2',branch:'main',token:''};
+var openSet={},data=[],snapshot='',editing=null,cfg={repo:(function(){var m=location.hostname.match(/^([^.]+)\.github\.io$/),p=location.pathname.split('/')[1];return m&&p?m[1]+'/'+p:'StepStepi4/skillhub_test2';})(),branch:'main',token:''};   // репозиторій визначається за адресою сторінки
 try{var c=JSON.parse(localStorage.getItem(CFGKEY)||'null');if(c)for(var k in c)cfg[k]=c[k]}catch(e){}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function uid(p){return p+Math.random().toString(36).slice(2,8)}

@@ -725,3 +725,21 @@ html.gate-on #academyApp #loginView .login-card, html.gate-on #academyApp #login
 .rp-n{flex:0 0 24px;height:24px;border-radius:50%;background:var(--input-bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
 .rp-en{flex:1;min-width:0}.rp-en b,.rp-ev b{display:block;font-size:14px}.rp-en small,.rp-ev small{display:block;font-size:11px;color:var(--text-muted);font-weight:600}
 .rp-ev{text-align:right}
+
+/* Щоденний бліц-тест */
+.question-service { display:inline-block; font-size:12px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--primary); background:var(--input-bg); border-radius:8px; padding:5px 10px; margin-bottom:10px; }
+.bz-box { text-align:center; }
+.bz-hero { font-size:54px; line-height:1; margin:6px 0 4px; }
+.bz-title { font-size:24px; font-weight:800; margin-bottom:6px; }
+.bz-sub { font-size:14px; color:var(--text-muted); line-height:1.4; margin:0 6px 14px; }
+.bz-stats { display:flex; gap:8px; margin-bottom:12px; }
+.bz-stats > div { flex:1; background:var(--input-bg); border-radius:14px; padding:12px 4px; }
+.bz-stats b { display:block; font-size:20px; } .bz-stats span { font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; }
+.bz-rules { font-size:12.5px; color:var(--text-muted); line-height:1.4; }
+.bz-later { margin-top:8px; }
+.bz-review { text-align:left; display:flex; flex-direction:column; gap:8px; margin:6px 0 16px; max-height:none; }
+.bz-item { border-radius:14px; padding:11px 12px; background:var(--input-bg); border-left:4px solid var(--danger); }
+.bz-item.ok { border-left-color:var(--success); }
+.bz-svc { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--primary); margin-bottom:4px; }
+.bz-q { font-size:14px; font-weight:700; margin-bottom:4px; }
+.bz-a { font-size:13px; color:var(--danger); font-weight:600; } .bz-c { font-size:13px; color:var(--success); font-weight:600; }
