@@ -1127,9 +1127,9 @@
 
         return eduDb.users.filter(u => {
             if (!u.name || String(u.name).trim() === "") return false;
+            if (windowUserRole === 'seller') { const g = detectRoleGroup(u.role); return g !== 'owner' && g !== 'manager' && String(u.login).toLowerCase() !== String(me.login).toLowerCase(); }   // продавець: усі, крім Власника і Керівника
             if (detectRoleGroup(u.role) === 'guest') return false;
             if (windowUserRole === 'owner') return true;
-            if (windowUserRole === 'seller') return detectRoleGroup(u.role) === 'seller' && String(u.login).toLowerCase() !== String(me.login).toLowerCase();
             if (windowUserRole === 'manager') {
                 let uManager = String(u.manager || u.director || "").toLowerCase().trim();
                 if (!uManager) return false;

@@ -617,37 +617,33 @@
             <button class="modal-close" onclick="window.closeModalBase('sellerModal')"></button>
         </div>
         <div class="modal-body">
-            <form id="sellerFormSubmit">
-                <div class="input-group">
-                    <span style="font-weight:600; display:block; margin-bottom:8px; font-size:14px; color:var(--text-muted);">Магазин</span>
-                    <select id="sellerStore" name="store" required>
-                        <option value="" disabled selected>Завантаження списку...</option>
-                    </select>
+            <div class="sf-hero">
+                <div class="sf-hero-ic"><svg class="sf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M8 21H3v-5"/><path d="M3 21l7-7"/></svg></div>
+                <div><div class="sf-hero-t">Заявка на заміну продавця</div><div class="sf-hero-s">Заповніть дані — заявка одразу надійде відповідальним</div></div>
+            </div>
+            <form id="sellerFormSubmit" class="sf-form">
+                <div class="sf-card">
+                    <label class="sf-field"><span class="sf-lbl">Магазин</span>
+                        <span class="sf-wrap"><svg class="sf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg><select id="sellerStore" name="store" required><option value="" disabled selected>Завантаження списку...</option></select></span></label>
+                    <label class="sf-field"><span class="sf-lbl">ПІБ продавця</span>
+                        <span class="sf-wrap"><svg class="sf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><input type="text" id="sellerFio" name="fio" placeholder="Прізвище Ім'я" autocomplete="name" required></span></label>
                 </div>
-                <div class="input-group">
-                    <span style="font-weight:600; display:block; margin-bottom:8px; font-size:14px; color:var(--text-muted);">Ваше ПІБ</span>
-                    <input type="text" id="sellerFio" name="fio" placeholder="Прізвище Ім'я" required>
+                <div class="sf-card">
+                    <label class="sf-field"><span class="sf-lbl">Номер рахунку</span>
+                        <span class="sf-wrap"><svg class="sf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><input type="text" id="sellerBill" name="bill" placeholder="РО3________" autocapitalize="characters" required></span></label>
+                    <label class="sf-field"><span class="sf-lbl">Сума послуг, грн</span>
+                        <span class="sf-wrap"><svg class="sf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.5 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1 2-2.5 2c-1 0-2-.5-2.5-1.5M12 6v2M12 16v2"/></svg><input type="number" step="any" min="0" inputmode="decimal" id="sellerAmount" name="amount" placeholder="Вартість послуги або 0" required></span></label>
                 </div>
-                <div class="input-group">
-                    <span style="font-weight:600; display:block; margin-bottom:8px; font-size:14px; color:var(--text-muted);">Номер рахунку</span>
-                    <input type="text" id="sellerBill" name="bill" placeholder="РО3________" required>
-                </div>
-                <div class="input-group">
-                    <span style="font-weight:600; display:block; margin-bottom:8px; font-size:14px; color:var(--text-muted);">Сума послуг</span>
-                    <input type="number" step="any" id="sellerAmount" name="amount" placeholder="Вводимо вартість послуги в рахунку або 0" required>
-                </div>
-                <div class="input-group">
-                    <span style="font-weight:600; display:block; margin-bottom:8px; font-size:14px; color:var(--text-muted);">Причина зміни</span>
-                    <select id="sellerReason" name="reason" required>
-                        <option value="" disabled selected>Завантаження причин...</option>
-                    </select>
+                <div class="sf-card">
+                    <label class="sf-field"><span class="sf-lbl">Причина зміни</span>
+                        <span class="sf-wrap"><svg class="sf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg><select id="sellerReason" name="reason" required><option value="" disabled selected>Завантаження причин...</option></select></span></label>
                 </div>
                 <button type="submit" id="submitSellerBtn" class="btn-submit-glow">ВІДПРАВИТИ</button>
             </form>
             <div id="sellerStatusOverlay">
-                <div style="font-size: 3rem; margin-bottom: 10px;">✅</div>
-                <h5 style="color: var(--rozetka-green-dark); font-weight: 700; margin: 0; font-size: 1.2rem;">УСПІШНО ВІДПРАВЛЕНО!</h5>
-                <p style="font-size: 1rem; color: var(--text-muted); margin-top: 10px; margin-bottom: 0; line-height: 1.4;">Заявка обробляється протягом певного часу</p>
+                <div class="sf-done"><svg class="sf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+                <h5>Заявку відправлено</h5>
+                <p>Вона вже в обробці — відповідальні отримали повідомлення.</p>
             </div>
         </div>
     </div>

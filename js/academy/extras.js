@@ -179,29 +179,110 @@
         };
         draw();
     }
-    function weeklyText() {
-        const users = reportUsers(), s = teamStats(users);
-        const pct = s.courses ? Math.round(s.done / s.courses * 100) : 0;
-        const d = new Date(), fmt = x => String(x).padStart(2, '0');
-        const date = `${fmt(d.getDate())}.${fmt(d.getMonth() + 1)}.${d.getFullYear()}`;
-        const top = users.map(u => ({ n: u.name, v: computeUserMetrics(u).completed })).filter(x => x.v > 0).sort((a, b) => b.v - a.v).slice(0, 3);
-        const medals = ['🥇', '🥈', '🥉'];
-        let t = `📊 Підсумок тижня • ${date}\n`;
-        if (repMgrs.size) t += `👤 Керівники: ${Array.from(repMgrs).join(', ')}\n`;
-        t += `\n👥 Команда: ${s.n}\n📚 Курси: ${s.done}/${s.courses} (${pct}%)\n🎯 Цілі виконано: ${s.goalsDone} із ${s.withGoals}\n`;
-        if (s.oral.ok + s.oral.warn + s.oral.bad) t += `🗣 Усний залік: ✅ ${s.oral.ok} · 📖 ${s.oral.warn} · ❌ ${s.oral.bad}\n`;
-        if (top.length) t += `\n🏆 Лідери навчання:\n${top.map((x, i) => `${medals[i]} ${x.n} — ${x.v}`).join('\n')}\n`;
-        if (s.lag.length) t += `\n⚠️ Потребують уваги:\n${s.lag.slice(0, 5).map(x => `• ${x.name} — ${x.avg}%`).join('\n')}\n`;
-        if (s.overdue.length) t += `\n⏰ Прострочено дедлайн: ${s.overdue.length}\n`;
-        return t.trim();
+    /* ---------- Звіт по керівнику: тиждень / місяць ---------- */
+    const REP_KEYS = ['uah', 'pcs', 'plan', 'smart', 'cards'];
+    const gf = (u, k) => { const o = (u.goalsFact && u.goalsFact[k]) || (u.goals && u.goals[k]) || null; return o && o.fact !== null && o.fact !== undefined && o.fact !== '' ? Number(o.fact) : null; };
+    const gg = (u, k) => { const o = u.goals && u.goals[k]; return o && o.goal !== null && o.goal !== undefined && o.goal !== '' ? Number(o.goal) : null; };
+    const SNAP_KEY = 'skillhub_rep_snaps';
+    const snapRow = u => { const r = { d: computeUserMetrics(u).completed }; REP_KEYS.forEach(k => { const v = gf(u, k); if (v !== null) r[k] = v; }); return r; };
+    function loadSnaps() { try { return JSON.parse(localStorage.getItem(SNAP_KEY) || '[]') || []; } catch (e) { return []; } }
+    function takeSnapshot() {   // не частіше ніж раз на 6 годин; зберігаємо 60 знімків - база для приросту за тиждень/місяць
+        try {
+            if (!canManage() || !eduDb || !eduDb.users) return;
+            const snaps = loadSnaps(), last = snaps[snaps.length - 1];
+            if (last && Date.now() - last.t < 6 * 36e5) return;
+            const d = {}; eduDb.users.forEach(u => { if (u.login) d[u.login] = snapRow(u); });
+            snaps.push({ t: Date.now(), d: d });
+            localStorage.setItem(SNAP_KEY, JSON.stringify(snaps.slice(-60)));
+        } catch (e) {}
     }
-    function openWeekly() {
-        const m = sheet('weeklySheet', 'Підсумок тижня', '', `<button class="ex-main" id="weeklyCopy">Скопіювати</button>`);
+    function periodStart(kind) {
+        const n = new Date();
+        if (kind === 'month') return new Date(n.getFullYear(), n.getMonth(), 1).getTime();
+        const dow = (n.getDay() + 6) % 7;   // понеділок
+        return new Date(n.getFullYear(), n.getMonth(), n.getDate() - dow).getTime();
+    }
+    // база для приросту: останній знімок ДО початку періоду, інакше найраніший знімок усередині періоду
+    function baseline(kind) {
+        const snaps = loadSnaps(), st = periodStart(kind);
+        const before = snaps.filter(x => x.t < st).pop();
+        if (before) return before;
+        const inside = snaps.find(x => x.t >= st);
+        return inside && Date.now() - inside.t > 36e5 ? inside : null;
+    }
+    const fmtDay = t => { const d = new Date(t), f = x => String(x).padStart(2, '0'); return `${f(d.getDate())}.${f(d.getMonth() + 1)}`; };
+    const n0 = v => fmtNum(Math.round(v));
+    const pctOf = (f, g) => g ? Math.round(f / g * 100) : null;
+
+    function buildReport(users, kind) {
+        const base = baseline(kind), baseD = base ? base.d : null;
+        const tot = { uah: 0, pcs: 0, smart: 0, cards: 0, gUah: 0, gPcs: 0, gSmart: 0, gCards: 0, planSum: 0, planN: 0, courses: 0, done: 0, scoreSum: 0, scoreN: 0, goalsDone: 0, withGoals: 0, dUah: 0, dPcs: 0, dSmart: 0, dCards: 0, dDone: 0 };
+        const rows = users.map(u => {
+            const m = computeUserMetrics(u);
+            const r = { name: u.name, uah: gf(u, 'uah') || 0, pcs: gf(u, 'pcs') || 0, smart: gf(u, 'smart') || 0, cards: gf(u, 'cards') || 0, plan: gf(u, 'plan'), done: m.completed, total: m.totalAssigned };
+            const b = baseD && baseD[u.login];
+            r.dUah = b ? Math.max(0, r.uah - (b.uah || 0)) : null; r.dPcs = b ? Math.max(0, r.pcs - (b.pcs || 0)) : null;
+            r.dSmart = b ? Math.max(0, r.smart - (b.smart || 0)) : null; r.dCards = b ? Math.max(0, r.cards - (b.cards || 0)) : null; r.dDone = b ? Math.max(0, r.done - (b.d || 0)) : null;
+            tot.uah += r.uah; tot.pcs += r.pcs; tot.smart += r.smart; tot.cards += r.cards;
+            tot.gUah += gg(u, 'uah') || 0; tot.gPcs += gg(u, 'pcs') || 0; tot.gSmart += gg(u, 'smart') || 0; tot.gCards += gg(u, 'cards') || 0;
+            if (r.plan !== null) { tot.planSum += r.plan; tot.planN++; }
+            tot.courses += m.totalAssigned; tot.done += m.completed;
+            const sc = parseFloat(String(m.avgScoreFormatted || '').replace(',', '.')); if (!isNaN(sc) && sc > 0) { tot.scoreSum += sc; tot.scoreN++; }
+            if (hasGoals(u)) { tot.withGoals++; const keys = GOAL_DEFS.filter(d => u.goals[d.key] && u.goals[d.key].goal); if (keys.length && keys.every(d => (u.goals[d.key].done || 0) >= 100)) tot.goalsDone++; }
+            if (b) { tot.dUah += r.dUah; tot.dPcs += r.dPcs; tot.dSmart += r.dSmart; tot.dCards += r.dCards; tot.dDone += r.dDone; }
+            return r;
+        });
+        rows.sort((a, b) => (kind === 'week' && base ? (b.dUah - a.dUah) : (b.uah - a.uah)) || a.name.localeCompare(b.name, 'uk'));
+        return { tot, rows, base, kind };
+    }
+    function reportText(users, kind, mgrName) {
+        const R = buildReport(users, kind), t = R.tot, delta = kind === 'week' && R.base;
+        const title = kind === 'week' ? 'Тижневий звіт' : 'Місячний звіт';
+        const d = new Date(), f = x => String(x).padStart(2, '0');
+        let out = `📊 ${title} • ${f(d.getDate())}.${f(d.getMonth() + 1)}.${d.getFullYear()}\n👤 Керівник: ${mgrName}\n👥 Команда: ${users.length}\n`;
+        if (kind === 'week') out += delta ? `📈 Приріст за тиждень (з ${fmtDay(R.base.t)})\n` : `ℹ️ Приріст за тиждень зʼявиться після другого збереження даних; нижче накопичені показники\n`;
+        const line = (ico, nm, fact, goal, dl) => `${ico} ${nm}: ${n0(fact)}${goal ? ` / ${n0(goal)} (${pctOf(fact, goal)}%)` : ''}${delta && dl !== null ? `  ▲ +${n0(dl)}` : ''}`;
+        out += `\n💰 Продажі\n${line('•', 'Грн', t.uah, t.gUah, t.dUah)}\n${line('•', 'Шт', t.pcs, t.gPcs, t.dPcs)}\n`;
+        if (t.planN) out += `• Виконання плану (середнє): ${Math.round(t.planSum / t.planN)}%\n`;
+        out += `\n💳 Картки\n${line('•', 'Картки', t.cards, t.gCards, t.dCards)}\n`;
+        out += `\n📱 Smart\n${line('•', 'Smart', t.smart, t.gSmart, t.dSmart)}\n`;
+        out += `\n📚 Курси\n• Пройдено: ${t.done}/${t.courses} (${pctOf(t.done, t.courses) || 0}%)${delta ? `  ▲ +${t.dDone}` : ''}\n`;
+        if (t.scoreN) out += `• Середній бал: ${Math.round(t.scoreSum / t.scoreN)}%\n`;
+        out += `🎯 Цілі виконано: ${t.goalsDone} із ${t.withGoals}\n`;
+        const medals = ['🥇', '🥈', '🥉'], top = R.rows.filter(r => (delta ? r.dUah : r.uah) > 0).slice(0, 3);
+        if (top.length) out += `\n🏆 Лідери продажів\n${top.map((r, i) => `${medals[i]} ${r.name} — ${n0(delta ? r.dUah : r.uah)} грн`).join('\n')}\n`;
+        const low = R.rows.filter(r => r.total > 0 && r.done < r.total).sort((a, b) => (a.done / a.total) - (b.done / b.total)).slice(0, 5);
+        if (low.length) out += `\n⚠️ Відстають по курсах\n${low.map(r => `• ${r.name} — ${r.done}/${r.total}`).join('\n')}\n`;
+        return out.trim();
+    }
+    let repKind = 'week', repMgr = '';
+    function openPeriodReport() {
+        const m = sheet('weeklySheet', 'Звіт по керівнику', '', `<button class="ex-main" id="weeklyCopy">Скопіювати для відправки</button>`);
         const body = m.querySelector('.ex-sheet-body');
-        const draw = () => { body.innerHTML = mgrChips() + `<pre class="ex-pre" id="weeklyPre">${esc(weeklyText())}</pre>`; bindChips(body, draw); };
+        const names = Array.from(new Set(scope().map(mgrOf))).filter(x => x !== '—').sort((a, b) => a.localeCompare(b, 'uk'));
+        if (windowUserRole === 'manager') repMgr = '';
+        const usersNow = () => scope().filter(u => !repMgr || mgrOf(u) === repMgr);
+        const mgrLabel = () => repMgr || (windowUserRole === 'manager' ? 'моя команда' : 'усі керівники');
+        const kpi = (ico, nm, fact, goal, dl, delta) => `<div class="rp-kpi"><div class="rp-k-top"><span>${ico} ${nm}</span>${delta && dl !== null ? `<i class="rp-up">▲ +${n0(dl)}</i>` : ''}</div><div class="rp-k-v">${n0(fact)}${goal ? `<small> / ${n0(goal)}</small>` : ''}</div>${goal ? `<div class="rp-bar"><b style="width:${Math.min(100, pctOf(fact, goal))}%"></b></div><div class="rp-k-p">${pctOf(fact, goal)}%</div>` : ''}</div>`;
+        const draw = () => {
+            const users = usersNow(), R = buildReport(users, repKind), t = R.tot, delta = repKind === 'week' && !!R.base;
+            const chips = (names.length > 1 && windowUserRole !== 'manager') ? `<div class="ex-sub">Керівник</div><div class="ex-chips" id="rpMgr"><button class="ex-chip${repMgr ? '' : ' on'}" data-m="">Усі</button>${names.map(n => `<button class="ex-chip${repMgr === n ? ' on' : ''}" data-m="${esc(n)}">${esc(n)}</button>`).join('')}</div>` : '';
+            const per = `<div class="rp-seg" id="rpKind"><button class="${repKind === 'week' ? 'on' : ''}" data-k="week">Тиждень</button><button class="${repKind === 'month' ? 'on' : ''}" data-k="month">Місяць</button></div>`;
+            const note = repKind === 'week'
+                ? (R.base ? `Приріст за тиждень — з ${fmtDay(R.base.t)}. Поточні значення — накопичені.` : 'Приріст за тиждень зʼявиться, коли в застосунку збережеться другий знімок даних (кожні ~6 год при відкритті Академії). Поки — накопичені показники.')
+                : 'Накопичені показники поточного цільового періоду (місяця) проти цілей.';
+            const top = R.rows.slice(0, 15).map((r, i) => `<div class="rp-emp"><span class="rp-n">${i + 1}</span><div class="rp-en"><b>${esc(r.name)}</b><small>Курси ${r.done}/${r.total}${r.plan !== null ? ` · План ${Math.round(r.plan)}%` : ''}</small></div><div class="rp-ev"><b>${n0(repKind === 'week' && R.base ? r.dUah : r.uah)} ₴</b><small>${n0(r.pcs)} шт · ${n0(r.cards)} карт · ${n0(r.smart)} smart</small></div></div>`).join('');
+            body.innerHTML = chips + per + `<div class="ex-sub rp-note">${esc(note)}</div>
+                <div class="rp-grid">${kpi('💰', 'Продажі, грн', t.uah, t.gUah, t.dUah, delta)}${kpi('📦', 'Продажі, шт', t.pcs, t.gPcs, t.dPcs, delta)}${kpi('💳', 'Картки', t.cards, t.gCards, t.dCards, delta)}${kpi('📱', 'Smart', t.smart, t.gSmart, t.dSmart, delta)}${kpi('📚', 'Курси пройдено', t.done, t.courses, t.dDone, delta)}
+                <div class="rp-kpi"><div class="rp-k-top"><span>🎯 Цілі виконано</span></div><div class="rp-k-v">${t.goalsDone}<small> / ${t.withGoals}</small></div><div class="rp-k-p">${t.planN ? 'План (сер.): ' + Math.round(t.planSum / t.planN) + '%' : '&nbsp;'}${t.scoreN ? ' · бал ' + Math.round(t.scoreSum / t.scoreN) + '%' : ''}</div></div></div>
+                <div class="ex-sub">Співробітники (${users.length})</div>${top || '<div class="ex-sub">Немає даних</div>'}${R.rows.length > 15 ? `<div class="ex-sub">…ще ${R.rows.length - 15}</div>` : ''}`;
+            body.querySelectorAll('#rpKind button').forEach(b => b.onclick = () => { repKind = b.getAttribute('data-k'); draw(); });
+            body.querySelectorAll('#rpMgr .ex-chip').forEach(c => c.onclick = () => { repMgr = c.getAttribute('data-m'); draw(); });
+        };
         draw();
-        m.querySelector('#weeklyCopy').onclick = () => copyText(weeklyText());
+        m.querySelector('#weeklyCopy').onclick = () => copyText(reportText(usersNow(), repKind, mgrLabel()));
     }
+    window.ExtrasReport = { text: reportText, build: buildReport, snapshot: takeSnapshot };
 
     /* ---------- Журнал дій (Власник) ---------- */
     async function openLog() {
@@ -225,7 +306,7 @@
             <div class="ex-drawer-body">
                 <div class="ex-dsec ex-dsec-row"><span>Фільтри</span><button class="ex-link" type="button" onclick="resetFilters()">Скинути</button></div><div id="exFilterSlot"></div>
                 <div class="ex-dsec">Звіти</div>
-                <div class="ex-dgrid"><button class="ex-dbtn" data-a="team">Зведення</button><button class="ex-dbtn" data-a="week">Підсумок тижня</button></div>
+                <div class="ex-dgrid"><button class="ex-dbtn" data-a="team">Зведення</button><button class="ex-dbtn" data-a="week">Звіт: тиждень / місяць</button></div>
             </div></div>`;
         modal.appendChild(d);
         const fp = document.getElementById('filterPanel');
@@ -238,7 +319,7 @@
             const act = a.getAttribute('data-a');
             if (act === 'close') closeDrawer();
             else if (act === 'team') { closeDrawer(); openTeamSummary(); }
-            else if (act === 'week') { closeDrawer(); openWeekly(); }
+            else if (act === 'week') { closeDrawer(); openPeriodReport(); }
         });
         return d;
     }
@@ -284,7 +365,7 @@
         b.onclick = () => { sortMode = (sortMode + 1) % 3; applySort(); };
         top.appendChild(b); applySort();
     }
-    renderGoals = function (u) { _rg(u); renderToday(u); addSort(); };
+    renderGoals = function (u) { _rg(u); renderToday(u); addSort(); takeSnapshot(); };
     const _os = window.openStatsModal || openStatsModal;
     window.openStatsModal = openStatsModal = function () {
         _os.apply(this, arguments);
