@@ -2223,6 +2223,7 @@
 
     function triggerAntiCheat() {
         if (!isTestActive || isCheatingTriggered) return;
+        if (window.__blitzAt && Date.now() - window.__blitzAt < 1500) return;   // фокус-події під час відкриття екрана тесту
         isCheatingTriggered = true; isTestActive = false;
         if (testTimerInterval) clearInterval(testTimerInterval);
         document.body.classList.add('cheating');
