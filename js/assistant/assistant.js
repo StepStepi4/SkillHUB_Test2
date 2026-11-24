@@ -2945,18 +2945,27 @@ window.saveStore = function() {
         (data.stores || []).forEach(item => s.add(new Option(item, item)));
         (data.reasons || []).forEach(item => r.add(new Option(item, item)));
     }
+    function sellerListsFail(msg) {
+        ['sellerStore', 'sellerReason'].forEach(id => { const el = document.getElementById(id); if (el && el.options.length <= 1) el.innerHTML = '<option value="" disabled selected>' + msg + '</option>'; });
+    }
+    function loadSellerLists() {
+        if (sellerLists) return;
+        ['sellerStore', 'sellerReason'].forEach(id => { const el = document.getElementById(id); if (el && el.options.length <= 1) el.innerHTML = '<option value="" disabled selected>Завантаження...</option>'; });
+        fetchJsonT(API_URL + '?action=seller_form', 15000).then(d => {
+            if (d && Array.isArray(d.stores) && d.stores.length) {
+                sellerLists = d; fillSellerLists(d);
+                try { localStorage.setItem('skillhub_seller_lists', JSON.stringify(d)); } catch (e) {}
+            } else sellerListsFail(d && Array.isArray(d.stores) ? 'Список порожній — перевірте лист у таблиці' : 'Сервер не оновлено — опублікуйте нову версію скрипта');
+        }).catch(() => sellerListsFail('Не вдалося завантажити — торкніться, щоб повторити'));
+    }
     window.openSellerModal = function() {
         window.openModalBase('sellerModal');
         if (sellerLists) fillSellerLists(sellerLists);
         else {
             try { const c = JSON.parse(localStorage.getItem('skillhub_seller_lists') || 'null'); if (c && c.stores) fillSellerLists(c); } catch (e) {}
-            fetchJsonT(API_URL + '?action=seller_form', 12000).then(d => {
-                if (d && Array.isArray(d.stores)) {
-                    sellerLists = d; fillSellerLists(d);
-                    try { localStorage.setItem('skillhub_seller_lists', JSON.stringify(d)); } catch (e) {}
-                }
-            }).catch(() => {});
+            loadSellerLists();
         }
+        ['sellerStore', 'sellerReason'].forEach(id => { const el = document.getElementById(id); if (el && !el._rt) { el._rt = 1; el.addEventListener('pointerdown', () => { if (!sellerLists && el.options.length <= 1) loadSellerLists(); }); } });
         document.getElementById('sellerFormSubmit').style.display = 'block';
         document.getElementById('sellerStatusOverlay').style.display = 'none';
         document.getElementById('submitSellerBtn').disabled = false;
