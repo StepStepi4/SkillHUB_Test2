@@ -80,15 +80,7 @@
         .app-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; display: none; }
 
         .loader-text { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 15px; text-align: center; padding: 0 20px; line-height: 1.4;}
-        .progress-container { width: 220px; height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; display: none; margin-bottom: 15px; }
         .progress-bar { height: 100%; width: 0%; background: var(--primary); transition: width 0.3s ease; }
-
-        .inline-loader {
-            display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px;
-            background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px;
-            font-size: 13px; font-weight: 600; color: var(--text-muted);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
 
         .container:not(:where(#academyApp *)) {
             position: relative; width: 100%; max-width: 480px;
@@ -320,7 +312,6 @@
 
         .tech-photo-wrapper { display: flex; align-items: center; gap: 14px; margin-top: 16px; background: var(--input-bg); padding: 16px; border-radius: 16px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
         .tech-photo-wrapper:active { transform: scale(0.97); background: var(--border); }
-        .photo-icon { font-size: 26px; flex-shrink: 0;}
         .photo-text { flex: 1; display: flex; flex-direction: column; text-align: left; }
         .photo-title { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 2px;}
         .photo-subtitle { font-size: 12px; font-weight: 600; color: var(--primary); }
@@ -370,12 +361,6 @@
             25% { transform: scale(1.15) rotate(4deg); filter: drop-shadow(0px 2px 6px rgba(255, 50, 0, 0.8)); }
             50% { transform: scale(1.05) rotate(-3deg); filter: drop-shadow(0px 1px 5px rgba(255, 150, 0, 0.7)); }
             75% { transform: scale(1.1) rotate(3deg); filter: drop-shadow(0px 3px 7px rgba(255, 50, 0, 0.9)); }
-        }
-        .animated-fire {
-            display: inline-block;
-            animation: burningFire 1.2s infinite alternate ease-in-out;
-            transform-origin: bottom center;
-            margin-right: 5px;
         }
 
         .fav-checkbox {
@@ -476,8 +461,6 @@
 
 /* Іконки розділу «Опції» */
 .set-ico { width: 36px; height: 36px; flex-shrink: 0; margin-right: 12px; object-fit: contain; border-radius: 8px; }
-.set-emoji { display: flex; align-items: center; justify-content: center; font-size: 26px; }
-[data-theme="dark"] .set-ico:not(.set-emoji) { filter: brightness(1.15); }
 
 /* Новини */
 .news-btn { position: relative; }
@@ -522,12 +505,6 @@ body.academy-test .bottom-nav { display: none; }
    Кольорові іконки виключені зі списку. */
 img[src*="assets/icons/"]:not([src*="Factory"]):not([src*="Discount"]):not([src*="discount"]):not([src*="Client"]):not([src*="archive/chat"]):not([src*="archive/edu"]):not([src*="archive/rozetka"]):not([src*="Check.svg"]):not([src*="aim.svg"]):not([src*="analytics"]):not([src*="install"]):not([src*="puzzle"]):not([src*="statistics.svg"]):not([src*="website"]):not([src*="medal"]):not([src*="ukraine"]) { filter: brightness(0); }
 [data-theme="dark"] img[src*="assets/icons/"]:not([src*="Factory"]):not([src*="Discount"]):not([src*="discount"]):not([src*="Client"]):not([src*="archive/chat"]):not([src*="archive/edu"]):not([src*="archive/rozetka"]):not([src*="Check.svg"]):not([src*="aim.svg"]):not([src*="analytics"]):not([src*="install"]):not([src*="puzzle"]):not([src*="statistics.svg"]):not([src*="website"]):not([src*="medal"]):not([src*="ukraine"]) { filter: brightness(0) invert(1); }
-
-/* Новина зверху на «Пошук» і «Резерви» */
-.news-top { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 12px 16px; margin: 0 0 14px; cursor: pointer; position: relative; overflow: hidden; max-height: 170px; box-shadow: 0 6px 18px rgba(0,0,0,0.04); }
-.news-top.is-new { border-color: var(--danger); }
-.news-top::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 38px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
-.news-top .news-more { position: absolute; right: 14px; bottom: 8px; z-index: 1; font-size: 12px; font-weight: 700; color: var(--rozetka-green-dark); }
 .fb-slider-wrap { padding: 4px 2px 0; }
 .fb-slider-val { text-align: center; font-size: 28px; font-weight: 700; color: var(--rozetka-green-dark); margin-bottom: 4px; min-height: 34px; }
 .fb-slider-val.empty { font-size: 13px; font-weight: 600; color: var(--text-muted); line-height: 34px; }
@@ -551,41 +528,27 @@ img[src*="assets/icons/"]:not([src*="Factory"]):not([src*="Discount"]):not([src*
 
 /* Кнопка «Новини»: бейдж New без фону, жовта обводка біжить по контуру */
 .news-btn, .news-btn:active { background: none !important; border: none !important; box-shadow: none !important; width: auto; height: auto; padding: 0; display: inline-flex; align-items: center; justify-content: center; animation: none !important; }
-.news-btn .news-badge { display: block; width: 32px; height: 27px; overflow: visible; }
 /* У шапці бейдж видно лише поки є непрочитана новина */
 #newsBtn:not(.has-new) { display: none !important; }
-.news-row-ico { width: 36px; height: 36px; flex-shrink: 0; margin-right: 12px; display: flex; align-items: center; justify-content: center; }
-.news-row-ico .news-badge { width: 32px; height: 27px; overflow: visible; }
-/* Пульсація як у прикладі (лише для непрочитаного): червоний -> темніє, жовта дуга біжить по контуру -> червоний */
-.has-new .news-badge { transform-origin: center; animation: nbScale 3.6s ease-in-out infinite; }
-.has-new .news-badge .nb-bg { animation: nbBg 3.6s ease-in-out infinite; }
-.has-new .news-badge .nb-run { stroke-dasharray: 30 70; opacity: 0; animation: nbRun 3.6s linear infinite; }
-.news-badge .nb-run { opacity: 0; }
+/* Пульсація як у прикладі (лише для непрочитаного): червоний -> темніє{ transform-origin: center; animation: nbScale 3.6s ease-in-out infinite; }
 @keyframes nbScale { 0%, 10% { transform: scale(1); } 30%, 70% { transform: scale(1.4); } 90%, 100% { transform: scale(1); } }
 @keyframes nbBg { 0%, 15% { fill: #e50914; } 30%, 70% { fill: #3b0509; } 85%, 100% { fill: #e50914; } }
 @keyframes nbRun { 0%, 18% { opacity: 0; stroke-dashoffset: 0; } 28% { opacity: 1; } 72% { opacity: 1; } 82%, 100% { opacity: 0; stroke-dashoffset: -150; } }
-@media (prefers-reduced-motion: reduce) { .has-new .news-badge, .has-new .news-badge .nb-bg, .has-new .news-badge .nb-run { animation: none; } }
+@media (prefers-reduced-motion: reduce) { }
 
-/* Шапка: червона плашка «Свіжа новина», пульсує поки не прочитано */
-.news-pill { display: inline-block; background: #e50914; color: #fff; font: 800 13px/1 Inter, system-ui, sans-serif; letter-spacing: .2px; padding: 10px 16px; border-radius: 999px; white-space: nowrap; animation: pillPulse 1.4s ease-in-out infinite; }
+/* Шапка: червона плашка «Свіжа новина»{ display: inline-block; background: #e50914; color: #fff; font: 800 13px/1 Inter, system-ui, sans-serif; letter-spacing: .2px; padding: 10px 16px; border-radius: 999px; white-space: nowrap; animation: pillPulse 1.4s ease-in-out infinite; }
 @keyframes pillPulse {
   0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(229, 9, 20, .65); }
   50%  { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(229, 9, 20, 0); filter: brightness(1.15); }
   100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(229, 9, 20, 0); }
 }
-@media (prefers-reduced-motion: reduce) { .news-pill { animation: none; } }
+@media (prefers-reduced-motion: reduce) { }
 
 /* Новини: іконка news.svg, пульсує поки є непрочитане */
 .news-ico { display:block; height:27px; width:auto; filter:none !important; transform-origin:center; }
-.news-row-ico { width:auto; min-width:36px; }
-.news-row-ico .news-ico { height:24px; }
 .has-new .news-ico { animation: newsPulse 1.6s ease-in-out infinite; }
 @keyframes newsPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }
 @media (prefers-reduced-motion: reduce) { .has-new .news-ico { animation: none; } }
-/* Обране: сегмент у налаштуваннях та плаваюча кнопка */
-.seg-row { display:flex; gap:6px; width:100%; }
-.seg-row button { flex:1; border:1.5px solid var(--border); background:var(--input-bg); color:var(--text-main); border-radius:12px; padding:10px 4px; font-size:12px; font-weight:600; cursor:pointer; }
-.seg-row button.on { background:var(--text-main); color:var(--bg); border-color:var(--text-main); font-weight:700; }
 .fav-float { position:fixed; right:16px; bottom:calc(96px + env(safe-area-inset-bottom)); width:52px; height:52px; border-radius:50%; border:1.5px solid var(--border); background:var(--card-bg); box-shadow:0 6px 18px rgba(0,0,0,.18); display:flex; align-items:center; justify-content:center; z-index:900; touch-action:none; -webkit-tap-highlight-color:transparent; padding:0; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
 .fav-float img { width:24px; height:24px; pointer-events:none; }
 .fav-float.drag { transform:scale(1.12); box-shadow:0 10px 26px rgba(0,0,0,.28); }
@@ -697,9 +660,6 @@ button, .list-item, .nav-item, .list-card, .chip, [onclick] { touch-action: mani
 .gd-n{width:26px;height:26px;border-radius:50%;background:var(--accent,#007aff);color:#fff;font-size:13px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
 .gd-b{padding:0 14px 14px;font-size:14px;line-height:1.5;color:var(--text)}
 .gd-b p{margin:0 0 10px}
-.gd-shot{margin:4px 0 14px;text-align:center}
-.gd-shot img{width:100%;max-width:300px;border-radius:14px;border:1px solid var(--border)}
-.gd-shot figcaption{font-size:12px;opacity:.65;margin-top:6px}
 .gd-live{pointer-events:none;margin:8px 0}
 .gd-ex{border-left:3px solid var(--primary,#007aff);background:rgba(127,127,127,.08);border-radius:10px;padding:10px 12px;margin:10px 0}
 .gd-ex-t{font-weight:700;font-size:13px;margin-bottom:6px}
@@ -747,3 +707,4 @@ html.theme-ready body { transition: background-color .25s ease, color .25s ease;
 /* Екран після оновлення видно з першого кадру (до завантаження скриптів) */
 html.post-upd .app-loader { display: flex !important; opacity: 1 !important; pointer-events: auto !important; z-index: 2147483000 !important; }
 html.post-upd body { overflow: hidden; }
+[data-theme="dark"] .set-ico { filter: brightness(1.15); }

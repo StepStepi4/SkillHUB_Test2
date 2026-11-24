@@ -532,10 +532,7 @@
         btn.classList.toggle('has-new', unread);
         const row = document.getElementById('newsRow'); if (row) row.classList.toggle('has-new', unread);
     };
-    function newsHtml(n, isNew) {
-        return `<div class="news-date">${safeText(n.date)}${isNew ? '<span class="news-new">НОВЕ</span>' : ''}</div>`
-            + RichText.render(String(n.text || ''), { plain: line => `<div class="news-line">${RichText.inline(line)}</div>` });
-    }
+
     window.renderNewsTop = function() {};   // верхня картка новин прибрана
     // При запуску: якщо є непрочитана новина — один раз показуємо вікно. Не прочитав → кнопка в шапці пульсує червоним.
     let newsPopupDone = false;

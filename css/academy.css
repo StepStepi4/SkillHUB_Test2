@@ -186,7 +186,6 @@
         #academyApp .back-btn-sleek { background: var(--card-bg); border: 1px solid var(--border); width: 42px; height: 42px; border-radius: 13px; display: flex; justify-content: center; align-items: center; color: var(--text-main); transition: all 0.2s; cursor: pointer; padding: 0; position: relative; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
         #academyApp .back-btn-sleek:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         #academyApp .back-btn-sleek:active { transform: scale(0.92); background: var(--input-bg); }
-        #academyApp .back-btn-sleek.active-nav { border-color: var(--primary); background: var(--primary-light); }
 
         /* Симетрична сітка та суворий контроль висоти кнопок панелі */
         #academyApp .role-action-bar { display: grid; gap: 8px; margin-bottom: 18px; }
@@ -517,16 +516,9 @@ body.academy-open { overflow: hidden; }
 .ex-opt{border:1.5px solid var(--border);background:var(--input-bg);border-radius:14px;padding:14px;font-size:15px;font-weight:700;text-align:left;cursor:pointer}
 .ex-opt.sel{border-color:currentColor}.ex-opt.clr{color:var(--text-muted)}
 .ex-main{width:100%;border:0;border-radius:14px;padding:14px;font-weight:700;font-size:15px;background:var(--text-main);color:var(--card-bg,#fff);cursor:pointer}
-.ex-input{border:1.5px solid var(--border);border-radius:12px;padding:12px;font-size:16px;background:var(--input-bg);color:var(--text-main)}
 .ex-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
 .ex-sub{color:var(--text-muted);font-weight:600;font-size:13px;margin-top:6px}.ex-list{font-size:13px;color:var(--text-muted);line-height:1.6}
-.ex-pre{white-space:pre-wrap;font:600 14px/1.5 inherit;background:var(--input-bg);padding:12px;border-radius:12px;margin:0}
 .ex-log{padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}.ex-log small{color:var(--text-muted);display:block}
-.ex-tools{display:flex;gap:8px;margin-bottom:10px;flex-shrink:0}
-.ex-tools button{flex:1;border:1.5px solid var(--border);background:var(--card-bg);color:var(--text-main);border-radius:12px;padding:9px 6px;font-size:12px;font-weight:700;cursor:pointer}
-.ex-tools button.on{background:var(--text-main);color:var(--card-bg)}
-.bulk-bar{position:sticky;bottom:0;display:flex;gap:6px;align-items:center;padding:10px;background:var(--card-bg);border-top:1px solid var(--border);flex-shrink:0}
-.bulk-bar span{flex:1;font-weight:700;font-size:13px}.bulk-bar button{border:0;border-radius:10px;padding:9px 12px;font-weight:700;background:var(--text-main);color:var(--card-bg);cursor:pointer}
 .today-line{display:flex;flex-direction:column;gap:2px;background:var(--input-bg);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:13px}
 .today-line b{font-size:11px;text-transform:uppercase;color:var(--text-muted);font-weight:700}
 .ex-toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);background:var(--text-main);color:var(--card-bg,#fff);padding:10px 16px;border-radius:999px;font-weight:700;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:100001}
@@ -548,19 +540,6 @@ body.academy-open { overflow: hidden; }
 .ex-dsec{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin:10px 2px 2px}
 .ex-dbtn{height:46px;border:1.5px solid var(--border);background:var(--card-bg);color:var(--text-main);border-radius:12px;font-weight:700;font-size:14px;font-family:inherit;text-align:left;padding:0 14px;cursor:pointer}
 .ex-dbtn:active{background:var(--input-bg)}
-.bulk-bar{flex-shrink:0;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;padding:10px;background:var(--card-bg);border:1.5px solid var(--border);border-radius:16px;}
-.bulk-count{font-size:13px;font-weight:600;text-align:center;color:var(--text-main)}
-.bulk-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.bulk-btns button{height:40px;border:0;border-radius:10px;font-weight:700;font-size:13px;font-family:inherit;background:var(--text-main);color:var(--card-bg);cursor:pointer;padding:0}
-.bulk-btns button.ghost{background:var(--input-bg);color:var(--text-main);border:1.5px solid var(--border)}
-.bulk-chk{width:24px;height:24px;flex:0 0 24px;border-radius:8px;border:2px solid var(--border);margin-right:12px;display:flex;align-items:center;justify-content:center;color:var(--card-bg)}
-.bulk-chk.on{background:var(--text-main);border-color:var(--text-main)}
-.ex-chkrow{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px}
-.ex-chkrow input{position:absolute;opacity:0;pointer-events:none}
-.ex-box{width:24px;height:24px;flex:0 0 24px;border-radius:8px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;color:transparent}
-.ex-chkrow input:checked + .ex-box{background:var(--text-main);border-color:var(--text-main);color:var(--card-bg)}
-.ex-lbl{font-size:12px;font-weight:700;color:var(--text-muted);margin-top:10px}
-.ex-input.err{border-color:#dc2626}
 .ex-chips{display:flex;flex-wrap:wrap;gap:6px}
 .ex-chip{border:1.5px solid var(--border);background:var(--input-bg);color:var(--text-main);border-radius:999px;padding:6px 12px;font-weight:600;font-size:12px;font-family:inherit;cursor:pointer}
 .ex-chip.on{background:var(--text-main);color:var(--card-bg);border-color:var(--text-main)}
@@ -571,10 +550,8 @@ body.academy-open { overflow: hidden; }
 #academyApp .banner-action-btn{flex-direction:column}
 #academyApp .goal-sort{font-size:11px !important;font-weight:600 !important;line-height:1.2 !important;padding:5px 10px !important;width:auto !important;height:auto !important}
 .filter-panel{display:flex;flex-direction:column;gap:8px}
-.fp-title{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-top:6px}
 .fp-grid{display:grid;grid-template-columns:1fr;gap:10px}
 .fp-select{padding:11px 14px !important;border-radius:12px !important;font-size:14px !important}
-.fp-reset{height:42px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text-main);border-radius:12px;font-weight:700;font-size:13px;font-family:inherit;cursor:pointer;margin-top:6px}
 
 
 /* ===== компактне бічне меню ===== */
@@ -604,11 +581,6 @@ body.academy-open { overflow: hidden; }
 .wl-box{position:relative;width:100%;max-width:560px;height:100%;background:var(--bg,#f5f6fa);display:flex;flex-direction:column;overflow:hidden}
 .wl-x{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.22);color:#fff;z-index:2;font-size:15px}
 .wl-scroll{overflow-y:auto;padding:0 16px 8px;-webkit-overflow-scrolling:touch}
-.wl-hero{margin:0 -16px 14px;padding:calc(30px + env(safe-area-inset-top)) 20px 22px;background:linear-gradient(135deg,#0057b7,#2b7fe0 60%,#ffd700 160%);color:#fff}
-.wl-hi{font-size:14px;font-weight:600;opacity:.9}.wl-name{font-size:30px;font-weight:800;line-height:1.1;margin:2px 0 4px}.wl-role{font-size:13px;opacity:.85;font-weight:600}
-.wl-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px}
-.wl-kpi>div{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:10px 4px;text-align:center}
-.wl-kpi b{display:block;font-size:20px;color:var(--text-main)}.wl-kpi small{font-size:10.5px;color:var(--text-muted);font-weight:600}
 .wl-sec{display:flex;align-items:center;justify-content:space-between;font-weight:800;font-size:15px;color:var(--text-main);margin:18px 2px 8px}
 .wl-dl{font-size:11.5px;font-weight:700;color:var(--primary);background:rgba(0,122,255,.1);padding:3px 9px;border-radius:999px}.wl-dl.bad{color:var(--danger);background:rgba(255,59,48,.1)}
 .wl-rings{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -621,9 +593,6 @@ body.academy-open { overflow: hidden; }
 .wl-course{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;margin-bottom:6px;font-size:13.5px;font-weight:600;color:var(--text-main)}
 .wl-dot{width:10px;height:10px;border-radius:50%;background:#9aa0a6;flex-shrink:0}.wl-course.done .wl-dot{background:var(--success,#34c759)}.wl-course.prog .wl-dot{background:#ff9500}
 .wl-cn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wl-cs{font-size:12px;color:var(--text-muted)}
-.wl-next>div{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(0,122,255,.08);border-radius:12px;margin-bottom:6px;font-weight:700;font-size:13.5px;color:var(--text-main)}
-.wl-next span{width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}.wl-next small{color:var(--text-muted);font-weight:600}
-.wl-how{margin:0;padding-left:20px;font-size:13.5px;line-height:1.5;color:var(--text-main)}.wl-how li{margin-bottom:6px}
 .wl-empty{padding:12px;border-radius:12px;background:rgba(127,127,127,.1);font-size:13px;color:var(--text-muted);font-weight:600}.wl-empty.ok{color:var(--success,#34c759);background:rgba(52,199,89,.1)}
 .wl-foot{padding:10px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:var(--card-bg)}.wl-foot .btn{width:100%}
 .goal-dash{margin-right:auto}
@@ -649,7 +618,6 @@ body.academy-open { overflow: hidden; }
 .goal-dash{border:1px solid var(--border);background:var(--card-bg);color:var(--primary);font-weight:700;font-size:12px;padding:5px 10px;border-radius:999px;cursor:pointer}
 
 .wl-overlay .wl-box{background:var(--bg,var(--card-bg))}
-.wl-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:10px}
 .wl-tile{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:12px 8px;text-align:center;border-top:3px solid var(--primary)}
 .wl-tile.course{border-top-color:#ff9500}
 .wl-tile b{display:block;font-size:26px;line-height:1.1;color:var(--text-main)}.wl-tile span{font-size:12px;font-weight:700;color:var(--text-muted)}
@@ -695,7 +663,6 @@ html.gate-on #academyApp #loginView .login-card, html.gate-on #academyApp #login
 /* Вітальне вікно: без шапки і кольорових смуг, компактні блоки з показниками */
 .wl-x{background:rgba(127,127,127,.18);color:var(--text-main)}
 .wl-scroll{padding-top:calc(48px + env(safe-area-inset-top))}
-.wl-tiles{grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:8px}
 .wl-tile,.wl-tile.course{border-top:1px solid var(--border);border-radius:12px;padding:8px 6px}
 .wl-tile b{font-size:20px}.wl-tile span{font-size:11px}
 .wl-sec{margin:14px 2px 6px;font-size:14px}
@@ -731,7 +698,6 @@ html.gate-on #academyApp #loginView .login-card, html.gate-on #academyApp #login
 .bz-box { text-align:center; }
 .bz-hero { font-size:54px; line-height:1; margin:6px 0 4px; }
 .bz-title { font-size:24px; font-weight:800; margin-bottom:6px; }
-.bz-sub { font-size:14px; color:var(--text-muted); line-height:1.4; margin:0 6px 14px; }
 .bz-stats { display:flex; gap:8px; margin-bottom:12px; }
 .bz-stats > div { flex:1; background:var(--input-bg); border-radius:14px; padding:12px 4px; }
 .bz-stats b { display:block; font-size:20px; } .bz-stats span { font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; }

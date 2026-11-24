@@ -1485,7 +1485,7 @@
     ];
     let originalGoals = {}, pendingGoals = {};
 
-    function goalsOf(u) { return (u && (u.goals || u.goalsFact)) || {}; }
+
     function hasGoals(u) {
         const g = (u && u.goals) || {};
         return Object.keys(g).some(k => g[k] && g[k].goal !== null && g[k].goal !== undefined);
@@ -1755,10 +1755,7 @@
         checkUpcomingMeets();
     }
 
-    function openSkillhubFrame(url) {
-        if (!url) return;
-        window.open(url, '_blank');
-    }
+
 
     function closeSkillhubFrame() {
         document.getElementById('skillhubIframe').src = '';
