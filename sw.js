@@ -1,6 +1,6 @@
 // SkillHUB Assistant - Service Worker (offline-first)
 // ВАЖЛИВО: при кожному релізі міняйте VERSION - тоді всі пристрої підтягнуть нові файли.
-const VERSION = 'v-7722069e37';
+const VERSION = 'v-8cae2671d1';
 // Кеші прив'язані до шляху (репозиторію) застосунку: кілька застосунків на одному github.io не стирають кеші одне одного
 const SCOPE_URL = new URL(self.registration ? self.registration.scope : self.location.href);
 const REPO_KEY = (SCOPE_URL.pathname.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '').toLowerCase()) || 'root';
@@ -126,6 +126,27 @@ const SHELL = [
   "./assets/icons/ui/settings.svg",
   "./assets/icons/ui/shuffle.svg",
   "./assets/icons/ui/ukraine.svg",
+  "./assets/service/ekta_gar_povn_zakhystu.webp",
+  "./assets/service/ekta_kataisya_ta_ne_pereimaisya.webp",
+  "./assets/service/ekta_prostuy_obmin_bez_remontu.webp",
+  "./assets/service/ekta_spravzhnii_zakhyst.webp",
+  "./assets/service/ekta_zakhyst_ekrana_android.webp",
+  "./assets/service/ekta_zakhyst_ekrana_apple.webp",
+  "./assets/service/ekta_zakhyst_vid_poshkodzhen_apple.webp",
+  "./assets/service/eset_mobile.webp",
+  "./assets/service/eset_nod32.webp",
+  "./assets/service/eset_sec_essent.webp",
+  "./assets/service/office_2024.webp",
+  "./assets/service/office_365_family.webp",
+  "./assets/service/office_365_personal.webp",
+  "./assets/service/supp_bez%20mezh.webp",
+  "./assets/service/supp_bumerang.webp",
+  "./assets/service/supp_podovzh_gar.webp",
+  "./assets/service/supp_povniy_zah.webp",
+  "./assets/service/supp_zakh_vid_poshkodzh.webp",
+  "./assets/service/sweet_tv.webp",
+  "./assets/service/win_home.webp",
+  "./assets/service/win_professional.webp",
   "./css/academy.css",
   "./css/assistant.css",
   "./css/fonts.css",
@@ -133,12 +154,14 @@ const SHELL = [
   "./index.html",
   "./js/academy/academy.js",
   "./js/academy/blitz.js",
+  "./js/academy/brands.js",
   "./js/academy/extras.js",
   "./js/academy/gate.js",
   "./js/academy/welcome.js",
   "./js/assistant/assistant.js",
   "./js/assistant/diag.js",
   "./js/assistant/guide.js",
+  "./js/assistant/search-all.js",
   "./js/assistant/ux.js",
   "./js/core/brand.js",
   "./js/core/config.js",

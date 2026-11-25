@@ -708,3 +708,15 @@ html.theme-ready body { transition: background-color .25s ease, color .25s ease;
 html.post-upd .app-loader { display: flex !important; opacity: 1 !important; pointer-events: auto !important; z-index: 2147483000 !important; }
 html.post-upd body { overflow: hidden; }
 [data-theme="dark"] .set-ico { filter: brightness(1.15); }
+
+/* Картинка сервісу в модальному вікні: швидка плавна розгортка */
+.svc-hero { margin: 0 0 14px; transform-origin: top center; animation: svcHeroIn .34s cubic-bezier(.2,.8,.2,1) both; }
+.svc-hero-img { border-radius: 20px; overflow: hidden; background: var(--input-bg); box-shadow: 0 10px 28px rgba(0,0,0,.18); aspect-ratio: 1 / 1; max-height: 56vh; margin: 0 auto; }
+.svc-hero-img img { display: block; width: 100%; height: 100%; object-fit: cover; animation: svcImgIn .42s cubic-bezier(.2,.8,.2,1) both; }
+.svc-cap { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 8px 2px; text-align: center; animation: svcCapIn .4s .08s cubic-bezier(.2,.8,.2,1) both; }
+.svc-cap-line { width: 38px; height: 4px; border-radius: 2px; background: var(--primary); }
+.svc-cap-title { font-size: 17px; font-weight: 800; line-height: 1.25; color: var(--text-main); }
+@keyframes svcHeroIn { from { opacity: 0; transform: scale(.9) translateY(-10px); } to { opacity: 1; transform: none; } }
+@keyframes svcImgIn { from { transform: scale(1.12); } to { transform: scale(1); } }
+@keyframes svcCapIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .svc-hero, .svc-hero-img img, .svc-cap { animation: none; } }

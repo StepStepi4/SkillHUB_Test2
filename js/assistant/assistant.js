@@ -253,6 +253,26 @@
         sessionStorage.setItem('skillhub_active_tab', tabId);
     }
 
+    // Картинка сервісу (колонка H листа «Навчання» -> assets/service/<назва>.webp) з плавною розгорткою над описом
+    const svcKey = s => String(s || '').toLowerCase().replace(/\[.*?\]/g, '').replace(/[^a-zа-яёіїєґ0-9]/gi, '');
+    let svcImgMap = null, svcImgSrc = null;
+    window.serviceImageFor = function(name) {
+        const talks = (db && db.serviceTalks) || [];
+        if (svcImgSrc !== talks) {
+            svcImgSrc = talks; svcImgMap = [];
+            talks.forEach(t => { if (t && t.img && t.product) { const k = svcKey(t.product); if (k) svcImgMap.push([k, t.img]); } });
+        }
+        const k = svcKey(name); if (!k || !svcImgMap.length) return '';
+        let hit = svcImgMap.find(e => e[0] === k) || svcImgMap.find(e => k.length > 5 && e[0].length > 5 && (k.includes(e[0]) || e[0].includes(k)));
+        return hit ? hit[1] : '';
+    };
+    window.serviceHeroHTML = function(name, title) {
+        const img = window.serviceImageFor(name); if (!img) return '';
+        const src = 'assets/service/' + encodeURIComponent(img) + '.webp';
+        return `<div class="svc-hero"><div class="svc-hero-img"><img src="${src}" alt="" decoding="async" onerror="this.closest('.svc-hero').remove()"></div>`
+            + `<div class="svc-cap"><span class="svc-cap-line"></span></div></div>`;
+    };
+
     window.openModalBase = function(modalId, name = "", code = "", priceLabel = "", discount = "") {
         try {
             if (name && modalId === 'descModal') {
@@ -409,7 +429,7 @@
                     }
                 }
 
-                document.getElementById('modalBody').innerHTML = generateDescToggleHTML(raw, code).replace('display: none;', 'display: block;').replace('Детальніше', 'Опис сервісу') + comboHtml;
+                document.getElementById('modalBody').innerHTML = window.serviceHeroHTML(name, title) + generateDescToggleHTML(raw, code).replace('display: none;', 'display: block;').replace('Детальніше', 'Опис сервісу') + comboHtml;
                 let dc = document.getElementById('modalBody').querySelector('.desc-content');
                 if(dc) dc.classList.add('show');
             }
@@ -1993,14 +2013,15 @@ window.saveStore = function() {
             let menuMatches = window.SearchUtil.filter((db.skillHubButtons || []).filter(b => b && b.name && !window.isDenied(b.name)), rawVal, b => [b.name, b.desc].filter(Boolean))
                 .slice(0, 4).map(b => ({ searchType: 'menu', btn: b, name: b.name, desc: b.desc, icon: b.emoji || '🧭' }));
 
-            let matches = [...catMatches, ...menuMatches, ...servMatches].slice(0, 15);
+            let extraMatches = []; try { if (window.SearchAll) extraMatches = window.SearchAll.find(rawVal, db); } catch (e) {}
+            let matches = [...catMatches, ...menuMatches, ...extraMatches.slice(0, 5), ...servMatches].slice(0, 15);
 
             requestAnimationFrame(() => {
                 if (matches.length > 0) {
                     elSuggList.style.display = 'block';
                     let html = matches.map((m, idx) => {
                         let text = m.searchType === 'category' ? m.ua : m.name;
-                        if (m.searchType === 'menu') text = `${m.name}${m.desc ? `<span style="display:block; font-size:11px; font-weight:500; color:var(--text-muted);">${m.desc}</span>` : ''}`;
+                        if (m.searchType === 'menu' || m.searchType === 'extra') text = `${window.escapeHTML ? window.escapeHTML(m.name) : m.name}${m.desc ? `<span style="display:block; font-size:11px; font-weight:500; color:var(--text-muted);">${m.desc}</span>` : ''}`;
                         let brandBadge = '';
                         if (m.searchType === 'service' && m.brandText) {
                             brandBadge = `<div class="sc-brand ${m.cls}" style="margin: 0; font-size: 9px; padding: 2px 6px; flex-shrink: 0;">${m.brandText}</div>`;
@@ -2032,6 +2053,11 @@ window.saveStore = function() {
     elOkBtn.onclick = () => elPriceInput.blur();
 
     function selectItem(item) {
+        if (item.searchType === 'extra') {
+            elCatInput.value = ""; elClearBtn.style.display = "none"; elSuggList.style.display = "none"; elCatInput.blur();
+            try { item.run(); } catch (e) { console.error(e); }
+            return;
+        }
         if (item.searchType === 'menu') {
             elCatInput.value = ""; elClearBtn.style.display = "none"; elSuggList.style.display = "none";
             elCatInput.blur();

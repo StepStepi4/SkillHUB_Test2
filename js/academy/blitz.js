@@ -35,6 +35,42 @@
         out.forEach(q => { q.answers = shuf(q.answers.slice(), r); q.answers.forEach(a => a.selected = false); });
         return { questions: shuf(out, r), services: new Set(out.map(q => q.service)).size };
     }
+    /* ---------- Історія та тижнева статистика ---------- */
+    const WEEK_NEED = 5;                                    // відзнака 21: бліц складено (>=80%) не менше ніж у 5 з останніх 7 днів
+    const histKey = u => 'skillhub_blitz_hist_' + lowLogin(u.login);
+    const dayStr = d => { const f = x => String(x).padStart(2, '0'); return `${d.getFullYear()}-${f(d.getMonth() + 1)}-${f(d.getDate())}`; };
+    function hist(u) { try { return JSON.parse(lsGet(histKey(u)) || '{}') || {}; } catch (e) { return {}; } }
+    function saveHist(u, r) {
+        const h = hist(u), cur = h[r.d];
+        if (!cur || r.score >= cur.score) h[r.d] = { score: r.score, correct: r.correct, total: r.total, tries: r.tries };
+        const keys = Object.keys(h).sort(); while (keys.length > 40) delete h[keys.shift()];
+        lsSet(histKey(u), JSON.stringify(h));
+    }
+    function week(u) {
+        const h = hist(u), days = [], now = new Date();
+        for (let i = 6; i >= 0; i--) { const d = new Date(now); d.setDate(now.getDate() - i); const k = dayStr(d); days.push({ k: k, wd: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][d.getDay()], r: h[k] || null, today: i === 0 }); }
+        const done = days.filter(x => x.r), passed = days.filter(x => x.r && x.r.score >= 80), perfect = days.filter(x => x.r && x.r.score === 100);
+        return { days: days, done: done.length, passed: passed.length, perfect: perfect.length, avg: done.length ? Math.round(done.reduce((a, x) => a + x.r.score, 0) / done.length) : 0 };
+    }
+    function achievementCodes() {
+        const u = me(); if (!u) return [];
+        const h = hist(u), out = [], w = week(u);
+        if (Object.keys(h).some(k => h[k].score === 100)) out.push('22');
+        if (w.passed >= WEEK_NEED) out.push('21');
+        return out;
+    }
+    function renderWeek() {
+        const host = $('courseList'), u = me();
+        let el = $('blitzWeekCard');
+        if (!host || !u || windowViewingEmployee) { if (el) el.remove(); return; }
+        const w = week(u);
+        if (!w.done) { if (el) el.remove(); return; }
+        if (!el) { el = document.createElement('div'); el.id = 'blitzWeekCard'; el.className = 'bw-card'; host.parentNode.insertBefore(el, host); }
+        el.innerHTML = `<div class="bw-head"><b>⚡ Бліц за тиждень</b><span>${w.passed}/7 складено</span></div>
+            <div class="bw-bars">${w.days.map(x => `<div class="bw-day${x.today ? ' today' : ''}"><div class="bw-col"><i class="${x.r ? (x.r.score === 100 ? 'perf' : x.r.score >= 80 ? 'ok' : 'low') : ''}" style="height:${x.r ? Math.max(8, x.r.score) : 0}%"></i></div><em>${x.r ? x.r.score + '%' : '·'}</em><span>${x.wd}</span></div>`).join('')}</div>
+            <div class="bw-sum"><div><b>${w.avg}%</b><span>середній</span></div><div><b>${w.perfect}</b><span>на 100%</span></div><div><b>${w.done}</b><span>днів</span></div></div>`;
+    }
+
     function rec(u) { try { const d = JSON.parse(lsGet(key(u)) || 'null'); return d && d.d === today() ? d : null; } catch (e) { return null; } }
     function isDue(u) {
         if (!u || !eduDb || !eduDb.courses || windowViewingEmployee) return false;
@@ -80,7 +116,11 @@
         const flags = qs.map(q => !zero && isRight(q));
         const correct = flags.filter(Boolean).length, score = total ? Math.round(correct / total * 100) : 0;
         const u = me(), tr = u ? ((rec(u) || {}).tries || 1) : 1, canRetry = !!zero && tr < MAX_TRIES;
-        if (u) lsSet(key(u), JSON.stringify({ d: today(), tries: tr, done: !canRetry, score: score, correct: correct, total: total, cheat: !!zero }));
+        if (u) {
+            const r = { d: today(), tries: tr, done: !canRetry, score: score, correct: correct, total: total, cheat: !!zero };
+            lsSet(key(u), JSON.stringify(r));
+            if (!canRetry) { saveHist(u, r); try { enqueue({ action: 'blitz_save', date: r.d, score: score, correct: correct, total: total, tries: tr }); } catch (e) {} }
+        }
         window.__blitz = null;
         const list = zero ? '' : qs.map((q, i) => {
             const mine = q.answers.filter(a => a.selected).map(a => esc(a.text)), right = q.answers.filter(a => a.correct).map(a => esc(a.text));
@@ -94,7 +134,7 @@
             if (zero && canRetry) { $('resultSubtitle').innerHTML = 'У вас є ще одна спроба.'; } else $('resultSubtitle').innerHTML = `Правильних: <strong style="font-size:22px; color: var(--text-main); margin: 0 4px;">${correct}</strong> з ${total} · неправильних: <strong style="color: var(--danger);">${total - correct}</strong><br><span style="font-size:14px; margin-top: 6px; display:inline-block;">Результат: ${score}%</span>`;
             $('resultActionContainer').innerHTML = `<div class="bz-review">${list}</div>${canRetry ? '<button class="btn btn-glow" id="bzAgain">СПРОБУВАТИ ЩЕ РАЗ</button>' : ''}<button class="btn ${canRetry ? 'btn-secondary' : 'btn-glow'}" id="bzDone" style="margin-top:12px">ДО КАБІНЕТУ</button>`;
             if ($('bzAgain')) $('bzAgain').onclick = () => startBlitz();
-            $('bzDone').onclick = () => { switchView('cabinetView'); afterBlitz(); };
+            $('bzDone').onclick = () => { switchView('cabinetView'); renderWeek(); afterBlitz(); };
             switchView('resultView');
         });
     }
@@ -109,7 +149,8 @@
         try { due = !isTestActive && isDue(u); } catch (e) {}
         if (due) window.__noWelcome = true;
         _prev.apply(this, arguments);
+        try { renderWeek(); } catch (e) {}
         if (due) setTimeout(() => { if (currentUser && !isTestActive) openIntro(); else afterBlitz(); }, 350);
     };
-    window.Blitz = { build: buildBlitz, due: () => isDue(me()), start: openIntro };
+    window.Blitz = { achievementCodes: achievementCodes, week: () => week(me()), renderWeek: renderWeek, build: buildBlitz, due: () => isDue(me()), start: openIntro };
 })();

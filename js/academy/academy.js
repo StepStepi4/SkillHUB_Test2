@@ -202,9 +202,21 @@
         }
     }
 
+    // Відзнаки з таблиці + локальні відзнаки за бліц (21 - тиждень, 22 - 100%), якщо вони є в каталозі відзнак
+    function achStr(user) {
+        let base = user && user.achievements ? String(user.achievements) : '';
+        try {
+            if (window.Blitz && user && lowLogin(user.login) === lowLogin(currentUser)) {
+                const set = new Set(base.split(',').map(x => x.trim()).filter(Boolean));
+                Blitz.achievementCodes().filter(c => (globalAchievements || []).some(a => String(a.code).trim() === c)).forEach(c => set.add(c));
+                base = Array.from(set).join(',');
+            }
+        } catch (e) {}
+        return base;
+    }
     function checkNewAchievements(user) {
-        if (!user || !user.achievements) return;
-        let achCodes = String(user.achievements).split(',').map(s => s.trim()).filter(Boolean);
+        if (!user || !achStr(user)) return;
+        let achCodes = achStr(user).split(',').map(s => s.trim()).filter(Boolean);
         let storedKey = 'skillhub_achievements_' + user.login;
         let viewedCodes = [];
         try { viewedCodes = JSON.parse(localStorage.getItem(storedKey) || '[]'); } catch (e) {}
@@ -234,8 +246,8 @@
             academyScroll(true);
             if (currentUser) {
                 let user = eduDb.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
-                if (user && user.achievements) {
-                    let achCodes = String(user.achievements).split(',').map(s => s.trim()).filter(Boolean);
+                if (user && achStr(user)) {
+                    let achCodes = achStr(user).split(',').map(s => s.trim()).filter(Boolean);
                     localStorage.setItem('skillhub_achievements_' + user.login, JSON.stringify(achCodes));
                     checkNewAchievements(user); 
                 }
@@ -257,7 +269,7 @@
         let container = document.getElementById('achList');
         if (!container) return;
         let user = eduDb.users.find(u => String(u.login).toLowerCase() === String(currentUser).toLowerCase());
-        let earnedCodes = user && user.achievements ? String(user.achievements).split(',').map(s => s.trim()).filter(Boolean) : [];
+        let earnedCodes = user && achStr(user) ? achStr(user).split(',').map(s => s.trim()).filter(Boolean) : [];
         if (!globalAchievements || globalAchievements.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted); font-weight:600;">Відзнаки відсутні в базі</div>';
             return;
@@ -933,7 +945,7 @@
                 if (!coursesMap[groupName].some(existing => getCleanName(existing.product) === pClean)) {
                     coursesMap[groupName].push({
                         course: groupName, product: cleanProdTitle, info: c.info, test: c.test, 
-                        presentations: c.presentations || [], skillhubLink: c.skillhubLink || ""
+                        presentations: c.presentations || [], skillhubLink: c.skillhubLink || "", img: c.img || ""
                     });
                 }
             }
@@ -1923,6 +1935,7 @@
         requestAnimationFrame(() => {
             document.getElementById('learningAnalyticsBlock').innerHTML = statsHtml;
             document.getElementById('courseList').innerHTML = coursesHtml;
+            try { if (window.BrandCourses) BrandCourses.mount(user); } catch (e) { console.error(e); }
         });
     }
 
