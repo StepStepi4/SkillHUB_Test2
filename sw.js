@@ -1,6 +1,6 @@
 // SkillHUB Assistant - Service Worker (offline-first)
 // ВАЖЛИВО: при кожному релізі міняйте VERSION - тоді всі пристрої підтягнуть нові файли.
-const VERSION = 'v-8cae2671d1';
+const VERSION = 'v-86b4d9479f';
 // Кеші прив'язані до шляху (репозиторію) застосунку: кілька застосунків на одному github.io не стирають кеші одне одного
 const SCOPE_URL = new URL(self.registration ? self.registration.scope : self.location.href);
 const REPO_KEY = (SCOPE_URL.pathname.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '').toLowerCase()) || 'root';
@@ -154,7 +154,6 @@ const SHELL = [
   "./index.html",
   "./js/academy/academy.js",
   "./js/academy/blitz.js",
-  "./js/academy/brands.js",
   "./js/academy/extras.js",
   "./js/academy/gate.js",
   "./js/academy/welcome.js",

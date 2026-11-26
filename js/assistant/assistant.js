@@ -172,6 +172,7 @@
         if (!data.montazhData.services) data.montazhData.services = [];
         data.serviceCodes = data.serviceCodes || {};
         data.rezervyData = data.rezervyData || [];
+        data.serviceImages = data.serviceImages || {};
         data.rezervyDate = data.rezervyDate || "";
         data.serviceBrands = data.serviceBrands || {};
         data.trainingData = data.trainingData || [];
@@ -253,18 +254,15 @@
         sessionStorage.setItem('skillhub_active_tab', tabId);
     }
 
-    // Картинка сервісу (колонка H листа «Навчання» -> assets/service/<назва>.webp) з плавною розгорткою над описом
+    // Картинка сервісу (колонка «Фото сервісу» листа «Вартість» -> assets/service/<назва>.webp) з плавною розгорткою над описом
     const svcKey = s => String(s || '').toLowerCase().replace(/\[.*?\]/g, '').replace(/[^a-zа-яёіїєґ0-9]/gi, '');
-    let svcImgMap = null, svcImgSrc = null;
     window.serviceImageFor = function(name) {
-        const talks = (db && db.serviceTalks) || [];
-        if (svcImgSrc !== talks) {
-            svcImgSrc = talks; svcImgMap = [];
-            talks.forEach(t => { if (t && t.img && t.product) { const k = svcKey(t.product); if (k) svcImgMap.push([k, t.img]); } });
-        }
-        const k = svcKey(name); if (!k || !svcImgMap.length) return '';
-        let hit = svcImgMap.find(e => e[0] === k) || svcImgMap.find(e => k.length > 5 && e[0].length > 5 && (k.includes(e[0]) || e[0].includes(k)));
-        return hit ? hit[1] : '';
+        const m = (db && db.serviceImages) || null; if (!m) return '';
+        const direct = window.findInDb ? window.findInDb(m, name) : m[name];
+        if (direct) return direct;
+        const k = svcKey(name); if (!k) return '';
+        const hit = Object.keys(m).find(x => svcKey(x) === k);
+        return hit ? m[hit] : '';
     };
     window.serviceHeroHTML = function(name, title) {
         const img = window.serviceImageFor(name); if (!img) return '';

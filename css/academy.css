@@ -709,31 +709,6 @@ html.gate-on #academyApp #loginView .login-card, html.gate-on #academyApp #login
 .bz-q { font-size:14px; font-weight:700; margin-bottom:5px; }
 .bz-a { font-size:13px; color:var(--danger); font-weight:600; text-decoration:line-through; opacity:.85; } .bz-c { font-size:13px; color:var(--success); font-weight:600; }
 
-/* ===== Бренд-картки курсів (scroll-snap) ===== */
-.bc-wrap { margin: 0 -4px 14px; }
-.bc-track { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding: 10px calc(50% - 105px) 14px; scrollbar-width: none; overscroll-behavior-x: contain; }
-.bc-track::-webkit-scrollbar { display: none; }
-.bc-card { position: relative; flex: 0 0 210px; height: 124px; scroll-snap-align: center; border: 1px solid var(--border); border-radius: 22px; background: var(--card-bg); display: flex; align-items: center; justify-content: center; padding: 16px; cursor: pointer;
-    transform: scale(.8); opacity: .5; transition: transform .28s cubic-bezier(.2,.8,.2,1), opacity .28s, box-shadow .28s, border-color .28s; -webkit-tap-highlight-color: transparent; font: inherit; color: inherit; }
-.bc-card.active { transform: scale(1); opacity: 1; border-color: var(--primary); box-shadow: 0 10px 26px rgba(0,0,0,.14); }
-.bc-card img { max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; user-select: none; }
-.bc-name { font-size: 22px; font-weight: 800; color: var(--text-main); }
-.bc-chip { position: absolute; right: 10px; bottom: 8px; font-style: normal; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 10px; background: var(--input-bg); color: var(--text-muted); }
-.bc-card.active .bc-chip { background: var(--primary); color: #fff; }
-.bc-dots { display: flex; justify-content: center; gap: 6px; margin: -2px 0 10px; }
-.bc-dots i { width: 6px; height: 6px; border-radius: 3px; background: var(--border); transition: width .25s, background .25s; }
-.bc-dots i.on { width: 18px; background: var(--primary); }
-.bc-stats { opacity: 0; transform: translateY(6px); }
-.bc-stats.in { opacity: 1; transform: none; transition: opacity .25s, transform .25s; }
-.bc-sum { display: flex; gap: 8px; margin-bottom: 10px; }
-.bc-sum > div { flex: 1; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 12px 4px; text-align: center; }
-.bc-sum b { display: block; font-size: 20px; color: var(--text-main); } .bc-sum b small { font-size: 13px; color: var(--text-muted); font-weight: 600; }
-.bc-sum span { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
-.bc-bar { position: relative; height: 32px; border-radius: 12px; background: var(--input-bg); border: 1px solid var(--border); overflow: hidden; margin-bottom: 12px; }
-.bc-bar i { position: absolute; inset: 0 auto 0 0; background: var(--primary); opacity: .35; border-radius: inherit; transition: width .4s; }
-.bc-bar em { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-style: normal; font-weight: 700; font-size: 13px; color: var(--text-main); }
-.bc-rest { margin-top: 6px; }
-
 /* ===== Бліц за тиждень ===== */
 .bw-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 14px 14px 12px; margin: 0 0 14px; }
 .bw-head { display: flex; justify-content: space-between; align-items: center; font-size: 15px; margin-bottom: 10px; }

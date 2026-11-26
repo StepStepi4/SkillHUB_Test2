@@ -945,7 +945,7 @@
                 if (!coursesMap[groupName].some(existing => getCleanName(existing.product) === pClean)) {
                     coursesMap[groupName].push({
                         course: groupName, product: cleanProdTitle, info: c.info, test: c.test, 
-                        presentations: c.presentations || [], skillhubLink: c.skillhubLink || "", img: c.img || ""
+                        presentations: c.presentations || [], skillhubLink: c.skillhubLink || ""
                     });
                 }
             }
@@ -1935,7 +1935,6 @@
         requestAnimationFrame(() => {
             document.getElementById('learningAnalyticsBlock').innerHTML = statsHtml;
             document.getElementById('courseList').innerHTML = coursesHtml;
-            try { if (window.BrandCourses) BrandCourses.mount(user); } catch (e) { console.error(e); }
         });
     }
 
