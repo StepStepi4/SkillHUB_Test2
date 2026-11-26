@@ -316,7 +316,7 @@
             const cnt = {}; db.rezervyData.forEach(r => { cnt[r.store] = (cnt[r.store] || 0) + 1; });
             const store = Object.keys(cnt).filter(x => x && x !== 'Не вказано').sort((a, b) => cnt[b] - cnt[a])[0]; if (!store) return { value: 'магазини не визначено', status: 'warn' };
             const prev = sel.value; sel.value = store; window.renderRezervyList(); await sleep(200);
-            const rows = document.querySelectorAll('#rezervyList .list-item').length, st = document.querySelector('#rezervyList .rz-stats');
+            const rows = document.querySelectorAll('#rezervyList .list-item').length, st = (document.getElementById('rezervyStats') || {}).style && document.getElementById('rezervyStats').style.display !== 'none' ? document.getElementById('rezervyStats') : null;
             rezItems = db.rezervyData.filter(r => r.store === store).slice(0, 3);
             const txt = st ? st.innerText.replace(/\s+/g, ' ') : '';
             sel.value = prev; window.renderRezervyList();

@@ -1632,6 +1632,7 @@ window.saveStore = function() {
         const cont = document.getElementById('rezervyList');
         const searchInput = document.getElementById('topReservesSearchInput');
         const searchQuery = searchInput ? searchInput.value.trim() : '';
+        const statsEl = document.getElementById('rezervyStats'); if (statsEl) statsEl.style.display = 'none';
         const dateContainer = document.getElementById('rezervyDateContainer');
         const dateText = document.getElementById('rezervyDateText');
 
@@ -1657,7 +1658,7 @@ window.saveStore = function() {
         matches.sort((a, b) => b.price - a.price);
         let statPcs = 0, statSum = 0;
         matches.forEach(r => { const q = r.pcs != null ? r.pcs : Math.max(1, parseInt(r.qty, 10) || 1); statPcs += q; statSum += r.sum != null ? r.sum : (r.price || 0) * q; });
-        const statsHtml = `<div class="rz-stats"><span>📦 <b>${statPcs.toLocaleString('uk-UA')}</b> шт.</span><span>💰 <b>${Math.round(statSum).toLocaleString('uk-UA')}</b> грн.</span></div>`;
+        const statsHtml = `<span>📦 <b>${statPcs.toLocaleString('uk-UA')}</b> шт.</span><span>💰 <b>${Math.round(statSum).toLocaleString('uk-UA')}</b> грн.</span>`;
 
         let html = matches.map(r => {
             let shortName = r.name.replace(/^(Телевізор|Ноутбук|Смартфон|Мобільний телефон|Планшет|Холодильник|Пральна машина|Мікрохвильова піч|Кавомашина|Пилосос)\s*/i, '');
@@ -1744,7 +1745,8 @@ window.saveStore = function() {
                 </div>
             </div>`;
         }).join('');
-        safeUpdateHTML(cont, statsHtml + html);
+        safeUpdateHTML(cont, html);
+        if (statsEl) { statsEl.innerHTML = statsHtml; statsEl.style.display = 'flex'; }
     }
 
     const topPanel = document.getElementById('topSearchPanel');
