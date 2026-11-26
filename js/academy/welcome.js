@@ -270,12 +270,14 @@
         try { document.dispatchEvent(new Event('skillhub-badge')); } catch (e) {}
     }
     let cachedUser = null;
+    let lastCacheLoad = 0;
     async function refreshBadge() {
         let data = null, login = null;
         try { const a = readAuth(); login = a && a.login; } catch (e) {}
         if (!login) { paintBadge(0); return; }
         let u = (eduDb && eduDb.users) ? eduDb.users.find(x => lowLogin(x.login) === lowLogin(login)) : null;
-        if (!u) { try { data = await eduLoadCache(); u = data && data.educationData.users.find(x => lowLogin(x.login) === lowLogin(login)); } catch (e) {} }
+        if (!u && cachedUser && Date.now() - lastCacheLoad < 60000) u = cachedUser;     // не читаємо кеш з IndexedDB кожні 5 с
+        if (!u) { lastCacheLoad = Date.now(); try { data = await eduLoadCache(); u = data && data.educationData.users.find(x => lowLogin(x.login) === lowLogin(login)); } catch (e) {} }
         if (u && !globalAchievements.length && data) globalAchievements = data.achievementData || [];
         cachedUser = u || null;
         // Якщо кабінет відкритий і користувач його бачить - це вже не «подія»

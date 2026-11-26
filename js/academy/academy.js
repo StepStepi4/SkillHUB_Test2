@@ -802,7 +802,7 @@
             }
         };
         tick();
-        deadlineInterval = setInterval(tick, 1000);
+        deadlineInterval = setInterval(() => { if (!document.hidden) tick(); }, 1000);
     }
 
     function updateTestButtonState() {

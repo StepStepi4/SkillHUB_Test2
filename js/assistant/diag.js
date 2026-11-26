@@ -4,7 +4,7 @@
    лише лічильники, час і стани. 3) Весь текст проходить через __redact перед показом і копіюванням. */
 (function () {
     if (window.Diag) return;
-    const EXPECT_REV = 11;
+    const EXPECT_REV = 18;
     const files = ['index.html', 'sw.js', 'manifest.json', 'css/assistant.css', 'css/academy.css', 'js/core/config.js', 'js/assistant/assistant.js', 'js/academy/academy.js'];
     const red = s => (window.__redact ? window.__redact(s) : String(s));
     const $ = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
@@ -117,7 +117,7 @@
             if (sv && (sv.code === 'forbidden' || sv.code === 'auth_required' || sv.code === 'no_auth')) return deny(sv.code === 'forbidden' ? 'Доступ заборонено: потрібна роль «Власник».' : 'Сесія недійсна. Увійдіть в Академію як Власник.');
             return deny('Сервер повернув помилку' + (sv && sv.error ? ': ' + sv.error : '') + '. Імовірно, скрипт ще не оновлено до версії ' + EXPECT_REV + '.');
         }
-        state.total = 34; state.done = 1; setProgress();
+        state.total = 50; state.done = 1; setProgress();
 
         rep.sec('Середовище');
         await step(rep, 'Версія застосунку', async () => {
@@ -254,6 +254,164 @@
             const k = '__diag_probe'; const blob = 'x'.repeat(100 * 1024); const t = performance.now();
             try { localStorage.setItem(k, blob); localStorage.getItem(k); } finally { localStorage.removeItem(k); }
             const ms = Math.round(performance.now() - t); return { value: '100 КБ запис+читання за ' + ms + ' мс', status: ms > 150 ? 'warn' : 'ok' };
+        });
+
+        /* Сценарії: імітація дій користувача (стан інтерфейсу після кожного кроку відновлюється, меню не скидається) */
+        rep.sec('Сценарії: як користується співробітник');
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const A = () => (window.__appDb ? window.__appDb() : {}) || {};
+        const closeAll = () => { ['descModal', 'rezervItemModal'].forEach(m => { try { window.closeModalBase(m); } catch (e) {} }); };
+        const badText = t => /undefined|NaN|\[object/.test(t);
+        let rezItems = [];
+
+        await step(rep, 'Пошук: введення запиту та підказки', async () => {
+            const db = A(), inp = document.getElementById('catInput'), box = document.getElementById('customSuggestions');
+            if (!inp || !box) return { value: 'поле пошуку не знайдено', status: 'err' };
+            const src = (db.categories || []).map(c => c.ua).filter(Boolean)[0] || ((db.tariffs || [])[0] || {}).service || '';
+            if (!src) return { value: 'каталог порожній', status: 'err' };
+            const q = String(src).replace(/[^\wА-Яа-яІіЇїЄєҐґ ]/g, '').trim().slice(0, 6);
+            const was = inp.value, wasDis = inp.disabled; inp.disabled = false;
+            inp.value = q; inp.dispatchEvent(new Event('input', { bubbles: true }));
+            const t = performance.now(); let n = 0;
+            for (let i = 0; i < 12 && !n; i++) { await sleep(100); n = box.children.length; }
+            const ms = Math.round(performance.now() - t), txt = box.innerText || '';
+            inp.value = was; inp.dispatchEvent(new Event('input', { bubbles: true })); inp.disabled = wasDis; box.style.display = 'none';
+            return { value: 'запит «' + q + '» → підказок: ' + n + ' за ' + ms + ' мс', status: n ? (badText(txt) ? 'warn' : 'ok') : 'err', detail: n ? '' : 'Пошук нічого не знайшов за назвою з каталогу' };
+        });
+        await step(rep, 'Пошук: новини, курси, пропозиції (всі джерела)', async () => {
+            const db = A(); if (!window.SearchAll) return { value: 'модуль пошуку не завантажено', status: 'err' };
+            const word = (((db.news || [])[0] || {}).text || ((db.serviceTalks || [])[0] || {}).product || 'новин').replace(/<[^>]*>/g, ' ').trim().split(/\s+/)[0] || 'новин';
+            const r = window.SearchAll.find(word.slice(0, 5), db);
+            return { value: 'запит «' + word.slice(0, 5) + '» → знайдено ' + r.length + ' додаткових результатів', status: 'ok' };
+        });
+        await step(rep, 'Картки рекомендованих сервісів (2 категорії)', async () => {
+            const db = A(), cats = (db.categories || []).filter(c => c.ua).slice(0, 2); if (!cats.length) return { value: 'немає категорій', status: 'err' };
+            const out = [];
+            for (const c of cats) {
+                window.openRezervItemModal(c.ua, 1000, c.ua, false); await sleep(350);
+                const body = document.getElementById('rezervItemBody'), cards = body ? body.querySelectorAll('.service-card').length : 0;
+                out.push(c.ua + ': ' + cards + ' карток' + (body && badText(body.innerText) ? ' (є undefined/NaN!)' : ''));
+                closeAll(); await sleep(150);
+            }
+            const bad = out.some(x => /: 0 карток|NaN/.test(x));
+            return { value: out.join('; '), status: bad ? 'warn' : 'ok', detail: bad ? 'У категорії немає рекомендованих сервісів або ціна не рахується' : '' };
+        });
+        await step(rep, 'Опис сервісу з фото (2 сервіси)', async () => {
+            const db = A(), names = Object.keys(db.descriptions || {}).slice(0, 2); if (!names.length) return { value: 'описів немає', status: 'err' };
+            const out = []; let warn = false;
+            for (const n of names) {
+                window.openModalBase('descModal', n, (db.serviceCodes || {})[n] || '', '', ''); await sleep(500);
+                const b = document.getElementById('modalBody'), img = b && b.querySelector('.svc-hero img');
+                const hasImg = !!window.serviceImageFor(n), okImg = !img || (img.complete && img.naturalWidth > 0);
+                const len = b ? b.innerText.length : 0;
+                if (!len || (hasImg && !okImg)) warn = true;
+                out.push(n.slice(0, 28) + ': ' + (len ? 'опис ' + len + ' симв.' : 'порожньо') + (hasImg ? (okImg ? ', фото ✓' : ', фото НЕ завантажилось') : ', без фото'));
+                closeAll(); await sleep(150);
+            }
+            return { value: out.join('; '), status: warn ? 'warn' : 'ok' };
+        });
+        await step(rep, 'Резерви: вибір магазину та коротка статистика', async () => {
+            const db = A(), sel = document.getElementById('storeFilter'); rezItems = [];
+            if (!sel || !(db.rezervyData || []).length) return { value: 'резервів немає', status: 'warn' };
+            const cnt = {}; db.rezervyData.forEach(r => { cnt[r.store] = (cnt[r.store] || 0) + 1; });
+            const store = Object.keys(cnt).filter(x => x && x !== 'Не вказано').sort((a, b) => cnt[b] - cnt[a])[0]; if (!store) return { value: 'магазини не визначено', status: 'warn' };
+            const prev = sel.value; sel.value = store; window.renderRezervyList(); await sleep(200);
+            const rows = document.querySelectorAll('#rezervyList .list-item').length, st = document.querySelector('#rezervyList .rz-stats');
+            rezItems = db.rezervyData.filter(r => r.store === store).slice(0, 3);
+            const txt = st ? st.innerText.replace(/\s+/g, ' ') : '';
+            sel.value = prev; window.renderRezervyList();
+            return { value: store + ': ' + rows + ' позицій; ' + (txt || 'статистика не показана'), status: rows && st && !badText(txt) ? 'ok' : 'err', detail: rows === cnt[store] ? '' : 'Показано ' + rows + ' із ' + cnt[store] };
+        });
+        await step(rep, 'Резерви: відкриття 3 позицій і перевірка сервісів', async () => {
+            if (!rezItems.length) return { value: 'немає позицій для перевірки', status: 'warn' };
+            const out = []; let bad = false;
+            for (const r of rezItems) {
+                window.openRezervItemModal(r.cat, r.price, r.name, /уцінка/i.test(r.name)); await sleep(350);
+                const body = document.getElementById('rezervItemBody'), cards = body ? body.querySelectorAll('.service-card').length : -1;
+                const hasNaN = body ? badText(body.innerText) : false;
+                if (cards < 1 || hasNaN) bad = true;
+                out.push(r.name.slice(0, 22) + ': ' + (cards < 0 ? 'вікно не відкрилось' : cards + ' сервісів') + (hasNaN ? ' ⚠' : ''));
+                closeAll(); await sleep(150);
+            }
+            return { value: out.join('; '), status: bad ? 'warn' : 'ok', detail: bad ? 'Категорії немає в каталозі або ціна сервісів не рахується' : '' };
+        });
+        await step(rep, 'SkillHUB: перевірка 2 посилань', async () => {
+            const bt = (A().skillHubButtons || []).filter(b => /^https?:/i.test(String(b.link || '').trim())).slice(0, 2);
+            if (!bt.length) return { value: 'кнопок із посиланнями немає', status: 'info' };
+            const out = []; let bad = false;
+            for (const b of bt) {
+                const t = performance.now();
+                try { await timeout(fetch(String(b.link).trim(), { mode: 'no-cors', cache: 'no-store' }), 8000, b.name); out.push(b.name + ': доступне, ' + Math.round(performance.now() - t) + ' мс'); }
+                catch (e) { bad = true; out.push(b.name + ': НЕ відповідає'); }
+            }
+            return { value: out.join('; '), status: bad ? 'warn' : 'ok' };
+        });
+        await step(rep, 'Заміна продавця: списки форми', async () => {
+            const r = await fetchTimed(API_URL + '?action=seller_form'); let j = {}; try { j = JSON.parse(r.text); } catch (e) {}
+            const st = (j.stores || []).length, rs = (j.reasons || []).length;
+            return { value: 'магазинів ' + st + ', причин ' + rs + ', ' + r.total + ' мс', status: st && rs ? 'ok' : 'err', detail: st && rs ? '' : 'Лист «Заміна продавця»: магазини в T:T, причини в U:U; або скрипт не оновлено' };
+        });
+        await step(rep, 'Заміна продавця: пробна заявка в Telegram', async () => {
+            const r = await timeout(window.Academy.diagPost('diag_tg', { kind: 'seller' }), 30000, 'заявка');
+            if (!r || r.code === 'forbidden') return { value: 'недоступно', status: 'err' };
+            return { value: r.success ? 'надіслано в ' + r.sent + ' із ' + r.chats + ' чатів' : 'не надіслано', status: r.success ? 'ok' : 'err', detail: r.error || 'Без запису в таблицю, повідомлення позначене 🧪' };
+        });
+        await step(rep, 'Telegram-бот: тестове повідомлення', async () => {
+            const r = await timeout(window.Academy.diagPost('diag_tg', { kind: 'bot' }), 30000, 'бот');
+            if (!r) return { value: 'без відповіді', status: 'err' };
+            if (r.code === 'forbidden') return { value: 'недоступно', status: 'err' };
+            const parts = ['токен ' + (r.tokenSet ? 'є' : 'немає'), 'ключ ' + (r.keySet ? 'є' : 'немає'), r.bot ? 'бот ' + r.bot : '', 'доставлено ' + (r.sent || 0) + '/' + (r.chats || 0)].filter(Boolean);
+            return { value: parts.join(', '), status: r.success && r.keySet ? 'ok' : r.success ? 'warn' : 'err', detail: r.error || (r.keySet ? '' : 'Не збережено BOT_KEY — бот не зможе читати таблицю') };
+        });
+        await step(rep, 'Налаштування: тема', async () => {
+            const tg = document.getElementById('themeToggle'), root = document.documentElement; if (!tg) return { value: 'перемикач не знайдено', status: 'err' };
+            const was = root.getAttribute('data-theme') || 'light', wasLS = localStorage.getItem('theme');
+            tg.click(); await sleep(60); const now = root.getAttribute('data-theme'); tg.click(); await sleep(60);
+            const back = root.getAttribute('data-theme') === was; if (wasLS !== null) localStorage.setItem('theme', wasLS);
+            return { value: was + ' → ' + now + ' → ' + (back ? 'повернуто' : 'НЕ повернуто'), status: now !== was && back ? 'ok' : 'err' };
+        });
+        await step(rep, 'Налаштування: розмір тексту', async () => {
+            const sl = document.getElementById('fontSizeSlider'); if (!sl || !window.updateFontScale) return { value: 'слайдер не знайдено', status: 'err' };
+            const was = localStorage.getItem('skillhub_font_scale') || '1';
+            window.updateFontScale('1.2'); await sleep(50); const applied = !!document.getElementById('dynamicFontScale'); window.updateFontScale(was);
+            return { value: 'масштаб ' + was + ': застосування ' + (applied ? 'працює' : 'не працює'), status: applied ? 'ok' : 'err' };
+        });
+        await step(rep, 'Налаштування: обране та кнопки меню', async () => {
+            let favs = []; try { favs = JSON.parse(localStorage.getItem('skillhub_favs') || '[]'); } catch (e) { return { value: 'пошкоджений список обраного', status: 'err' }; }
+            const names = (A().skillHubButtons || []).map(b => b.name), orphan = favs.filter(f => !names.includes(f) && !document.querySelector('[data-func="' + f + '"]'));
+            const rows = ['newsRow', 'diagRow', 'forceUpdateBtn'].filter(id => !document.getElementById(id));
+            return { value: 'в обраному ' + favs.length + ', кнопок меню ' + names.length, status: orphan.length || rows.length ? 'warn' : 'ok', detail: (orphan.length ? 'Немає в меню: ' + orphan.join(', ') + '. ' : '') + (rows.length ? 'Немає елементів: ' + rows.join(', ') : '') };
+        });
+        await step(rep, 'Налаштування: service worker і кеш', async () => {
+            const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+            const keys = window.caches ? await caches.keys() : [];
+            return { value: reg ? (reg.active ? 'активний' : 'не активний') + ', кешів ' + keys.length : 'не зареєстровано', status: reg && reg.active ? 'ok' : 'warn' };
+        });
+        await step(rep, 'Академія продавця: актуальність даних', async () => {
+            const r = await window.Academy.diagPost('edu', {}); if (!r || !r.success) return { value: 'помилка ' + (r && r.code), status: 'err' };
+            const users = (r.educationData && r.educationData.users) || [], sellers = users.filter(u => /продав/i.test(u.role || ''));
+            let local = null; try { local = eduDb && eduDb.users ? eduDb.users : null; } catch (e) {}
+            const sumFacts = arr => arr.reduce((a, u) => a + GOAL_DEFS.reduce((b, d) => b + (Number((((u.goalsFact || u.goals) || {})[d.key] || {}).fact) || 0), 0), 0);
+            const same = local ? (local.length === users.length && Math.round(sumFacts(local)) === Math.round(sumFacts(users))) : null;
+            return { value: 'продавців ' + sellers.length + ' із ' + users.length + '; дані застосунку ' + (same === null ? 'ще не завантажені' : same ? 'збігаються з таблицею' : 'відстають від таблиці'), status: same === false ? 'warn' : 'ok', detail: same === false ? 'Потрібне оновлення (кнопка в кабінеті)' : '' };
+        });
+        await step(rep, 'Академія продавця: цілі та виконання', async () => {
+            const r = await window.Academy.diagPost('edu', {}); if (!r || !r.success) return { value: 'помилка ' + (r && r.code), status: 'err' };
+            const sellers = ((r.educationData && r.educationData.users) || []).filter(u => /продав/i.test(u.role || ''));
+            let withGoals = 0, withFacts = 0, odd = 0, full = 0, rows = 0;
+            sellers.forEach(u => {
+                if (u.goals) withGoals++;
+                const g = u.goals || u.goalsFact || {}; let any = false;
+                GOAL_DEFS.forEach(d => {
+                    const o = g[d.key]; if (!o) return; rows++;
+                    if (o.fact !== null && o.fact !== undefined && o.fact !== '') any = true;
+                    const done = o.done;
+                    if (o.goal > 0 && o.fact != null && o.fact !== '' && (done == null || isNaN(done) || Math.abs(done - Math.round(o.fact / o.goal * 100)) > 1)) odd++;
+                    if (done >= 100) full++;
+                });
+                if (any) withFacts++;
+            });
+            return { value: 'із цілями ' + withGoals + ', з фактом ' + withFacts + ', показників виконано на 100% ' + full + ', розбіжностей у % ' + odd, status: odd ? 'warn' : sellers.length && !withFacts ? 'warn' : 'ok', detail: odd ? 'Відсоток виконання не збігається з фактом/ціллю — перевірте формули в таблиці' : (sellers.length && !withFacts ? 'У продавців немає фактичних показників' : '') };
         });
 
         /* Сервер: результати його власної діагностики */

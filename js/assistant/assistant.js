@@ -93,6 +93,7 @@
     const SEEN_VERSION_KEY = 'skillhub_version_flat_v6';
 
     let db = { categories: [], descriptions: {}, tariffs: [], appVersion: "", changelog: "", montazhData: {cities:[], services:[]}, serviceCodes: {}, rezervyData: [], rezervyDate: "", serviceBrands: {}, trainingData: [], skillHubButtons: [], sellerRatings: [], klochCalcData: { rules: [], relevance: "" } };
+    window.__appDb = () => db;          // лише для читання діагностикою
     let currentCategoryData = null;
     let currentServiceData = null;
     let savedScrollY = 0;
@@ -1654,6 +1655,9 @@ window.saveStore = function() {
         if (matches.length === 0) { safeUpdateHTML(cont, `<div style="padding:20px; text-align:center; color:var(--text-muted); font-weight:600;">Немає товарів</div>`); return; }
 
         matches.sort((a, b) => b.price - a.price);
+        let statPcs = 0, statSum = 0;
+        matches.forEach(r => { const q = r.pcs != null ? r.pcs : Math.max(1, parseInt(r.qty, 10) || 1); statPcs += q; statSum += r.sum != null ? r.sum : (r.price || 0) * q; });
+        const statsHtml = `<div class="rz-stats"><span>📦 <b>${statPcs.toLocaleString('uk-UA')}</b> шт.</span><span>💰 <b>${Math.round(statSum).toLocaleString('uk-UA')}</b> грн.</span></div>`;
 
         let html = matches.map(r => {
             let shortName = r.name.replace(/^(Телевізор|Ноутбук|Смартфон|Мобільний телефон|Планшет|Холодильник|Пральна машина|Мікрохвильова піч|Кавомашина|Пилосос)\s*/i, '');
@@ -1740,7 +1744,7 @@ window.saveStore = function() {
                 </div>
             </div>`;
         }).join('');
-        safeUpdateHTML(cont, html);
+        safeUpdateHTML(cont, statsHtml + html);
     }
 
     const topPanel = document.getElementById('topSearchPanel');
@@ -2162,6 +2166,8 @@ window.saveStore = function() {
 
     function renderDescLine(line) {
             const l = line.trim(); if (!l) return '';
+            // Рядок лише з картинкою: без іконки-крапки, по центру
+            if (/^!\[[^\]]*\]\([^)]*\)(\s*!\[[^\]]*\]\([^)]*\))*$/.test(l)) return `<div class="desc-img-only">${RichText.inline(l)}</div>`;
             if (l.startsWith('+')) return `<div style="font-weight:700; font-size:14px; color:var(--text-main); margin: 12px 0 6px 0;">${RichText.inline(l.substring(1).trim())}</div>`;
             if (l.startsWith('=')) return `<div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin: 12px 0 6px 0;">${RichText.inline(l.substring(1).trim())}</div>`;
 

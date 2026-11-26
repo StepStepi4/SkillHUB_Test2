@@ -720,3 +720,10 @@ html.post-upd body { overflow: hidden; }
 @keyframes svcImgIn { from { transform: scale(1.12); } to { transform: scale(1); } }
 @keyframes svcCapIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .svc-hero, .svc-hero-img img, .svc-cap { animation: none; } }
+
+.desc-img-only { display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; text-align: center; }
+.desc-img-only img { max-width: 100%; height: auto; border-radius: 12px; }
+
+.rz-stats { display: flex; gap: 8px; margin: 0 0 10px; }
+.rz-stats span { flex: 1; text-align: center; padding: 9px 6px; border-radius: 14px; background: var(--card-bg); border: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text-muted); }
+.rz-stats b { color: var(--text-main); font-size: 15px; }

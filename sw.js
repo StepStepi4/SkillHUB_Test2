@@ -1,6 +1,6 @@
 // SkillHUB Assistant - Service Worker (offline-first)
 // ВАЖЛИВО: при кожному релізі міняйте VERSION - тоді всі пристрої підтягнуть нові файли.
-const VERSION = 'v-86b4d9479f';
+const VERSION = 'v-dde0ab5a48';
 // Кеші прив'язані до шляху (репозиторію) застосунку: кілька застосунків на одному github.io не стирають кеші одне одного
 const SCOPE_URL = new URL(self.registration ? self.registration.scope : self.location.href);
 const REPO_KEY = (SCOPE_URL.pathname.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '').toLowerCase()) || 'root';
@@ -136,6 +136,10 @@ const SHELL = [
   "./assets/service/eset_mobile.webp",
   "./assets/service/eset_nod32.webp",
   "./assets/service/eset_sec_essent.webp",
+  "./assets/service/logo_ekta.webp",
+  "./assets/service/logo_eset.webp",
+  "./assets/service/logo_microsoft.webp",
+  "./assets/service/logo_support.webp",
   "./assets/service/office_2024.webp",
   "./assets/service/office_365_family.webp",
   "./assets/service/office_365_personal.webp",
