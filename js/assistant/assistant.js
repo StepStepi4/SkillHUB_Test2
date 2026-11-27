@@ -181,6 +181,7 @@
         data.sellerRatings = data.sellerRatings || [];
         data.news = Array.isArray(data.news) ? data.news : [];
         data.contest = (data.contest && typeof data.contest === 'object') ? { active: !!data.contest.active, showTable: !!data.contest.showTable } : { active: false, showTable: false };
+        data.topSellers = Array.isArray(data.topSellers) ? data.topSellers : [];
         data.access = (data.access && typeof data.access === 'object') ? data.access : {};
         data.klochCalcData = data.klochCalcData || { rules: [], relevance: "" };
         return data;
@@ -572,17 +573,49 @@
         try { localStorage.setItem('skillhub_news_seen', String(latest)); } catch (e) {}
         window.renderNewsBadge();
     }
-    // «Змагання»: кнопка видима, лише якщо в листі B1 = «Активне»; таблиця - якщо B2 = «Так»
+    // 🏆 Рейтинг ТОП продавців регіону (лист «Отримана статистика по співробітникам», T:Z)
     window.renderContestRow = function() {
         const row = document.getElementById('contestRow');
-        if (row) row.style.display = (db && db.contest && db.contest.active) ? '' : 'none';
+        if (row) row.style.display = (db && db.topSellers && db.topSellers.length) ? '' : 'none';
+    };
+    const topNorm = x => String(x || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const topFmt = v => { const n = Number(String(v).replace(/\s/g, '').replace(',', '.')); return (v !== '' && isFinite(n)) ? n.toLocaleString('uk-UA').replace(/\u00a0/g, ' ') : safeText(v); };
+    let topPeriod = null;
+    window.topSetPeriod = function(p) { topPeriod = p; window.renderTopSellers(); };
+    window.renderTopSellers = function() {
+        const list = (db && db.topSellers) || [];
+        const me = currentUserInfo(), meKey = me ? topNorm(me.name || me.fio || '') : '';
+        const periods = []; list.forEach(t => { if (t.period && periods.indexOf(t.period) === -1) periods.push(t.period); });
+        const rank = p => /міс/i.test(p) ? 0 : /рік|год/i.test(p) ? 1 : 2;
+        periods.sort((a, b) => rank(a) - rank(b));
+        if (!topPeriod || periods.indexOf(topPeriod) === -1) topPeriod = periods[0] || '';
+        const rows = list.filter(t => t.period === topPeriod);
+        const noms = []; rows.forEach(t => { if (noms.indexOf(t.nomination) === -1) noms.push(t.nomination); });
+        let html = '<div class="top-wrap">';
+        // моє місце
+        const mine = list.filter(t => meKey && topNorm(t.name) === meKey).sort((a, b) => a.place - b.place)[0];
+        if (mine) html += `<div class="top-me"><span class="top-me-medal">${mine.place === 1 ? '🥇' : mine.place === 2 ? '🥈' : mine.place === 3 ? '🥉' : '🏅'}</span><div><b>Ви в ТОПі!</b><small>${safeText(mine.nomination)} · ${safeText(mine.period).toLowerCase()} · ${mine.place} місце</small></div></div>`;
+        if (periods.length > 1) html += '<div class="top-tabs">' + periods.map(p => `<button class="${p === topPeriod ? 'on' : ''}" onclick="window.topSetPeriod('${safeText(p).replace(/'/g, '')}')">${safeText(p)}</button>`).join('') + '</div>';
+        noms.forEach(nm => {
+            const g = rows.filter(t => t.nomination === nm).sort((a, b) => (a.place || 99) - (b.place || 99));
+            const by = pl => g.filter(t => t.place === pl)[0];
+            const card = (t, pl) => {
+                if (!t) return `<div class="top-pod p${pl} empty"></div>`;
+                const you = meKey && topNorm(t.name) === meKey;
+                return `<div class="top-pod p${pl}${you ? ' you' : ''}"><div class="top-ava">${pl === 1 ? '<i class="top-crown">👑</i>' : ''}<img src="assets/achievements/${safeText(t.ach)}.webp" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${pl === 1 ? '🥇' : pl === 2 ? '🥈' : '🥉'}'}))" alt=""></div>
+                    <div class="top-nm">${safeText(t.name)}</div><div class="top-st">${safeText(t.store)}</div><div class="top-res">${topFmt(t.result)}</div><div class="top-step">${pl}</div></div>`;
+            };
+            html += `<div class="top-sec"><div class="top-nom">${safeText(nm)}</div><div class="top-podium">${card(by(2), 2)}${card(by(1), 1)}${card(by(3), 3)}</div>`;
+            g.filter(t => t.place > 3).forEach(t => { html += `<div class="top-row${meKey && topNorm(t.name) === meKey ? ' you' : ''}"><b>${t.place}</b><span>${safeText(t.name)}<small>${safeText(t.store)}</small></span><em>${topFmt(t.result)}</em></div>`; });
+            html += '</div>';
+        });
+        if (!noms.length) html += '<div class="news-empty">Рейтинг поки порожній</div>';
+        html += '<div class="top-foot">За місця в ТОПі нараховуються відзнаки в Академії</div></div>';
+        safeUpdateHTML('modalBody', html);
     };
     window.openContest = function() {
-        const c = (db && db.contest) || {};
-        const stub = '<div class="news-empty">Поки немає активних змагань</div>';
-        document.getElementById('modalTitle').innerHTML = '🏆 Змагання';
-        // умови та підсумкова таблиця будуть підключені пізніше - поки заглушка
-        safeUpdateHTML('modalBody', stub + (c.showTable ? '' : ''));
+        document.getElementById('modalTitle').innerHTML = '🏆 Рейтинг ТОП продавців регіону';
+        window.renderTopSellers();
         window.openModalBase('descModal');
     };
     window.renderVoteRow = function() {
@@ -643,6 +676,7 @@
             if (Array.isArray(r.news)) db.news = r.news;
             if (Array.isArray(r.feedback)) db.feedback = r.feedback;
             if (r.contest && typeof r.contest === 'object') db.contest = { active: !!r.contest.active, showTable: !!r.contest.showTable };
+            if (Array.isArray(r.topSellers)) db.topSellers = r.topSellers;
             window.renderContestRow();
             db.voteOpen = !!r.voteOpen; db.voteIds = r.voteIds; db.voteClosedIds = r.voteClosedIds;
             window.renderNewsBadge(); window.renderVoteRow(); window.renderServerRev();
@@ -695,14 +729,22 @@
             if (done) return `<div class="fb-q">${title}<div class="fb-done">✓ ${rate ? 'Дякуємо, оцінку враховано' : 'Дякуємо! Нову відповідь можна буде надіслати завтра'}</div></div>`;
             active++;
             if (rate) {
-                return `<div class="fb-q" data-i="${i}">${title}<div class="fb-slider-wrap"><div class="fb-slider-val empty" id="fbVal${i}">Рухайте повзунок</div><input type="range" class="fb-slider" min="1" max="10" step="1" value="5" oninput="window.fbSlide(${i}, this.value)" onchange="window.fbSlide(${i}, this.value)"><div class="fb-rate-hint"><span>1 — дуже погано</span><span>10 — відмінно</span></div></div></div>`;
+                return `<div class="fb-q" data-i="${i}">${title}<div class="fb-slider-wrap"><div class="fb-emo" id="fbEmo${i}">🙂</div><div class="fb-slider-val empty" id="fbVal${i}">Рухайте повзунок</div><input type="range" class="fb-slider" id="fbRange${i}" min="1" max="10" step="1" value="5" style="--v:44%" oninput="window.fbSlide(${i}, this.value)" onchange="window.fbSlide(${i}, this.value)"><div class="fb-rate-hint"><span>1 — дуже погано</span><span>10 — відмінно</span></div></div></div>`;
             }
             return `<div class="fb-q" data-i="${i}">${title}<textarea class="fb-text" maxlength="1500" placeholder="Ваша розгорнута відповідь…" oninput="window.fbText(${i}, this.value)"></textarea></div>`;
         }).join('');
         sendBtn.style.display = active ? '' : 'none';
         sendBtn.disabled = false; sendBtn.innerText = 'Надіслати';
     };
-    window.fbSlide = function(i, v) { fbState[i] = String(v); const el = document.getElementById('fbVal' + i); if (el) { el.classList.remove('empty'); el.innerText = v + ' / 10'; } };
+    const FB_FACES = [['😡', 'Жахливо'], ['😠', 'Дуже погано'], ['😞', 'Погано'], ['😕', 'Так собі'], ['😐', 'Нормально'], ['🙂', 'Непогано'], ['😊', 'Добре'], ['😃', 'Дуже добре'], ['😍', 'Чудово!'], ['🤩', 'Неймовірно!']];
+    window.fbSlide = function(i, v) {
+        fbState[i] = String(v);
+        const f = FB_FACES[Math.max(1, Math.min(10, +v)) - 1], el = document.getElementById('fbVal' + i), em = document.getElementById('fbEmo' + i), rg = document.getElementById('fbRange' + i);
+        if (el) { el.classList.remove('empty'); el.innerHTML = '<b>' + v + '</b> / 10 · ' + f[1]; }
+        if (em) { em.textContent = f[0]; em.classList.remove('pop'); void em.offsetWidth; em.classList.add('pop'); }
+        if (rg) rg.style.setProperty('--v', ((v - 1) / 9 * 100) + '%');
+        try { if (navigator.vibrate) navigator.vibrate(5); } catch (e) {}
+    };
     window.fbText = function(i, v) { fbState[i] = v; };
 
     window.sendFeedback = async function() {

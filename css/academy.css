@@ -734,3 +734,10 @@ html.gate-on #academyApp #loginView .login-card, html.gate-on #academyApp #login
 [data-theme="dark"] #academyApp .goal-bubble{background:#fff;color:#000}
 [data-theme="dark"] #academyApp .goal-bubble::after{border-top-color:#fff}
 .wl-ring{cursor:pointer}.wl-ring:active{transform:scale(.98)}
+
+/* відзнаки: сірі теж відкриваються й показують опис */
+#academyApp .ach-card.locked{cursor:pointer}
+#academyApp .ach-card.locked:active{transform:scale(.97)}
+#academyApp .ach-card.locked.zoomed{opacity:.9;border-style:solid;border-color:var(--text-muted);box-shadow:0 14px 30px rgba(0,0,0,.12)}
+#academyApp .ach-card.locked.zoomed .ach-card-desc{display:block;color:var(--text-muted)}
+#academyApp .ach-card.locked.zoomed .ach-icon-wrapper{width:96px;height:96px}

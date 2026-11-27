@@ -1,6 +1,6 @@
 // SkillHUB Assistant - Service Worker (offline-first)
 // ВАЖЛИВО: при кожному релізі міняйте VERSION - тоді всі пристрої підтягнуть нові файли.
-const VERSION = 'v-0b79709a7d';
+const VERSION = 'v-0cf82e651c';
 // Кеші прив'язані до шляху (репозиторію) застосунку: кілька застосунків на одному github.io не стирають кеші одне одного
 const SCOPE_URL = new URL(self.registration ? self.registration.scope : self.location.href);
 const REPO_KEY = (SCOPE_URL.pathname.replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '').toLowerCase()) || 'root';
@@ -28,6 +28,12 @@ const SHELL = [
   "./assets/achievements/19.webp",
   "./assets/achievements/2.webp",
   "./assets/achievements/20.webp",
+  "./assets/achievements/23.webp",
+  "./assets/achievements/24.webp",
+  "./assets/achievements/25.webp",
+  "./assets/achievements/26.webp",
+  "./assets/achievements/27.webp",
+  "./assets/achievements/28.webp",
   "./assets/achievements/3.webp",
   "./assets/achievements/4.webp",
   "./assets/achievements/5.webp",
@@ -79,6 +85,7 @@ const SHELL = [
   "./assets/icons/skillhub/Favorite.svg",
   "./assets/icons/skillhub/Klochkivska.svg",
   "./assets/icons/skillhub/News.svg",
+  "./assets/icons/skillhub/O4.svg",
   "./assets/icons/skillhub/SkillHUB.svg",
   "./assets/icons/skillhub/Smart.svg",
   "./assets/icons/skillhub/add.svg",

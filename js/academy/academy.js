@@ -256,7 +256,6 @@
     }
 
     function toggleAchZoom(el) {
-        if (el.classList.contains('locked')) return;
         if (el.classList.contains('zoomed')) {
             el.classList.remove('zoomed');
         } else {
@@ -286,7 +285,7 @@
                     <div style="display: flex; flex-direction: column; justify-content: center; flex: 1;">
                         <div class="ach-card-title">${safeTitle}</div>
                         <div class="ach-card-desc">${safeDesc}</div>
-                        ${isEarned ? `<div style="margin-top:6px;"><span style="color:var(--success); font-size:11px; font-weight: 700;">НАТИСНІТЬ ДЛЯ ОПИСУ</span></div>` : ''}
+                        <div style="margin-top:6px;"><span style="color:${isEarned ? 'var(--success)' : 'var(--text-muted)'}; font-size:11px; font-weight: 700;">НАТИСНІТЬ ДЛЯ ОПИСУ</span></div>
                     </div>
                 </div>
             `;
