@@ -4,7 +4,7 @@
    лише лічильники, час і стани. 3) Весь текст проходить через __redact перед показом і копіюванням. */
 (function () {
     if (window.Diag) return;
-    const EXPECT_REV = 18;
+    const EXPECT_REV = 19;
     const files = ['index.html', 'sw.js', 'manifest.json', 'css/assistant.css', 'css/academy.css', 'js/core/config.js', 'js/assistant/assistant.js', 'js/academy/academy.js'];
     const red = s => (window.__redact ? window.__redact(s) : String(s));
     const $ = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
@@ -208,7 +208,11 @@
         await step(rep, 'Читання каталогу', async () => {
             const r = await fetchTimed(API_URL + '?action=catalog'); const t = performance.now(); catObj = JSON.parse(r.text); const pm = Math.round(performance.now() - t);
             const speed = r.total ? Math.round(r.size / 1024 / (r.total / 1000)) : 0;
-            return { value: kb(r.size) + ' за ' + r.total + ' мс (≈' + speed + ' КБ/с), розбір ' + pm + ' мс', status: !r.ok ? 'err' : r.total > 9000 ? 'warn' : 'ok' };
+            const age = catObj.generatedAt ? Math.round((Date.now() - catObj.generatedAt) / 1000) : null;
+            const top = Object.keys(catObj).map(k => [k, JSON.stringify(catObj[k]).length]).sort((x, y) => y[1] - x[1]).slice(0, 3).map(x => x[0] + ' ' + kb(x[1])).join(', ');
+            const fresh = age !== null && age < 20;
+            return { value: kb(r.size) + ' за ' + r.total + ' мс (≈' + speed + ' КБ/с), розбір ' + pm + ' мс; ' + (fresh ? 'зібрано заново' : age !== null ? 'з кешу сервера, вік ' + (age < 120 ? age + ' с' : Math.round(age / 60) + ' хв') : ''), status: !r.ok ? 'err' : r.total > 9000 ? 'warn' : 'ok',
+                detail: (r.total > 9000 ? (fresh ? 'Кеш був порожній — каталог збирався з таблиці. Увімкніть «⚙️ Налаштування → ⚡ Прискорити застосунок» (прогрів кешу кожні 5 хв). ' : 'Повільна передача великого файлу від Google. ') : '') + 'Найважче: ' + top };
         });
         await step(rep, 'Вміст каталогу', async () => {
             const c = catObj || {}; const svc = (c.categories || []).filter(x => x && (x.ua || x.name)).length;
