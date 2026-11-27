@@ -85,7 +85,7 @@
     function afterBlitz() { window.__noWelcome = false; try { if (currentUser && !$('welcomeOverlay') && typeof openWelcome === 'function') openWelcome(); } catch (e) {} }
     function openIntro() {
         const u = me(); if (!u || $('blitzIntro')) return;
-        const b = buildBlitz(u), n = b.questions.length, t = (rec(u) || {}).tries || 0;
+        const b = buildBlitz(u), n = b.questions.length, t = (rec(u) || {}).tries || 0; window.__bzPre = { u: lowLogin(u.login), d: today(), b: b };
         const o = document.createElement('div'); o.id = 'blitzIntro'; o.className = 'wl-overlay';
         o.innerHTML = `<div class="wl-box bz-box"><div class="wl-scroll">
             <div class="bz-hero">⚡</div><div class="bz-title">Щоденний бліц</div>
@@ -93,15 +93,17 @@
             <div class="bz-rules">Не згортайте застосунок під час тесту.</div>
             </div><div class="wl-foot"><button class="btn btn-primary" id="bzStart">Почати бліц</button><button class="btn btn-secondary bz-later" id="bzLater">Пізніше</button></div></div>`;
         document.body.appendChild(o); requestAnimationFrame(() => o.classList.add('show'));
-        $('bzStart').onclick = () => { closeIntro(); setTimeout(startBlitz, 200); };
+        $('bzStart').onclick = () => { closeIntro(); startBlitz(); };
         $('bzLater').onclick = () => { try { sessionStorage.setItem('skillhub_blitz_skip_' + lowLogin(u.login), today()); } catch (e) {} closeIntro(); afterBlitz(); };
     }
 
     /* ---------- Тест ---------- */
-    async function startBlitz() {
+    function startBlitz() {
         const u = me(); if (!u) return;
-        try { if (!(await checkSessionNow(4000))) return; } catch (e) {}
-        const b = buildBlitz(u); if (!b.questions.length) { afterBlitz(); return; }
+        // перевірка сесії - у фоні, щоб тест стартував миттєво
+        try { checkSessionNow(4000); } catch (e) {}
+        const pre = window.__bzPre; window.__bzPre = null;
+        const b = (pre && pre.u === lowLogin(u.login) && pre.d === today()) ? pre.b : buildBlitz(u); if (!b.questions.length) { afterBlitz(); return; }
         { const d = rec(u) || { d: today(), tries: 0 }; d.tries = (d.tries || 0) + 1; d.done = false; lsSet(key(u), JSON.stringify(d)); }
         window.__blitzAt = Date.now();
         parsedQuestions = b.questions; window.__blitz = { total: b.questions.length, services: b.services };

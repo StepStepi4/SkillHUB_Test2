@@ -724,3 +724,13 @@ html.gate-on #academyApp #loginView .login-card, html.gate-on #academyApp #login
 .bw-sum { display: flex; gap: 8px; margin-top: 10px; }
 .bw-sum > div { flex: 1; background: var(--input-bg); border-radius: 12px; padding: 8px 4px; text-align: center; }
 .bw-sum b { display: block; font-size: 16px; } .bw-sum span { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+
+/* шкала цілей: чорна, у темній темі інвертована */
+#academyApp .goal-line{background:rgba(127,127,127,.28)}
+#academyApp .goal-done{background:#000}
+#academyApp .goal-bubble{background:#000;color:#fff}
+#academyApp .goal-bubble::after{border-top-color:#000}
+[data-theme="dark"] #academyApp .goal-done{background:#fff}
+[data-theme="dark"] #academyApp .goal-bubble{background:#fff;color:#000}
+[data-theme="dark"] #academyApp .goal-bubble::after{border-top-color:#fff}
+.wl-ring{cursor:pointer}.wl-ring:active{transform:scale(.98)}

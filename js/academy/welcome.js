@@ -104,7 +104,10 @@
         const o = document.createElement('div'); o.id = 'welcomeOverlay'; o.className = 'wl-overlay';
         o.innerHTML = `<div class="wl-box"><button class="wl-x" aria-label="Закрити">✕</button><div class="wl-scroll">${buildWelcome(u)}</div>
             <div class="wl-foot"><button class="btn btn-primary wl-go">До кабінету</button></div></div>`;
-        o.addEventListener('click', e => { if (e.target === o || e.target.closest('.wl-x') || e.target.closest('.wl-go')) closeWelcome(); });
+        o.addEventListener('click', e => {
+            if (e.target.closest('.wl-ring')) { closeWelcome(); try { switchCabinetMode('goals'); } catch (x) {} return; }
+            if (e.target === o || e.target.closest('.wl-x') || e.target.closest('.wl-go')) closeWelcome();
+        });
         document.body.appendChild(o); requestAnimationFrame(() => o.classList.add('show'));
         try { sessionStorage.setItem('skillhub_welcome_' + lowLogin(u.login), '1'); } catch (e) {}
     }
