@@ -741,3 +741,83 @@ html.gate-on #academyApp #loginView .login-card, html.gate-on #academyApp #login
 #academyApp .ach-card.locked.zoomed{opacity:.9;border-style:solid;border-color:var(--text-muted);box-shadow:0 14px 30px rgba(0,0,0,.12)}
 #academyApp .ach-card.locked.zoomed .ach-card-desc{display:block;color:var(--text-muted)}
 #academyApp .ach-card.locked.zoomed .ach-icon-wrapper{width:96px;height:96px}
+
+/* ===== Кабінет: курси, фільтри, цілі ===== */
+#academyApp #modeLearn .tab-content{display:block}
+#academyApp .course-toolbar{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+#academyApp .course-search{display:flex;align-items:center;gap:8px;background:var(--input-bg);border-radius:14px;padding:0 12px}
+#academyApp .course-search input{flex:1;border:0;background:transparent;padding:12px 0;font:600 14px inherit;font-family:inherit;color:var(--text-main);outline:none;min-width:0}
+#academyApp .course-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+#academyApp .course-chips::-webkit-scrollbar{display:none}
+#academyApp .cchip{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--border);background:var(--card-bg);color:var(--text-muted);border-radius:99px;padding:7px 12px;font:700 12.5px inherit;font-family:inherit;cursor:pointer;transition:.15s}
+#academyApp .cchip i{font-style:normal;font-size:11px;min-width:18px;text-align:center;padding:1px 5px;border-radius:99px;background:var(--input-bg)}
+#academyApp .cchip.on{background:var(--text-main);border-color:var(--text-main);color:var(--card-bg)}
+#academyApp .cchip.on i{background:rgba(127,127,127,.35);color:inherit}
+#academyApp .course-card{padding:14px 16px;gap:12px}
+#academyApp .cc-main{flex:1;min-width:0}
+#academyApp .cc-title{font-size:16px;font-weight:700;color:var(--text-main);margin-bottom:9px}
+#academyApp .cc-bar{height:6px;border-radius:99px;background:var(--input-bg);overflow:hidden}
+#academyApp .cc-bar i{display:block;height:100%;border-radius:99px;background:var(--text-main);transition:width .4s}
+#academyApp .cc-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12px;font-weight:600;color:var(--text-muted)}
+#academyApp .cc-st{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}
+#academyApp .cc-st.wip{color:#f59e0b}#academyApp .cc-st.ok{color:var(--success)}
+#academyApp .course-card.completed{opacity:.72}
+#academyApp .course-card.completed .cc-bar i{background:var(--success)}
+#academyApp .course-done-head{margin:18px 2px 10px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);display:flex;align-items:center;gap:8px}
+#academyApp .course-done-head i{font-style:normal;padding:1px 8px;border-radius:99px;background:var(--input-bg)}
+#academyApp .course-empty{text-align:center;background:var(--card-bg);border-radius:16px;border:1px solid var(--border);color:var(--text-muted);padding:26px 18px;font-weight:600}
+#academyApp #tabStats{margin-top:8px}
+/* цілі: компактна таблиця Показник | Факт | Ціль | % */
+#academyApp .gl-card{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:6px 14px 8px}
+#academyApp .gl-head,#academyApp .gl-row{display:grid;grid-template-columns:1.25fr .9fr .9fr .7fr;align-items:center;column-gap:8px}
+#academyApp .gl-head{padding:8px 0 6px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);border-bottom:1px solid var(--border)}
+#academyApp .gl-head span:not(:first-child),#academyApp .gl-row>div:not(.gl-name):not(.gl-bar){text-align:right}
+#academyApp .gl-row{padding:9px 0 0;font-size:14px}
+#academyApp .gl-row+.gl-row{border-top:1px solid var(--border)}
+#academyApp .gl-name{font-weight:700;color:var(--text-main)}
+#academyApp .gl-fact{font-weight:800;color:var(--text-main)}
+#academyApp .gl-goal{font-weight:600;color:var(--text-muted)}
+#academyApp .gl-pct{font-weight:800;font-size:13px;color:var(--text-main)}
+#academyApp .gl-row.ok .gl-pct{color:var(--success)}
+#academyApp .gl-bar{grid-column:1/-1;height:5px;border-radius:99px;background:rgba(127,127,127,.25);margin:8px 0 9px;overflow:hidden}
+#academyApp .gl-bar i{display:block;height:100%;border-radius:99px;background:#000}
+[data-theme="dark"] #academyApp .gl-bar i{background:#fff}
+#academyApp .goal-dl{margin-top:10px;font-size:12px;font-weight:700;color:var(--text-muted);text-align:center}
+
+/* ===== Мої зустрічі ===== */
+#academyApp .mt-sec,.mt-sec{margin:14px 2px 8px;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);display:flex;gap:8px;align-items:center}
+.mt-sec i{font-style:normal;padding:1px 8px;border-radius:99px;background:var(--input-bg)}
+.mt-card{display:flex;align-items:center;gap:12px;background:var(--card-bg);border:1.5px solid var(--border);border-radius:18px;padding:10px 12px;margin-bottom:10px;cursor:pointer;transition:.15s}
+.mt-card:active{transform:scale(.99)}
+.mt-card.today{border-color:var(--primary)}
+.mt-card.soon{background:var(--primary-light);box-shadow:0 0 0 3px rgba(0,87,183,.12)}
+.mt-card.past{opacity:.62}
+.mt-date{flex:0 0 54px;height:58px;border-radius:14px;background:var(--text-main);color:var(--card-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.mt-date b{font-size:20px;font-weight:800}.mt-date span{font-size:10.5px;font-weight:700;text-transform:uppercase;opacity:.8}.mt-date em{font-style:normal;font-size:11px;font-weight:800;margin-top:2px}
+.mt-date.none{background:var(--input-bg);color:var(--text-muted)}
+.mt-info{flex:1;min-width:0}.mt-name{font-size:15px;font-weight:700;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt-sub{display:flex;gap:8px;align-items:center;margin-top:3px;font-size:12px;font-weight:600;color:var(--text-muted);flex-wrap:wrap}
+.mt-now{background:var(--primary);color:#fff;border-radius:99px;padding:1px 8px;font-size:10.5px;font-weight:800;text-transform:uppercase}
+.mt-act{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.mt-act small{font-size:10.5px;font-weight:700;color:var(--text-muted)}
+.mt-join{background:var(--text-main);color:var(--card-bg);text-decoration:none;border-radius:11px;padding:8px 12px;font-size:12px;font-weight:800;white-space:nowrap}
+.mt-nolink{font-size:11px;font-weight:700;color:var(--text-muted)}
+
+/* ===== Призначення ===== */
+.as-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.as-chips button,.as-all button{border:1.5px solid var(--border);background:var(--card-bg);color:var(--text-main);border-radius:99px;padding:6px 11px;font:700 12px inherit;font-family:inherit;cursor:pointer}
+.as-chips button:active,.as-all button:active{background:var(--input-bg)}
+.as-tools{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.as-count{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
+.as-all{display:flex;gap:6px}
+.as-row{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--card-bg);border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:.15s}
+.as-row.on{border-color:var(--text-main)}
+.as-row.locked{opacity:.55}
+.as-name{font-weight:700;font-size:14px;color:var(--text-main)}
+.as-row{position:relative}
+.as-chk{position:absolute;right:14px;top:50%;margin:-13px 0 0;width:44px;height:26px;opacity:0;cursor:pointer;z-index:1}
+.as-sw{flex:0 0 44px;height:26px;border-radius:99px;background:rgba(127,127,127,.35);position:relative;transition:.2s}
+.as-sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:.2s}
+.as-chk:checked+.as-sw{background:var(--success)}
+.as-chk:checked+.as-sw::after{transform:translateX(18px)}
+.team-sort{border:1.5px solid var(--border);background:var(--card-bg);color:var(--text-main);border-radius:10px;padding:4px 6px;font:700 11px inherit;font-family:inherit;text-transform:none}

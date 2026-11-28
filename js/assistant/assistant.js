@@ -698,7 +698,7 @@
     window.openFeedback = async function() {
         const body = document.getElementById('feedbackBody');
         const sendBtn = document.getElementById('feedbackSend');
-        for (const k in fbState) delete fbState[k];
+        for (const k in fbState) delete fbState[k]; try { for (const k in fbT) delete fbT[k]; } catch (e) {}
         fbQs = ((db && db.feedback) || []).slice();
         let failed = false;
         if (!fbQs.length) {
@@ -729,20 +729,61 @@
             if (done) return `<div class="fb-q">${title}<div class="fb-done">✓ ${rate ? 'Дякуємо, оцінку враховано' : 'Дякуємо! Нову відповідь можна буде надіслати завтра'}</div></div>`;
             active++;
             if (rate) {
-                return `<div class="fb-q" data-i="${i}">${title}<div class="fb-slider-wrap"><div class="fb-emo" id="fbEmo${i}">🙂</div><div class="fb-slider-val empty" id="fbVal${i}">Рухайте повзунок</div><input type="range" class="fb-slider" id="fbRange${i}" min="1" max="10" step="1" value="5" style="--v:44%" oninput="window.fbSlide(${i}, this.value)" onchange="window.fbSlide(${i}, this.value)"><div class="fb-rate-hint"><span>1 — дуже погано</span><span>10 — відмінно</span></div></div></div>`;
+                return `<div class="fb-q" data-i="${i}">${title}<div class="fb-slider-wrap"><div class="fb-emo" id="fbEmo${i}">${window.fbFaceSVG(i)}</div><div class="fb-slider-val empty" id="fbVal${i}">Рухайте повзунок</div><input type="range" class="fb-slider" id="fbRange${i}" min="1" max="10" step="1" value="5" style="--v:44%" oninput="window.fbSlide(${i}, this.value)" onchange="window.fbSlide(${i}, this.value)"><div class="fb-rate-hint"><span>1 — дуже погано</span><span>10 — відмінно</span></div></div></div>`;
             }
             return `<div class="fb-q" data-i="${i}">${title}<textarea class="fb-text" maxlength="1500" placeholder="Ваша розгорнута відповідь…" oninput="window.fbText(${i}, this.value)"></textarea></div>`;
         }).join('');
         sendBtn.style.display = active ? '' : 'none';
         sendBtn.disabled = false; sendBtn.innerText = 'Надіслати';
     };
-    const FB_FACES = [['😡', 'Жахливо'], ['😠', 'Дуже погано'], ['😞', 'Погано'], ['😕', 'Так собі'], ['😐', 'Нормально'], ['🙂', 'Непогано'], ['😊', 'Добре'], ['😃', 'Дуже добре'], ['😍', 'Чудово!'], ['🤩', 'Неймовірно!']];
+    const FB_LABELS = ['Жахливо', 'Дуже погано', 'Погано', 'Так собі', 'Нормально', 'Непогано', 'Добре', 'Дуже добре', 'Чудово!', 'Неймовірно!'];
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const mixC = (c1, c2, t) => c1.map((v, k) => Math.round(lerp(v, c2[k], t)));
+    // кольір обличчя: червоний → бурштиновий → зелений
+    function faceColor(t) { return t < .5 ? mixC([239, 68, 68], [250, 176, 5], t * 2) : mixC([250, 176, 5], [34, 197, 94], (t - .5) * 2); }
+    // обличчя малюється кодом, тому рот, очі й колір змінюються плавно разом із повзунком
+    function faceAttrs(t) {
+        const col = faceColor(t), c = 'rgb(' + col.join(',') + ')', dark = 'rgb(' + mixC(col, [20, 20, 30], .78).join(',') + ')';
+        const curve = lerp(-17, 19, t);                         // <0 - сум, >0 - усмішка
+        const mouth = `M 31 ${66 - curve * .18} Q 50 ${66 + curve * 1.55} 69 ${66 - curve * .18}`;
+        const eyeH = lerp(4.2, 6.6, Math.min(1, Math.abs(t - .5) * 2 * .6 + .4));
+        const tilt = lerp(14, -4, t);                           // брови: насуплені → розслаблені
+        const brow = Math.max(0, .5 - t) * 2;
+        return { c, dark, mouth, eyeH, tilt, brow, cheek: Math.max(0, t - .55) * 1.6 };
+    }
+    window.fbFaceSVG = function(i) {
+        const f = faceAttrs(.5);
+        return `<svg viewBox="0 0 100 100" width="96" height="96" aria-hidden="true">
+            <defs><radialGradient id="fbg${i}" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
+            <circle id="fbFace${i}" cx="50" cy="50" r="46" fill="${f.c}"/><circle cx="50" cy="50" r="46" fill="url(#fbg${i})"/>
+            <ellipse id="fbCheekL${i}" cx="24" cy="62" rx="7" ry="4" fill="#fff" opacity="0"/><ellipse id="fbCheekR${i}" cx="76" cy="62" rx="7" ry="4" fill="#fff" opacity="0"/>
+            <ellipse id="fbEyeL${i}" cx="35" cy="42" rx="4.6" ry="${f.eyeH}" fill="${f.dark}"/><ellipse id="fbEyeR${i}" cx="65" cy="42" rx="4.6" ry="${f.eyeH}" fill="${f.dark}"/>
+            <path id="fbBrowL${i}" d="M27 31 L43 31" stroke="${f.dark}" stroke-width="3.4" stroke-linecap="round" opacity="0"/><path id="fbBrowR${i}" d="M57 31 L73 31" stroke="${f.dark}" stroke-width="3.4" stroke-linecap="round" opacity="0"/>
+            <path id="fbMouth${i}" d="${f.mouth}" fill="none" stroke="${f.dark}" stroke-width="5" stroke-linecap="round"/></svg>`;
+    };
+    const fbT = {};
+    function paintFace(i, t) {
+        const q = id => document.getElementById(id + i); if (!q('fbMouth')) return;
+        const f = faceAttrs(t);
+        q('fbFace').setAttribute('fill', f.c);
+        q('fbMouth').setAttribute('d', f.mouth); q('fbMouth').setAttribute('stroke', f.dark);
+        ['fbEyeL', 'fbEyeR'].forEach(n => { q(n).setAttribute('ry', f.eyeH); q(n).setAttribute('fill', f.dark); });
+        q('fbBrowL').setAttribute('d', `M27 ${31 + f.tilt * .4} L43 ${31 - f.tilt * .4}`); q('fbBrowR').setAttribute('d', `M57 ${31 - f.tilt * .4} L73 ${31 + f.tilt * .4}`);
+        ['fbBrowL', 'fbBrowR'].forEach(n => { q(n).setAttribute('opacity', f.brow); q(n).setAttribute('stroke', f.dark); });
+        ['fbCheekL', 'fbCheekR'].forEach(n => q(n).setAttribute('opacity', Math.min(.5, f.cheek)));
+        const rg = document.getElementById('fbRange' + i); if (rg) rg.style.setProperty('--c', f.c);
+    }
     window.fbSlide = function(i, v) {
         fbState[i] = String(v);
-        const f = FB_FACES[Math.max(1, Math.min(10, +v)) - 1], el = document.getElementById('fbVal' + i), em = document.getElementById('fbEmo' + i), rg = document.getElementById('fbRange' + i);
-        if (el) { el.classList.remove('empty'); el.innerHTML = '<b>' + v + '</b> / 10 · ' + f[1]; }
-        if (em) { em.textContent = f[0]; em.classList.remove('pop'); void em.offsetWidth; em.classList.add('pop'); }
-        if (rg) rg.style.setProperty('--v', ((v - 1) / 9 * 100) + '%');
+        const n = Math.max(1, Math.min(10, +v)), el = document.getElementById('fbVal' + i), rg = document.getElementById('fbRange' + i);
+        if (el) { el.classList.remove('empty'); el.innerHTML = '<b>' + n + '</b> / 10 · ' + FB_LABELS[n - 1]; }
+        if (rg) rg.style.setProperty('--v', ((n - 1) / 9 * 100) + '%');
+        // плавний перехід обличчя до нового значення
+        const to = (n - 1) / 9, st = fbT[i] || (fbT[i] = { t: .5, raf: 0 });
+        cancelAnimationFrame(st.raf);
+        const from = st.t, t0 = performance.now();
+        const step = now => { const k = Math.min(1, (now - t0) / 220), e = 1 - Math.pow(1 - k, 3); st.t = lerp(from, to, e); paintFace(i, st.t); if (k < 1) st.raf = requestAnimationFrame(step); };
+        st.raf = requestAnimationFrame(step);
         try { if (navigator.vibrate) navigator.vibrate(5); } catch (e) {}
     };
     window.fbText = function(i, v) { fbState[i] = v; };
