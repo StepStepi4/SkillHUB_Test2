@@ -165,7 +165,7 @@
     function resetFilters(silent) {
         FILTER_CHECKS.forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
         ['f_manager','f_oral','f_store'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-        teamQuick = 'all'; if (!silent) applyFilters();
+        if (!silent) applyFilters();
     }
     window.resetFilters = resetFilters;
     function populateStoreFilter() {
@@ -582,7 +582,19 @@
         });
     }
 
-    function switchCabinetTab() { /* курси та статистика тепер на одній сторінці */ }
+    function switchCabinetTab(tabName, el = null) {
+        requestAnimationFrame(() => {
+            document.querySelectorAll('#cabinetTabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            if (tabName === 'stats') {
+                document.getElementById('tabBtnStats').classList.add('active');
+                document.getElementById('tabStats').classList.add('active');
+            } else {
+                document.getElementById('tabBtnCourses').classList.add('active');
+                document.getElementById('tabCourses').classList.add('active');
+            }
+        });
+    }
 
     /* ====================== ЧЕРГА ВІДПРАВКИ (outbox) ======================
        Результати тестів і призначення курсів спершу пишуться на пристрій і
@@ -1155,7 +1167,7 @@
         document.getElementById('f_deadline').checked = false;
         ['f_goals','f_done','f_goalsdone'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
         document.getElementById('f_meet').checked = false;
-        resetFilters(true); teamQuick = 'all'; { const ts = document.getElementById('teamSort'); if (ts) ts.value = 'name'; }
+        resetFilters(true);
         document.getElementById('filterActiveDot').style.display = 'none';
         
         populateManagerFilter(); populateStoreFilter();
@@ -1225,29 +1237,7 @@
         renderStatsModalEmployees(qLow);
     }
 
-    let teamQuick = 'all';
-    const TEAM_QUICK = [['all', 'Усі'], ['progress', 'В процесі'], ['new', 'Не розпочали'], ['done', 'Завершили'], ['overdue', 'Прострочено'], ['none', 'Без призначень'], ['lag', 'Цілі відстають']];
-    function teamState(u, k) {
-        const m = computeUserMetrics(u);
-        switch (k) {
-            case 'progress': return m.totalAssigned > 0 && m.started > 0 && m.completed < m.totalAssigned;
-            case 'new': return m.totalAssigned > 0 && m.started === 0;
-            case 'done': return m.totalAssigned > 0 && m.completed >= m.totalAssigned;
-            case 'overdue': { const ms = computeRemainingDeadlineMs(u); return ms !== null && ms <= 0; }
-            case 'none': return !(u.assigned && u.assigned.length) && !hasGoals(u);
-            case 'lag': { const g = u.goals || {}, ks = Object.keys(g).filter(x => x !== 'deadline' && g[x] && g[x].goal); return ks.length > 0 && !goalsAllDone(u) && ks.reduce((a, x) => a + Math.min(100, g[x].done || 0), 0) / ks.length < 50; }
-            default: return true;
-        }
-    }
-    window.teamQuickSet = function(k) { teamQuick = k; applyFilters(); };
-    function renderTeamChips() {
-        const box = document.getElementById('teamChips'); if (!box) return;
-        const base = getAccessibleEmployeesList();
-        const cnt = k => k === 'all' ? base.length : base.filter(u => teamState(u, k)).length;
-        box.innerHTML = TEAM_QUICK.filter(f => f[0] === 'all' || cnt(f[0]) > 0 || teamQuick === f[0]).map(f => `<button class="cchip${teamQuick === f[0] ? ' on' : ''}" onclick="teamQuickSet('${f[0]}')">${f[1]}<i>${cnt(f[0])}</i></button>`).join('');
-    }
     function filterEmployeesLogic(employees) {
-        if (teamQuick !== 'all') employees = employees.filter(u => teamState(u, teamQuick));
         const chk = id => { const el = document.getElementById(id); return el ? el.checked : false; };
         const f_assigned = chk('f_assigned'), f_goals = chk('f_goals'), f_meet = chk('f_meet');
         const f_deadline = chk('f_deadline'), f_done = chk('f_done'), f_goalsdone = chk('f_goalsdone'), f_lag = chk('f_goalslag'), f_none = chk('f_noassign');
@@ -1302,13 +1292,7 @@
         }
 
         // Встановлення індикатора фільтру
-        { const so = (document.getElementById('teamSort') || {}).value || 'name';
-          const pr = u => { const m = computeUserMetrics(u); return m.totalAssigned ? m.completed / m.totalAssigned : -1; };
-          const sc = u => { const m = computeUserMetrics(u); return parseFloat(m.avgScoreFormatted) || 0; };
-          if (so === 'prog_desc') employees.sort((a, b) => pr(b) - pr(a)); else if (so === 'prog_asc') employees.sort((a, b) => pr(a) - pr(b));
-          else if (so === 'score') employees.sort((a, b) => sc(b) - sc(a)); else employees.sort((a, b) => String(a.name).localeCompare(String(b.name), 'uk')); }
-        renderTeamChips();
-        let hasActiveFilters = teamQuick !== 'all' || FILTER_CHECKS.some(id => { const el = document.getElementById(id); return el && el.checked; })
+        let hasActiveFilters = FILTER_CHECKS.some(id => { const el = document.getElementById(id); return el && el.checked; })
             || ['f_manager','f_oral','f_store'].some(id => { const el = document.getElementById(id); return el && el.value !== ''; });
         document.getElementById('filterActiveDot').style.display = hasActiveFilters ? 'block' : 'none';
 
@@ -1400,7 +1384,6 @@
         document.getElementById('btnTeamStats').classList.remove('active');
         document.getElementById('btnMyMeets').classList.add('active');
 
-        meetFilter = 'all'; meetQ = ''; { const mi = document.getElementById('meetSearchInput'); if (mi) mi.value = ''; }
         renderMeetList();
         document.getElementById('meetModalOverlay').classList.add('active');
         document.getElementById('meetModal').classList.add('active');
@@ -1422,54 +1405,76 @@
         checkUpcomingMeets();
     }
 
-    let meetFilter = 'all', meetQ = '';
-    const MEET_FILTERS = [['all', 'Усі'], ['today', 'Сьогодні'], ['soon', 'Майбутні'], ['past', 'Минулі'], ['nodate', 'Без дати']];
-    window.meetFilterSet = function(k) { meetFilter = k; renderMeetList(); };
-    window.meetSearch = function(v) { meetQ = String(v || '').toLowerCase().trim(); renderMeetList(true); };
-    function meetKind(item) {
-        if (!item.dateObj) return 'nodate';
-        const d = item.dateObj, n = new Date();
-        if (d.toDateString() === n.toDateString()) return 'today';
-        return d.getTime() > n.getTime() ? 'soon' : 'past';
-    }
-    const MONTHS_UA = ['січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
-    function renderMeetList(keepChips) {
-        const listContainer = document.getElementById('meetModalList');
+    function renderMeetList() {
+        let listContainer = document.getElementById('meetModalList');
         if (!eduDb || !eduDb.users) return;
-        const all = eduDb.users.filter(u => {
-            const l = String(u.meetLink || '').trim(), d = String(u.meetDate || '').trim();
-            return (l !== '' && l !== '-') || (d !== '' && d !== '-');
-        }).map(u => { const dObj = parseUaDate(u.meetDate); return { user: u, dateObj: dObj, sortDate: dObj ? dObj.getTime() : 9999999999999 }; });
-        all.forEach(m => { m.kind = meetKind(m); });
-        // найближчі - за зростанням, минулі - від найсвіжіших
-        const upcoming = all.filter(m => m.kind === 'today' || m.kind === 'soon').sort((a, b) => a.sortDate - b.sortDate);
-        const past = all.filter(m => m.kind === 'past').sort((a, b) => b.sortDate - a.sortDate);
-        const nod = all.filter(m => m.kind === 'nodate');
-        const cnt = k => k === 'all' ? all.length : all.filter(m => m.kind === k).length;
-        const chips = document.getElementById('meetChips');
-        if (chips && !keepChips) chips.innerHTML = MEET_FILTERS.filter(f => f[0] === 'all' || cnt(f[0]) > 0 || meetFilter === f[0])
-            .map(f => `<button class="cchip${meetFilter === f[0] ? ' on' : ''}" onclick="meetFilterSet('${f[0]}')">${f[1]}<i>${cnt(f[0])}</i></button>`).join('');
-        const tb = document.getElementById('meetToolbar'); if (tb) tb.style.display = all.length ? '' : 'none';
-        if (!all.length) { listContainer.innerHTML = '<div class="course-empty">Немає запланованих зустрічей</div>'; return; }
 
-        const q = meetQ;
-        const pass = m => (meetFilter === 'all' || m.kind === meetFilter) && (!q || String(m.user.name || '').toLowerCase().indexOf(q) !== -1 || String(m.user.store || '').toLowerCase().indexOf(q) !== -1);
-        const card = m => {
-            const u = m.user, d = m.dateObj;
-            let link = String(u.meetLink || '').trim(); if (link === '-') link = '';
-            const soon = d && d.getTime() - Date.now() > 0 && d.getTime() - Date.now() <= 3600000;
-            const badge = d ? `<div class="mt-date"><b>${d.getDate()}</b><span>${MONTHS_UA[d.getMonth()]}</span><em>${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}</em></div>` : '<div class="mt-date none"><b>—</b><span>дата</span></div>';
-            const store = (u.store && u.store !== '-') ? `<span>📍 ${escapeHTMLAttr(u.store)}</span>` : '';
-            const href = link ? (link.includes('http') ? escapeHTMLAttr(link) : 'https://' + escapeHTMLAttr(link).replace(/^https?:\/\//, '')) : '';
-            const join = link ? `<a href="${href}" target="_blank" rel="noopener" class="mt-join" onclick="event.stopPropagation()">Приєднатись</a>` : '<span class="mt-nolink">без посилання</span>';
-            return `<div class="mt-card ${m.kind}${soon ? ' soon' : ''}" onclick="selectEmployeeFromModal('${escapeHTMLAttr(u.login)}')">${badge}
-                <div class="mt-info"><div class="mt-name">${escapeHTMLAttr(u.name)}</div><div class="mt-sub">${store}${soon ? '<span class="mt-now">скоро</span>' : ''}</div></div>
-                <div class="mt-act">${join}<small>Відкрити ❯</small></div></div>`;
-        };
-        const sec = (title, arr) => arr.length ? `<div class="mt-sec">${title}<i>${arr.length}</i></div>` + arr.map(card).join('') : '';
-        const today = upcoming.filter(m => m.kind === 'today' && pass(m)), soonL = upcoming.filter(m => m.kind === 'soon' && pass(m));
-        const html = sec('Сьогодні', today) + sec('Найближчі', soonL) + sec('Без дати', nod.filter(pass)) + sec('Минулі', past.filter(pass));
-        listContainer.innerHTML = html || '<div class="course-empty">Нічого не знайдено</div>';
+        let meets = eduDb.users.filter(u => {
+            let l = String(u.meetLink || "").trim();
+            let d = String(u.meetDate || "").trim();
+            return (l !== "" && l !== "-") || (d !== "" && d !== "-");
+        }).map(u => {
+            let dObj = parseUaDate(u.meetDate);
+            let sortDate = dObj ? dObj.getTime() : 9999999999999;
+            return { user: u, dateObj: dObj, sortDate: sortDate };
+        }).sort((a, b) => a.sortDate - b.sortDate);
+
+        if (meets.length === 0) {
+            listContainer.innerHTML = `<div style="text-align:center; padding: 32px 16px; color: var(--text-muted); font-weight: 600;">Немає запланованих зустрічей</div>`;
+            return;
+        }
+
+        let html = meets.map(item => {
+            let u = item.user;
+            let storeTxt = (u.store && u.store !== "-") ? `📍 ${escapeHTMLAttr(u.store)}` : "";
+            
+            let isApproaching = false;
+            if (item.dateObj) {
+                let timeDiff = item.dateObj.getTime() - Date.now();
+                isApproaching = timeDiff > 0 && timeDiff <= 60 * 60 * 1000;
+            }
+            
+            let borderCol = isApproaching ? 'var(--primary)' : 'var(--border)';
+            let bgClass = isApproaching ? 'background: var(--primary-light);' : '';
+            
+            let dateVal = String(u.meetDate || "").trim();
+            let linkVal = String(u.meetLink || "").trim();
+            if (linkVal === "-") linkVal = "";
+            if (dateVal === "-") dateVal = "";
+            
+            let hasLink = linkVal !== "";
+            let dateDisplay = dateVal !== "" ? escapeHTMLAttr(dateVal) : "Дата не вказана";
+            
+            let linkHref = "javascript:void(0)";
+            let onclick = "alert('Посилання на зустріч ще не додано. Оновіть дані або перевірте пізніше.');";
+            let btnStyle = "padding: 8px 14px; border-radius: 10px; font-size: 12px; text-decoration:none; white-space:nowrap;";
+            
+            if (hasLink) {
+                linkHref = linkVal.includes("http") ? escapeHTMLAttr(linkVal) : "https://" + escapeHTMLAttr(linkVal).replace(/^https?:\/\//,'');
+                onclick = "";
+            } else {
+                btnStyle += " opacity: 0.6;";
+            }
+            
+            let linkBtn = `<a href="${linkHref}" target="${hasLink ? '_blank' : '_self'}" onclick="${onclick}" class="btn btn-glow" style="${btnStyle}">ПРИЄДНАТИСЯ</a>`;
+
+            return `
+                <div class="list-card" style="border-color: ${borderCol}; ${bgClass} padding: 14px 16px; cursor:default;">
+                    <div style="flex: 1; padding-right: 10px;">
+                        <div style="font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 4px;">${escapeHTMLAttr(u.name)}</div>
+                        <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; flex-direction: column; gap: 2px;">
+                            ${storeTxt ? `<span>${storeTxt}</span>` : ''}
+                            <span>🗓 ${dateDisplay}</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex-shrink: 0;">
+                        ${linkBtn}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        listContainer.innerHTML = html;
     }
 
     let originalAssignments = {};
@@ -1513,26 +1518,22 @@
         const anyFact = g && GOAL_DEFS.some(d => g[d.key] && g[d.key].fact !== null && g[d.key].fact !== undefined && g[d.key].fact !== '');
         if (!g || (!user.goals && !anyFact)) { box.innerHTML = '<div class="goal-empty">Цілі ще не призначені</div>'; return; }
         const noGoals = !hasGoals(user);
-        const has = v => v !== null && v !== undefined && v !== '';
-        let html = `<div class="gl-card"><div class="gl-head"><span>Показник</span><span>Факт</span><span>Ціль</span><span>Викон.</span></div>`;
+        let html = '<div class="goal-top">' + (noGoals ? 'Поточні показники' : 'Ціль / Факт') + '</div>';
         GOAL_DEFS.forEach(d => {
             const o = g[d.key] || {};
-            if (!has(o.goal) && !has(o.fact)) return;                 // порожні показники не займають місце
-            const done = has(o.done) ? o.done : null;
+            const done = (o.done === null || o.done === undefined) ? null : o.done;
             const w = done === null ? 0 : Math.max(0, Math.min(100, done));
-            const ok = done !== null && done >= 100;
-            html += `<div class="gl-row${ok ? ' ok' : ''}">
-                <div class="gl-name">${d.short}</div>
-                <div class="gl-fact">${has(o.fact) ? fmtNum(o.fact) + d.unit : '—'}</div>
-                <div class="gl-goal">${has(o.goal) ? fmtNum(o.goal) + d.unit : '—'}</div>
-                <div class="gl-pct">${done === null ? '' : fmtNum(done) + '%'}</div>
-                <div class="gl-bar"><i style="width:${w}%"></i></div>
+            const isDone = done !== null && done >= 100;
+            const sub = (o.goal !== null && o.goal !== undefined)
+                ? `${fmtNum(o.goal)}${d.unit} / ${fmtNum(o.fact)}${d.unit}` : (o.fact !== null && o.fact !== undefined && o.fact !== '' ? `факт: ${fmtNum(o.fact)}${d.unit}` : 'ціль не задана');
+            const bub = done === null ? '' : `<div class="goal-bubble" style="left:${w}%">${fmtNum(done)}%</div>`;
+            html += `<div class="goal-row">
+                <div class="goal-head"><span>${d.short}</span><small class="${isDone ? 'goal-ok' : ''}">${sub}</small></div>
+                <div class="goal-slider">${bub}<div class="goal-line"><div class="goal-done" style="width:${w}%"></div></div></div>
             </div>`;
         });
-        html += '</div>';
         const dl = g.deadline && g.deadline.goal;
-        if (dl) html += `<div class="goal-dl">⏳ Дедлайн цілей: ${fmtNum(dl)} дн.</div>`;
-        if (noGoals) html += '<div class="goal-dl">Цілі ще не призначені, показано поточні показники</div>';
+        if (dl) html += `<div class="goal-dl">Дедлайн цілей: ${fmtNum(dl)} дн.</div>`;
         box.innerHTML = html;
     }
 
@@ -1633,9 +1634,9 @@
                 }
 
                 html += `
-                <label class="as-row${isAssigned ? ' on' : ''}${isDisabled ? ' locked' : ''}" data-key="${cleanKey}" data-title="${escapeHTMLAttr(c.name.toLowerCase())}" data-assigned="${isAssigned ? 1 : 0}">
-                    <span class="as-name">${escapeHTMLAttr(c.name)}</span>
-                    <input type="checkbox" class="as-chk" onchange="toggleAssign('${cleanKey}', this.checked)" ${isAssigned ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}><span class="as-sw"></span>
+                <label class="answer-label" style="display:flex; justify-content:space-between; align-items:center; opacity: ${isDisabled ? 0.6 : 1}; margin-bottom: 8px;">
+                    <span style="font-weight:700;">${escapeHTMLAttr(c.name)}</span>
+                    <input type="checkbox" onchange="toggleAssign('${cleanKey}', this.checked)" ${isAssigned ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
                 </label>
                 `;
             });
@@ -1643,15 +1644,7 @@
             html = `<div style="text-align:center; padding: 20px; color: var(--text-muted);">Каталог курсів порожній</div>`;
         }
 
-        // призначені - вгору
-        if (eduDb.courseCatalog && eduDb.courseCatalog.length) {
-            const tmp = document.createElement('div'); tmp.innerHTML = html;
-            const rows = Array.from(tmp.children);
-            rows.sort((a, b) => (b.dataset.assigned | 0) - (a.dataset.assigned | 0));
-            list.innerHTML = ''; rows.forEach(r => list.appendChild(r));
-        } else list.innerHTML = html;
-        { const si = document.getElementById('assignSearch'); if (si) si.value = ''; }
-        updateAssignCount();
+        list.innerHTML = html;
         buildGoalForm(windowViewingEmployee);
         saveBtn.style.display = 'none';
         
@@ -1667,38 +1660,7 @@
     }
 
     function toggleDeadline(val) { pendingDeadline = String(val).trim(); checkAssignChanges(); }
-    function toggleAssign(key, isChecked) {
-        pendingAssignments[key] = isChecked;
-        const row = document.querySelector('#assignCourseList .as-row[data-key="' + key + '"]'); if (row) row.classList.toggle('on', isChecked);
-        updateAssignCount(); checkAssignChanges();
-    }
-    function updateAssignCount() {
-        const n = Object.keys(pendingAssignments).filter(k => pendingAssignments[k]).length, el = document.getElementById('assignCount');
-        if (el) el.textContent = 'Призначено: ' + n + ' з ' + Object.keys(pendingAssignments).length;
-    }
-    window.assignFilter = function(v) {
-        const q = String(v || '').toLowerCase().trim();
-        document.querySelectorAll('#assignCourseList .as-row').forEach(r => { r.style.display = (!q || r.dataset.title.indexOf(q) !== -1) ? '' : 'none'; });
-    };
-    window.assignAll = function(on) {
-        document.querySelectorAll('#assignCourseList .as-row').forEach(r => {
-            if (r.style.display === 'none') return;
-            const c = r.querySelector('.as-chk'); if (!c || c.disabled || c.checked === on) return;
-            c.checked = on; toggleAssign(r.dataset.key, on);
-        });
-    };
-    window.setDeadlineQuick = function(v) {
-        const i = document.getElementById('assignDeadlineInput'); if (!i || i.disabled) return;
-        i.value = v; toggleDeadline(String(v));
-    };
-    window.setMeetQuick = function(days, hour) {
-        const i = document.getElementById('assignMeetDate'); if (!i) return;
-        if (days === null) { i.value = ''; checkAssignChanges(); return; }
-        const d = new Date(); d.setDate(d.getDate() + days); d.setHours(hour, 0, 0, 0);
-        const pad = n => String(n).padStart(2, '0');
-        i.value = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(hour) + ':00';
-        checkAssignChanges();
-    };
+    function toggleAssign(key, isChecked) { pendingAssignments[key] = isChecked; checkAssignChanges(); }
 
     function checkAssignChanges() {
         let hasChanges = false;
@@ -1941,60 +1903,38 @@
         `;
 
         const courseNames = Object.keys(coursesMap);
-        const res = user.results || {};
-        courseRows = courseNames.map(name => {
-            const parsed = formatWithCustomEmoji(name, '📘'), prods = coursesMap[name] || [];
-            let passed = 0, started = 0;
-            prods.forEach(p => {
-                const r = res[p.product] || res[getCleanName(p.product)];
-                if (r) { started++; if (parseTestResultString(r).score >= 80) passed++; }
-            });
-            const total = prods.length;
-            const state = (total > 0 && passed === total) ? 'done' : (started > 0 ? 'progress' : 'new');
-            return { name, title: parsed.title, total, passed, started, state };
-        });
-        courseFilter = 'all';
-        const si = document.getElementById('courseSearchInput'); if (si) si.value = '';
-        courseQ = '';
+        let coursesHtml = '';
+        let res = user.results || {};
+
+        if (courseNames.length === 0) {
+            coursesHtml = '<div style="text-align:center; background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); color: var(--text-muted); padding: 30px 20px; font-weight: 600;">Наразі не призначено жодного курсу.</div>';
+        } else {
+            coursesHtml = courseNames.map(name => {
+                let parsed = formatWithCustomEmoji(name, '📘'), safeName = escapeHTMLAttr(name), courseProducts = coursesMap[name] || [];
+                let cTotal = courseProducts.length, cPassed = 0;
+
+                courseProducts.forEach(p => {
+                    let cleanP = getCleanName(p.product), resStr = res[p.product] || res[cleanP];
+                    if (resStr) { let pr = parseTestResultString(resStr); if (pr.score >= 80) cPassed++; }
+                });
+
+                let cardClass = (cTotal > 0 && cPassed === cTotal) ? "list-card completed" : "list-card";
+                return `
+                <div class="${cardClass}" onclick="openCourse(this.getAttribute('data-name'))" data-name="${safeName}">
+                    <div class="list-card-title" style="flex: 1;"><span style="font-size: 16px;">${parsed.title}</span></div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="font-size: 15px; font-weight: 700; color: var(--text-main);">${cPassed} <span style="font-size: 13px; font-weight: 600; color: var(--text-muted);">/ ${cTotal}</span></div>
+                        <div class="list-card-arrow">❯</div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
 
         requestAnimationFrame(() => {
             document.getElementById('learningAnalyticsBlock').innerHTML = statsHtml;
-            renderCourseChips(); renderCourseList();
+            document.getElementById('courseList').innerHTML = coursesHtml;
         });
-    }
-
-    /* ---- Курси: фільтри + список (завершені внизу) ---- */
-    let courseRows = [], courseFilter = 'all', courseQ = '';
-    const COURSE_FILTERS = [['all', 'Усі'], ['progress', 'В процесі'], ['new', 'Не розпочаті'], ['done', 'Пройдені']];
-    function renderCourseChips() {
-        const box = document.getElementById('courseChips'); if (!box) return;
-        const cnt = k => k === 'all' ? courseRows.length : courseRows.filter(r => r.state === k).length;
-        box.innerHTML = COURSE_FILTERS.filter(f => f[0] === 'all' || cnt(f[0]) > 0 || courseFilter === f[0])
-            .map(f => `<button class="cchip${courseFilter === f[0] ? ' on' : ''}" onclick="courseFilterSet('${f[0]}')">${f[1]}<i>${cnt(f[0])}</i></button>`).join('');
-        const tb = document.getElementById('courseToolbar'); if (tb) tb.style.display = courseRows.length > 1 ? '' : 'none';
-    }
-    window.courseFilterSet = function(k) { courseFilter = k; renderCourseChips(); renderCourseList(); };
-    window.courseSearch = function(v) { courseQ = String(v || '').toLowerCase().trim(); renderCourseList(); };
-    function courseCardHtml(r) {
-        const pct = r.total ? Math.round(r.passed / r.total * 100) : 0;
-        const st = r.state === 'done' ? '<span class="cc-st ok">✓ Пройдено</span>' : r.state === 'progress' ? '<span class="cc-st wip">В процесі</span>' : '<span class="cc-st">Не розпочато</span>';
-        return `<div class="list-card course-card ${r.state === 'done' ? 'completed' : ''}" onclick="openCourse(this.getAttribute('data-name'))" data-name="${escapeHTMLAttr(r.name)}">
-            <div class="cc-main"><div class="cc-title">${r.title}</div>
-                <div class="cc-bar"><i style="width:${pct}%"></i></div>
-                <div class="cc-meta">${st}<span>${r.passed} / ${r.total} тем</span></div></div>
-            <div class="list-card-arrow">❯</div></div>`;
-    }
-    function renderCourseList() {
-        const box = document.getElementById('courseList'); if (!box) return;
-        if (!courseRows.length) { box.innerHTML = '<div class="course-empty">Наразі не призначено жодного курсу</div>'; return; }
-        let rows = courseRows.filter(r => (courseFilter === 'all' || r.state === courseFilter) && (!courseQ || String(r.title).toLowerCase().indexOf(courseQ) !== -1));
-        if (!rows.length) { box.innerHTML = '<div class="course-empty">Нічого не знайдено</div>'; return; }
-        const order = { progress: 0, new: 1, done: 2 };
-        const active = rows.filter(r => r.state !== 'done').sort((a, b) => order[a.state] - order[b.state] || (b.passed / (b.total || 1)) - (a.passed / (a.total || 1)));
-        const done = rows.filter(r => r.state === 'done');
-        let html = active.map(courseCardHtml).join('');
-        if (done.length) html += `<div class="course-done-head">✓ Завершені курси <i>${done.length}</i></div>` + done.map(courseCardHtml).join('');
-        box.innerHTML = html;
     }
 
     function renderEmployeeAchievementsAndTests(emp) {
