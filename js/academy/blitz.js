@@ -47,8 +47,16 @@
         lsSet(histKey(u), JSON.stringify(h));
     }
     function week(u) {
-        const h = hist(u), days = [], now = new Date();
-        for (let i = 6; i >= 0; i--) { const d = new Date(now); d.setDate(now.getDate() - i); const k = dayStr(d); days.push({ k: k, wd: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][d.getDay()], r: h[k] || null, today: i === 0 }); }
+        // Тиждень починається з першого дня бліца (будь-який день тижня) - він ліворуч;
+        // якщо від нього минуло понад 7 днів, вікно «пересувається» на найраніший бліц за останні 7 днів.
+        const h = hist(u), now = new Date(), WD = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+        const last7 = []; for (let i = 6; i >= 0; i--) { const d = new Date(now); d.setDate(now.getDate() - i); last7.push(d); }
+        const first = last7.find(d => h[dayStr(d)]) || now;
+        const days = [], todayK = dayStr(now);
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(first); d.setDate(first.getDate() + i); const k = dayStr(d);
+            days.push({ k: k, wd: WD[d.getDay()], r: h[k] || null, today: k === todayK, future: k > todayK });
+        }
         const done = days.filter(x => x.r), passed = days.filter(x => x.r && x.r.score >= 80), perfect = days.filter(x => x.r && x.r.score === 100);
         return { days: days, done: done.length, passed: passed.length, perfect: perfect.length, avg: done.length ? Math.round(done.reduce((a, x) => a + x.r.score, 0) / done.length) : 0 };
     }
@@ -60,14 +68,14 @@
         return out;
     }
     function renderWeek() {
-        const host = $('courseList'), u = me();
+        const host = $('courseListTitle') || $('courseList'), u = me();
         let el = $('blitzWeekCard');
         if (!host || !u || windowViewingEmployee) { if (el) el.remove(); return; }
         const w = week(u);
         if (!w.done) { if (el) el.remove(); return; }
         if (!el) { el = document.createElement('div'); el.id = 'blitzWeekCard'; el.className = 'bw-card'; host.parentNode.insertBefore(el, host); }
         el.innerHTML = `<div class="bw-head"><b>⚡ Бліц за тиждень</b><span>${w.passed}/7 складено</span></div>
-            <div class="bw-bars">${w.days.map(x => `<div class="bw-day${x.today ? ' today' : ''}"><div class="bw-col"><i class="${x.r ? (x.r.score === 100 ? 'perf' : x.r.score >= 80 ? 'ok' : 'low') : ''}" style="height:${x.r ? Math.max(8, x.r.score) : 0}%"></i></div><em>${x.r ? x.r.score + '%' : '·'}</em><span>${x.wd}</span></div>`).join('')}</div>
+            <div class="bw-bars">${w.days.map(x => `<div class="bw-day${x.today ? ' today' : ''}${x.future ? ' future' : ''}"><div class="bw-col"><i class="${x.r ? (x.r.score === 100 ? 'perf' : x.r.score >= 80 ? 'ok' : 'low') : ''}" style="height:${x.r ? Math.max(8, x.r.score) : 0}%"></i></div><em>${x.r ? x.r.score + '%' : '·'}</em><span>${x.wd}</span></div>`).join('')}</div>
             <div class="bw-sum"><div><b>${w.avg}%</b><span>середній</span></div><div><b>${w.perfect}</b><span>на 100%</span></div><div><b>${w.done}</b><span>днів</span></div></div>`;
     }
 

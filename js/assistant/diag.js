@@ -4,7 +4,7 @@
    лише лічильники, час і стани. 3) Весь текст проходить через __redact перед показом і копіюванням. */
 (function () {
     if (window.Diag) return;
-    const EXPECT_REV = 21;
+    const EXPECT_REV = 22;
     const files = ['index.html', 'sw.js', 'manifest.json', 'css/assistant.css', 'css/academy.css', 'js/core/config.js', 'js/assistant/assistant.js', 'js/academy/academy.js'];
     const red = s => (window.__redact ? window.__redact(s) : String(s));
     const $ = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
@@ -321,23 +321,28 @@
             const store = Object.keys(cnt).filter(x => x && x !== 'Не вказано').sort((a, b) => cnt[b] - cnt[a])[0]; if (!store) return { value: 'магазини не визначено', status: 'warn' };
             const prev = sel.value; sel.value = store; window.renderRezervyList(); await sleep(200);
             const rows = document.querySelectorAll('#rezervyList .list-item').length, st = (document.getElementById('rezervyStats') || {}).style && document.getElementById('rezervyStats').style.display !== 'none' ? document.getElementById('rezervyStats') : null;
-            rezItems = db.rezervyData.filter(r => r.store === store).slice(0, 3);
+            rezItems = db.rezervyData.filter(r => r.store === store).slice(0, 14);
             const txt = st ? st.innerText.replace(/\s+/g, ' ') : '';
             sel.value = prev; window.renderRezervyList();
             return { value: store + ': ' + rows + ' позицій; ' + (txt || 'статистика не показана'), status: rows && st && !badText(txt) ? 'ok' : 'err', detail: rows === cnt[store] ? '' : 'Показано ' + rows + ' із ' + cnt[store] };
         });
         await step(rep, 'Резерви: відкриття 3 позицій і перевірка сервісів', async () => {
             if (!rezItems.length) return { value: 'немає позицій для перевірки', status: 'warn' };
-            const out = []; let bad = false;
+            // беремо позиції, для яких у каталозі є сервіси; позиції без категорії (напр. уцінка) пропускаємо - це не помилка
+            const out = []; let bad = false, good = 0, skipped = 0, tried = 0;
             for (const r of rezItems) {
+                if (good >= 3 || tried >= 8) break; tried++;
                 window.openRezervItemModal(r.cat, r.price, r.name, /уцінка/i.test(r.name)); await sleep(350);
                 const body = document.getElementById('rezervItemBody'), cards = body ? body.querySelectorAll('.service-card').length : -1;
                 const hasNaN = body ? badText(body.innerText) : false;
-                if (cards < 1 || hasNaN) bad = true;
-                out.push(r.name.slice(0, 22) + ': ' + (cards < 0 ? 'вікно не відкрилось' : cards + ' сервісів') + (hasNaN ? ' ⚠' : ''));
                 closeAll(); await sleep(150);
+                if (cards < 0) { bad = true; out.push(r.name.slice(0, 22) + ': вікно не відкрилось'); continue; }
+                if (cards === 0) { skipped++; continue; }
+                good++; if (hasNaN) bad = true;
+                out.push(r.name.slice(0, 22) + ': ' + cards + ' сервісів' + (hasNaN ? ' ⚠' : ''));
             }
-            return { value: out.join('; '), status: bad ? 'warn' : 'ok', detail: bad ? 'Категорії немає в каталозі або ціна сервісів не рахується' : '' };
+            if (!good && !bad) return { value: 'перевірено ' + tried + ' позицій, жодна не має сервісів у каталозі', status: 'warn', detail: 'Категорії резервів немає в каталозі' };
+            return { value: out.join('; ') + (skipped ? ' (без сервісів у каталозі пропущено: ' + skipped + ')' : ''), status: bad ? 'warn' : 'ok', detail: bad ? 'Вікно не відкрилось або ціна сервісів не рахується' : '' };
         });
         await step(rep, 'SkillHUB: перевірка 2 посилань', async () => {
             const bt = (A().skillHubButtons || []).filter(b => /^https?:/i.test(String(b.link || '').trim())).slice(0, 2);

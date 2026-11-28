@@ -598,15 +598,15 @@
         if (periods.length > 1) html += '<div class="top-tabs">' + periods.map(p => `<button class="${p === topPeriod ? 'on' : ''}" onclick="window.topSetPeriod('${safeText(p).replace(/'/g, '')}')">${safeText(p)}</button>`).join('') + '</div>';
         noms.forEach(nm => {
             const g = rows.filter(t => t.nomination === nm).sort((a, b) => (a.place || 99) - (b.place || 99));
-            const by = pl => g.filter(t => t.place === pl)[0];
-            const card = (t, pl) => {
-                if (!t) return `<div class="top-pod p${pl} empty"></div>`;
-                const you = meKey && topNorm(t.name) === meKey;
-                return `<div class="top-pod p${pl}${you ? ' you' : ''}"><div class="top-ava">${pl === 1 ? '<i class="top-crown">👑</i>' : ''}<img src="assets/achievements/${safeText(t.ach)}.webp" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${pl === 1 ? '🥇' : pl === 2 ? '🥈' : '🥉'}'}))" alt=""></div>
-                    <div class="top-nm">${safeText(t.name)}</div><div class="top-st">${safeText(t.store)}</div><div class="top-res">${topFmt(t.result)}</div><div class="top-step">${pl}</div></div>`;
-            };
-            html += `<div class="top-sec"><div class="top-nom">${safeText(nm)}</div><div class="top-podium">${card(by(2), 2)}${card(by(1), 1)}${card(by(3), 3)}</div>`;
-            g.filter(t => t.place > 3).forEach(t => { html += `<div class="top-row${meKey && topNorm(t.name) === meKey ? ' you' : ''}"><b>${t.place}</b><span>${safeText(t.name)}<small>${safeText(t.store)}</small></span><em>${topFmt(t.result)}</em></div>`; });
+            html += `<div class="top-sec tp"><div class="top-nom">${safeText(nm)}</div>`;
+            g.forEach(t => {
+                const you = meKey && topNorm(t.name) === meKey, pl = t.place, n2 = String(pl).padStart(2, '0');
+                const badge = t.ach ? `<img class="tp-badge" src="assets/achievements/${safeText(t.ach)}.webp" onerror="this.style.display='none'" alt="">` : '';
+                html += `<div class="tp-row p${pl <= 3 ? pl : 'x'}${you ? ' you' : ''}" style="animation-delay:${Math.min(pl, 8) * 60}ms">
+                    <div class="tp-num"><span>${n2}</span></div>
+                    <div class="tp-body"><div class="tp-nm">${safeText(t.name)}${you ? '<em>Ви</em>' : ''}</div><div class="tp-line"></div><div class="tp-st">${safeText(t.store)}</div></div>
+                    <div class="tp-right"><div class="tp-res">${topFmt(t.result)}</div>${badge}</div></div>`;
+            });
             html += '</div>';
         });
         if (!noms.length) html += '<div class="news-empty">Рейтинг поки порожній</div>';

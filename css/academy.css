@@ -741,3 +741,33 @@ html.gate-on #academyApp #loginView .login-card, html.gate-on #academyApp #login
 #academyApp .ach-card.locked.zoomed{opacity:.9;border-style:solid;border-color:var(--text-muted);box-shadow:0 14px 30px rgba(0,0,0,.12)}
 #academyApp .ach-card.locked.zoomed .ach-card-desc{display:block;color:var(--text-muted)}
 #academyApp .ach-card.locked.zoomed .ach-icon-wrapper{width:96px;height:96px}
+
+/* ===== Шкала цілей: капсула з чорною «таблеткою» (як у прикладі); у темній темі інверсія ===== */
+#academyApp .goal-slider{padding-top:36px}
+#academyApp .goal-line{height:22px;padding:3px;box-sizing:border-box;border-radius:99px;background:var(--card-bg);border:1.5px solid var(--text-main);overflow:visible;position:relative}
+#academyApp .goal-done{height:100%;min-width:0;border-radius:99px;background:var(--text-main);box-shadow:-3px 4px 6px rgba(0,0,0,.28);position:relative;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+#academyApp .goal-done[style*="width:0%"]{display:none}
+#academyApp .goal-bubble{background:var(--text-main);color:var(--card-bg)}
+#academyApp .goal-bubble::after{border-top-color:var(--text-main)}
+[data-theme="dark"] #academyApp .goal-done{background:var(--text-main);box-shadow:-3px 4px 7px rgba(0,0,0,.6)}
+[data-theme="dark"] #academyApp .goal-bubble{background:var(--text-main);color:var(--card-bg)}
+[data-theme="dark"] #academyApp .goal-bubble::after{border-top-color:var(--text-main)}
+
+/* ===== Бліц: чорно-біле оформлення (інвертується разом із темою) ===== */
+.bw-card{border:1.5px solid var(--text-main);background:var(--card-bg)}
+.bw-head b{letter-spacing:.02em}
+.bw-head span{color:var(--text-main)}
+.bw-col{background:transparent;border:1.5px solid var(--text-main);border-radius:99px;padding:2px;box-sizing:border-box;align-items:flex-end}
+.bw-col i{border-radius:99px;background:var(--text-main)}
+.bw-col i.ok{background:var(--text-main);opacity:.6}
+.bw-col i.perf{background:var(--text-main);box-shadow:-2px 3px 5px rgba(0,0,0,.3)}
+.bw-col i.low{background:repeating-linear-gradient(135deg,var(--text-main) 0 3px,transparent 3px 6px)}
+.bw-day.today span{color:var(--text-main);text-decoration:underline;text-underline-offset:3px}
+.bw-day.future .bw-col{border-style:dashed;opacity:.45}
+.bw-sum>div{background:transparent;border:1.5px solid var(--text-main)}
+.bw-day{min-width:0}
+#blitzIntro .bz-stats>div{background:transparent;border:1.5px solid var(--text-main)}
+#blitzIntro .btn-glow,#blitzIntro .btn-primary{background:var(--text-main) !important;color:var(--card-bg) !important;box-shadow:-3px 4px 8px rgba(0,0,0,.28) !important;border:0 !important}
+#blitzIntro .btn-secondary{background:transparent !important;color:var(--text-main) !important;border:1.5px solid var(--text-main) !important}
+#blitzIntro .bz-hero{filter:grayscale(1) contrast(1.4)}
+.question-service{color:var(--text-main);background:transparent;border:1.5px solid var(--text-main)}

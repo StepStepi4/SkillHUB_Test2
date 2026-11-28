@@ -775,3 +775,26 @@ input[type="range"].fb-slider::-webkit-slider-thumb{-webkit-appearance:none;widt
 .top-row.you{background:rgba(0,87,183,.08);border-radius:10px}
 .top-foot{text-align:center;font-size:11.5px;font-weight:600;color:var(--text-muted);padding-bottom:6px}
 input[type="range"].fb-slider::-webkit-slider-thumb{border-color:var(--c,#999) !important}
+
+/* Рейтинг: пластини з великими номерами (чорно-біле, інвертується в темній темі) */
+.tp{padding:14px 12px 4px}
+.tp-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;animation:topUp .45s cubic-bezier(.2,.8,.2,1) both}
+.tp-num{flex:0 0 74px;height:60px;display:flex;align-items:center;justify-content:center;transform:skewX(-10deg);border-radius:13px;background:linear-gradient(135deg,#3a3a3a,#000);border:1px solid rgba(255,255,255,.22);box-shadow:-4px 6px 10px rgba(0,0,0,.3)}
+.tp-num span{display:block;transform:skewX(10deg);font-style:italic;font-weight:900;font-size:32px;line-height:1;color:#fff;letter-spacing:-.02em}
+.tp-row.p1 .tp-num{height:70px;flex-basis:84px}.tp-row.p1 .tp-num span{font-size:38px}
+.tp-body{flex:1;min-width:0;position:relative;padding-top:7px}
+.tp-body::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--text-main),transparent)}
+.tp-nm{font-size:15px;font-weight:800;color:var(--text-main);line-height:1.2;word-break:break-word}
+.tp-nm em{font-style:normal;margin-left:6px;font-size:10px;font-weight:800;text-transform:uppercase;padding:2px 7px;border-radius:99px;background:var(--text-main);color:var(--card-bg);vertical-align:2px}
+.tp-line{width:34px;height:2px;border-radius:2px;background:var(--text-main);margin:6px 0 5px}
+.tp-st{font-size:11.5px;font-weight:600;color:var(--text-muted);line-height:1.25}
+.tp-right{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px;max-width:34%}
+.tp-res{font-size:15px;font-weight:800;color:var(--text-main);white-space:nowrap}
+.tp-badge{width:38px;height:38px;object-fit:contain;filter:grayscale(1) contrast(1.15) drop-shadow(0 3px 5px rgba(0,0,0,.3))}
+.tp-row.px .tp-num{height:50px;flex-basis:62px;opacity:.82}.tp-row.px .tp-num span{font-size:26px}
+.tp-row.you .tp-body{background:rgba(127,127,127,.12);border-radius:10px;padding:9px 8px 6px;margin:-2px 0}
+[data-theme="dark"] .tp-num{background:linear-gradient(135deg,#fff,#c9c9c9);border-color:rgba(0,0,0,.2)}
+[data-theme="dark"] .tp-num span{color:#000}
+[data-theme="dark"] .tp-badge{filter:grayscale(1) contrast(1.1) drop-shadow(0 3px 5px rgba(255,255,255,.15))}
+.top-me{background:var(--text-main);color:var(--card-bg)}
+.top-tabs button.on{background:var(--text-main);color:var(--card-bg)}
